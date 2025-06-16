@@ -2,16 +2,18 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import MyTheme from './themes/mytheme';
 import { ThemeProvider } from '@mui/material/styles';
-import Tutorials from './pages/Tutorials';
+import Tutorials from './pages/tutorials/Tutorials';
 import Home from './pages/Home';
-import EditTutorial from './pages/EditTutorial';
-import AddTutorial from './pages/AddTutorial';
+import EditTutorial from './pages/tutorials/EditTutorial';
+import AddTutorial from './pages/tutorials/AddTutorial';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import Support from './pages/Support';
 import { Avatar, Container, Toolbar, Typography, Box, Button, Drawer, List, ListItem, ListItemText, ListItemButton, Menu, MenuItem, Divider } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import http from './http';
 import UserContext from './contexts/UserContext';
+import Contactstaff from './pages/faq/Contactstaff';
 
 const logout = () => {
   localStorage.clear();
@@ -124,7 +126,7 @@ function App() {
                     display: 'flex',
                     alignItems: 'center',
                     px: 2,
-                    py: 3,
+                    py: 2,
                     cursor: 'pointer',
                     bgcolor: '#cdcdcd',
                     borderTopLeftRadius: 10,
@@ -191,8 +193,9 @@ function App() {
                   <Route path={"/notifications"} element={<Login />} />
                   <Route path={"/useranalytics"} element={<Login/>} />
                   <Route path={"/myclients"} element={<Login />} />
-                  <Route path={"/supportcentre"} element={<Login />} />
+                  <Route path={"/supportcentre"} element={<Support />} />
                   <Route path={"/settings"} element={<Login />} />
+                  <Route path={"/contact"} element={<Contactstaff />} />
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
               </Container>

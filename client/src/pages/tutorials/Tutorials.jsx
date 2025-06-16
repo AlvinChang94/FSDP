@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Box, Typography, Grid, Card, CardContent, Input, IconButton, Button } from '@mui/material';
 import { AccountCircle, AccessTime, Search, Clear, Edit } from '@mui/icons-material';
-import http from '../http';
+import http from '../../http';
 import dayjs from 'dayjs';
-import global from '../global';
+import global from '../../global';
 import { Link } from 'react-router-dom';
-import UserContext from '../contexts/UserContext';
+import UserContext from '../../contexts/UserContext';
 
 function Tutorials() {
     const [tutorialList, setTutorialList] = useState([]);
