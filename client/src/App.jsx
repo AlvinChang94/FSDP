@@ -82,11 +82,6 @@ function App() {
                       <ListItemText primary="Tutorials" sx={{ color: 'white' }} />
                     </ListItemButton>
                   </ListItem>
-                  <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                    <ListItemButton component={Link} to="/adminDash">
-                      <ListItemText primary="Admin Dashboard" sx={{ color: 'white' }} />
-                    </ListItemButton>
-                  </ListItem>
                   {/* Tutorials is only listed for our own reference, we will remove it later */}
                   {user && (
                     <>
@@ -118,6 +113,11 @@ function App() {
                       <ListItem disablePadding sx={{ '&:hover': {backgroundColor: 'rgba(25, 118, 210, 0.1)'} }}>
                         <ListItemButton component={Link} to="/supportcentre">
                           <ListItemText primary="Support Centre" sx={{ color: 'white' }} />
+                        </ListItemButton>
+                      </ListItem>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
+                        <ListItemButton component={Link} to="/adminDash">
+                          <ListItemText primary="Admin Dashboard (add to admin)" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
                     </>
