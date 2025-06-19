@@ -35,6 +35,10 @@ function AdminLogin() {
             http.post("/user/login", data)
                 .then((res) => {
                     console.log(res.data);
+                      if (user.role !== 'admin') {
+                        toast.error("You are not authorized to login as admin.");
+                        return; // stop here so login does not proceed
+                          }
                     localStorage.setItem("accessToken", res.data.accessToken);
                     setUser(res.data.user);
                     navigate("/");
