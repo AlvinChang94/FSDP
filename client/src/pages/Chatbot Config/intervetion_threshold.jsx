@@ -1,4 +1,4 @@
-function intervention_threshold() {
+function Intervention_threshold() {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
       <h1 className="text-4xl font-bold mb-4">Welcome to the Home Page</h1>
@@ -6,4 +6,4 @@ function intervention_threshold() {
     </div>
   );
 }
-export default intervention_threshold;
+export default Intervention_threshold;

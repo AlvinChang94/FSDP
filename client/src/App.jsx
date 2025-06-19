@@ -17,6 +17,9 @@ import AdminLogin from './pages/admin/Adminlogin';
 import Contactstaff from './pages/faq/Contactstaff';
 import AdminDashboard from './pages/admin/adminDash';
 import TonePersonality from './pages/Chatbot Config/tone_personality';
+import Faq_Management from './pages/Chatbot Config/faq_management';
+import Security_privacy from './pages/Chatbot Config/security_privacy';
+import Intervention_threshold from './pages/Chatbot Config/intervetion_threshold';
 import ChatbotPreview from './pages/ChatbotPreview'
 
 const logout = () => {
@@ -199,6 +202,9 @@ function App() {
                   <Route path={"/register"} element={<Register />} />
                   <Route path={"/login"} element={<Login />} />
                   <Route path={"/config/tone_personality"} element={<TonePersonality />} />
+                  <Route path={"/config/faq_management"} element={<Faq_Management />} />
+                  <Route path={"/config/security_privacy"} element={<Security_privacy />} />
+                  <Route path={"/config/intervention_threshold"} element={<Intervention_threshold />} />
                   <Route path={"/preview"} element={<ChatbotPreview />} />
                   <Route path={"/notifications"} element={<Login />} />
                   <Route path={"/useranalytics"} element={<Login/>} />
@@ -208,6 +214,7 @@ function App() {
                   <Route path={"/contact"} element={<Contactstaff />} />
                   <Route path={"/AdminDash"} element={<AdminDashboard />} />
                   <Route path={'notification'} element={<Notification />}/>
+                  
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
               </Container>

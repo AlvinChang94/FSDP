@@ -1,4 +1,4 @@
-function security_privacy() {
+function Security_privacy() {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
       <h1 className="text-4xl font-bold mb-4">Welcome to the Home Page</h1>
@@ -6,4 +6,4 @@ function security_privacy() {
     </div>
   );
 }
-export default security_privacy;
+export default Security_privacy;

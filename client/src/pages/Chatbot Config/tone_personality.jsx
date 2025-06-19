@@ -46,17 +46,17 @@ function TonePersonality() {
   };
 
   return (
-    <Box sx={{}}>
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#181617" }}>
+    <Box sx={{ml: -6, mt: -4, mb: -30}}>
+    <Box sx={{ display: "flex", bgcolor: "#181617"}}>
       {/* Secondary Nav Bar */}
       <Box sx={{
-        width: 270,
+        width: 250,
         bgcolor: "#181f2a",
         color: "#fff",
         pt: 4,
         px: 0,
-        minHeight: "100vh",
-        borderRight: "1px solid #222"
+        borderRight: "1px solid #222",
+        height: "96.9vh"
       }}>
         <Typography sx={{ color: "#bfcfff", fontWeight: 700, fontSize: 18, pl: 4, mb: 2 }}>
           Chatbot boundaries
@@ -98,7 +98,7 @@ function TonePersonality() {
       </Box>
 
       {/* Main Content */}
-      <Box sx={{ flex: 1, bgcolor: "#f7f8fa", p: 5 }}>
+      <Box sx={{ flex: 1, bgcolor: "#f7f8fa", p: 5, mr:'-48px' }}>
         <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3 }}>
           Tone & Personality
         </Typography>
