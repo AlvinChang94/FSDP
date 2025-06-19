@@ -15,6 +15,7 @@ import http from './http';
 import UserContext from './contexts/UserContext';
 import Contactstaff from './pages/faq/Contactstaff';
 import AdminDashboard from './pages/admin/AdminDash';
+import Notification from './pages/notification/Notifs';
 
 const logout = () => {
   localStorage.clear();
@@ -203,6 +204,7 @@ function App() {
                   <Route path={"/settings"} element={<Login />} />
                   <Route path={"/contact"} element={<Contactstaff />} />
                   <Route path={"/AdminDash"} element={<AdminDashboard />} />
+                  <Route path={'notification'} element={<Notification />}/>
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
               </Container>
