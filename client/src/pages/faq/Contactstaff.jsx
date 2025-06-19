@@ -41,8 +41,10 @@ function Contactstaff() {
     const [msgMenuAnchor, setMsgMenuAnchor] = useState(null);
     const [msgMenuMessage, setMsgMenuMessage] = useState(null);
     const [editModalOpen, setEditModalOpen] = useState(false);
-    const [editMessage, setEditMessage] = useState(null); // The message object being edited
-    const [editContent, setEditContent] = useState('');   // The new content
+    const [editMessage, setEditMessage] = useState(null);
+    const [editContent, setEditContent] = useState('');
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [deleteMessage, setDeleteMessage] = useState(null);
     const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
     const handleMenuOpen = (event, ticket) => {
         setAnchorEl(event.currentTarget);
@@ -488,7 +490,7 @@ function Contactstaff() {
                                             px: 2,
                                             py: 1,
                                             maxWidth: '40%',
-                                            ...(!isAdmin && {paddingRight: '30px'}),
+                                            ...(!isAdmin && { paddingRight: '30px' }),
 
                                             borderRadius: isAdmin
                                                 ? '16px 16px 16px 1px'
@@ -568,16 +570,11 @@ function Contactstaff() {
                                 handleMsgMenuClose();
                             }}>Edit</MenuItem>
                             <MenuItem onClick={async () => {
-                                await http.put(`/api/messages/del/${msgMenuMessage.message_uuid}`, { content: "This message has been deleted" });
+                                
+                                setDeleteMessage(msgMenuMessage);
+                                setDeleteConfirmOpen(true);
                                 handleMsgMenuClose();
-                                setMessages(prevMessages =>
-                                    prevMessages.map(m =>
-                                        m.message_uuid === msgMenuMessage.message_uuid
-                                            ? { ...m, isDeleted: true }
-                                            : m
-
-                                    )
-                                );
+                                
                             }}>Delete</MenuItem>
                         </Menu>
                         <div ref={messagesEndRef} />
@@ -585,6 +582,47 @@ function Contactstaff() {
                 </Box>
 
             )}
+            <Modal open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+                <Box sx={{
+                    bgcolor: 'white',
+                    p: 3,
+                    borderRadius: 2,
+                    maxWidth: 350,
+                    mx: 'auto',
+                    mt: '20vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 2
+                }}>
+                    <Typography variant="h6" sx={{ mb: 2, textAlign: 'center' }}>
+                        Are you sure you want to delete this message?
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            onClick={async () => {
+                                await http.put(`/api/messages/del/${deleteMessage.message_uuid}`);
+                                setDeleteConfirmOpen(false);
+                                setShouldAutoScroll(false);
+                                setMessages(prevMessages =>
+                                    prevMessages.map(m =>
+                                        m.message_uuid === deleteMessage.message_uuid
+                                            ? { ...m, isDeleted: true }
+                                            : m
+                                    )
+                                );
+                            }}
+                        >
+                            Delete
+                        </Button>
+                        <Button variant="outlined" onClick={() => setDeleteConfirmOpen(false)}>
+                            Cancel
+                        </Button>
+                    </Box>
+                </Box>
+            </Modal>
             <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
                 <Box sx={{
                     bgcolor: 'white',
