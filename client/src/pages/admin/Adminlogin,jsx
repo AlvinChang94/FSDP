@@ -36,7 +36,6 @@ function Login() {
                 .then((res) => {
                     console.log(res.data);
                     localStorage.setItem("accessToken", res.data.accessToken);
-                    localStorage.setItem("userId", res.data.user.id)
                     setUser(res.data.user);
                     navigate("/");
                     window.location.reload();
