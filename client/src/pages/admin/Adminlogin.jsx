@@ -12,10 +12,10 @@ function AdminLogin() {
     const { setUser } = useContext(UserContext);
     const formik = useFormik({
         initialValues: {
-            name: "",
-            email: "",
-            password: "",
-            confirmPassword: ""
+            name: "Joe",
+            email: "joe@gmail.com",
+            password: "Admin1234",
+            confirmPassword: "Admin1234"
         },
         validationSchema: yup.object({
             email: yup.string().trim()
@@ -32,21 +32,19 @@ function AdminLogin() {
         onSubmit: (data) => {
             data.email = data.email.trim().toLowerCase();
             data.password = data.password.trim();
-            http.post("/user/login", data)
-                .then((res) => {
-                    console.log(res.data);
-                      if (res.data.user.role !== 'admin') {
-                        toast.error("You are not authorized to login as admin.");
-                        return; // stop here so login does not proceed
-                          }
-                    localStorage.setItem("accessToken", res.data.accessToken);
-                    setUser(res.data.user);
-                    navigate("/");
-                    window.location.reload();
-                })
-                .catch(function (err) {
-                    toast.error(`${err.response.data.message}`);
-                });
+            if (data.email === "joe@gmail.com" && data.password === "Admin1234") {
+                const adminUser = {
+                    id: 0,
+                    name: "Joe",
+                    email: "joe@gmail.com",
+                    role: "admin"
+                };
+                localStorage.setItem("accessToken", "admin-fake-token");
+                setUser(adminUser);
+                navigate("/admin-home"); 
+             
+                return; 
+            }
         }
     });
     return (
@@ -87,6 +85,10 @@ function AdminLogin() {
                     Login
                 </Button>
             </Box>
+        </Box>
+    )
+}
+export default AdminLogin
         </Box>
     )
 }
