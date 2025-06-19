@@ -13,9 +13,8 @@ import { Avatar, Container, Toolbar, Typography, Box, Drawer, List, ListItem, Li
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import http from './http';
 import UserContext from './contexts/UserContext';
+import AdminLogin from './pages/admin/Adminlogin';
 import Contactstaff from './pages/faq/Contactstaff';
-import ChatbotPreview from './pages/ChatbotPreview'
-import TonePersonality from './pages/Chatbot Config/tone_personality';
 import AdminDashboard from './pages/adminDash/adminDash';
 
 const logout = () => {
@@ -118,7 +117,7 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/adminDash">
+                        <ListItemButton component={Link} to="/AdminDash">
                           <ListItemText primary="Admin Dashboard (add to admin)" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
@@ -196,15 +195,16 @@ function App() {
                   <Route path={"/edittutorial/:id"} element={<EditTutorial />} />
                   <Route path={"/register"} element={<Register />} />
                   <Route path={"/login"} element={<Login />} />
-                  <Route path={"/config/tone_personality"} element={<TonePersonality />} />
-                  <Route path={"/preview"} element={<ChatbotPreview />} />
+                  <Route path={"/config"} element={<Login />} />
+                  <Route path={"/preview"} element={<Login />} />
                   <Route path={"/notifications"} element={<Login />} />
                   <Route path={"/useranalytics"} element={<Login/>} />
                   <Route path={"/myclients"} element={<Login />} />
                   <Route path={"/supportcentre"} element={<Support />} />
                   <Route path={"/settings"} element={<Login />} />
                   <Route path={"/contact"} element={<Contactstaff />} />
-                  <Route path={"/adminDash"} element={<AdminDashboard />} />
+                  <Route path={"/AdminDash"} element={<AdminDashboard />} />
+                  <Route path={'notification'} element={<Notification />}/>
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
               </Container>

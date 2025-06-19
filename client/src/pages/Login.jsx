@@ -3,6 +3,8 @@ import UserContext from '../contexts/UserContext';
 import { Box, Typography, TextField, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
+import { Link } from 'react-router-dom';
+import { Link as MuiLink } from '@mui/material'; 
 import * as yup from 'yup';
 import http from '../http';
 import { ToastContainer, toast } from 'react-toastify';
@@ -83,6 +85,11 @@ function Login() {
                     type="submit">
                     Login
                 </Button>
+                <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
+                    or <MuiLink component={Link} to="/admin-login" underline="hover">
+                        login as an admin
+                    </MuiLink>
+                </Typography>
             </Box>
         </Box>
     )

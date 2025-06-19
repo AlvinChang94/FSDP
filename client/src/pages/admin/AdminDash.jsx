@@ -1,7 +1,7 @@
 import { Box, Typography, Grid, Paper, Button, Link as MuiLink } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-function adminDash() {
+function AdminDash() {
     return (
         <Box sx={{ position: 'fixed', minHeight: '100vh', minWidth: 'calc(100vw - 284px)', bgcolor: '#f5f6fa', top: 0, left: '220px', p: 4 }}>
             <Paper elevation={3} sx={{ maxWidth: 1100, mx: 'auto', p: 4, mb: 4, bgcolor: 'white' }}>
@@ -9,9 +9,11 @@ function adminDash() {
                     <Typography variant="h4" fontWeight="bold" gutterBottom>
                         Admin Dashboard
                     </Typography>
-                    <Button variant="contained" color="secondary">
-                        View notifications
-                    </Button>
+                    <Link to='/Notification' style={{ textDecoration: 'none' }}>
+                        <Button variant='contained' color='secondary'>
+                            View Notifications
+                        </Button>
+                    </Link>
                 </Box>
                 <Typography variant="body1" color="text.secondary">
                     {/* Your description here */}
@@ -59,4 +61,4 @@ function adminDash() {
         </Box>
     );
 }
-export default adminDash;
+export default AdminDash;
