@@ -74,7 +74,7 @@ function App() {
                   <ListItem disablePadding sx={{ marginTop: '-70px' }}>
                     <ListItemButton component={Link} to="/">
                       <img
-                        src="./public/queryease.png"
+                        src="queryease.png"
                         alt="Learning"
                         style={{ width: '100%', height: 'auto', cursor: 'pointer' }}
                       />

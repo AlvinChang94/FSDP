@@ -6,4 +6,4 @@ function security_privacy() {
     </div>
   );
 }
-export default Home;
+export default security_privacy;
