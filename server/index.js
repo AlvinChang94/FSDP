@@ -5,6 +5,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
+
 // Simple Route
 app.use(cors({
     origin: process.env.CLIENT_URL
@@ -22,11 +23,11 @@ const userRoute = require('./routes/user');
 app.use("/user", userRoute);
 const fileRoute = require('./routes/file');
 app.use("/file", fileRoute);
+const messageRoutes = require('./routes/messages');
+app.use('/api/messages', messageRoutes);
+const ticketRoutes = require('./routes/tickets')
+app.use('/api/ticket', ticketRoutes)
 
-//let port = process.env.APP_PORT;
-//app.listen(port, () => {
-//    console.log(`Sever running on http://localhost:${port}`);
-//});
 const db = require('./models');
 db.sequelize.sync({ alter: false })
     .then(() => {

@@ -143,7 +143,7 @@ function App() {
                 >
                   <Avatar
                     alt="Profile Picture"
-                    src="./public/placeholderpfp.png"
+                    src="/placeholderpfp.png"
                     sx={{ width: 40, height: 40, mr: 2, border: '2px solid black' }}
 
                   />
