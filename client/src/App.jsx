@@ -13,6 +13,7 @@ import { Avatar, Container, Toolbar, Typography, Box, Button, Drawer, List, List
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import http from './http';
 import UserContext from './contexts/UserContext';
+import AdminLogin from './pages/admin/Adminlogin';
 import Contactstaff from './pages/faq/Contactstaff';
 import AdminDashboard from './pages/admin/AdminDash';
 import Notification from './pages/notification/Notifs';
@@ -195,6 +196,7 @@ function App() {
                   <Route path={"/edittutorial/:id"} element={<EditTutorial />} />
                   <Route path={"/register"} element={<Register />} />
                   <Route path={"/login"} element={<Login />} />
+                  <Route path={"/admin-login"} element={<AdminLogin />} />
                   <Route path={"/config"} element={<Login />} />
                   <Route path={"/preview"} element={<Login />} />
                   <Route path={"/notifications"} element={<Login />} />
