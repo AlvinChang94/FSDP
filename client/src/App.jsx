@@ -14,7 +14,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import http from './http';
 import UserContext from './contexts/UserContext';
 import Contactstaff from './pages/faq/Contactstaff';
-import AdminDashboard from './pages/AdminDash';
+import AdminDashboard from './pages/admin/AdminDash';
 
 const logout = () => {
   localStorage.clear();
