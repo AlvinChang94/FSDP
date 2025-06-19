@@ -9,11 +9,13 @@ import AddTutorial from './pages/tutorials/AddTutorial';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Support from './pages/Support';
-import { Avatar, Container, Toolbar, Typography, Box, Button, Drawer, List, ListItem, ListItemText, ListItemButton, Menu, MenuItem, Divider } from '@mui/material';
+import { Avatar, Container, Toolbar, Typography, Box, Drawer, List, ListItem, ListItemText, ListItemButton, Menu, MenuItem, Divider } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import http from './http';
 import UserContext from './contexts/UserContext';
 import Contactstaff from './pages/faq/Contactstaff';
+import ChatbotPreview from './pages/ChatbotPreview'
+import TonePersonality from './pages/Chatbot Config/tone_personality';
 import AdminDashboard from './pages/adminDash/adminDash';
 
 const logout = () => {
@@ -86,7 +88,7 @@ function App() {
                   {user && (
                     <>
                       <ListItem disablePadding sx={{ '&:hover': {backgroundColor: 'rgba(25, 118, 210, 0.1)'} }}>
-                        <ListItemButton component={Link} to="/config">
+                        <ListItemButton component={Link} to="/config/tone_personality">
                           <ListItemText primary="Chatbot Config" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
@@ -194,8 +196,8 @@ function App() {
                   <Route path={"/edittutorial/:id"} element={<EditTutorial />} />
                   <Route path={"/register"} element={<Register />} />
                   <Route path={"/login"} element={<Login />} />
-                  <Route path={"/config"} element={<Login />} />
-                  <Route path={"/preview"} element={<Login />} />
+                  <Route path={"/config/tone_personality"} element={<TonePersonality />} />
+                  <Route path={"/preview"} element={<ChatbotPreview />} />
                   <Route path={"/notifications"} element={<Login />} />
                   <Route path={"/useranalytics"} element={<Login/>} />
                   <Route path={"/myclients"} element={<Login />} />
