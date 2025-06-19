@@ -35,7 +35,7 @@ function AdminLogin() {
             http.post("/user/login", data)
                 .then((res) => {
                     console.log(res.data);
-                      if (user.role !== 'admin') {
+                      if (res.data.user.role !== 'admin') {
                         toast.error("You are not authorized to login as admin.");
                         return; // stop here so login does not proceed
                           }
