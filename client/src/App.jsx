@@ -14,7 +14,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import http from './http';
 import UserContext from './contexts/UserContext';
 import Contactstaff from './pages/faq/Contactstaff';
-import AdminDashboard from './pages/adminDash/adminDash';
+import AdminDashboard from './pages/AdminDash';
 
 const logout = () => {
   localStorage.clear();
@@ -116,7 +116,7 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/adminDash">
+                        <ListItemButton component={Link} to="/AdminDash">
                           <ListItemText primary="Admin Dashboard (add to admin)" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
@@ -202,7 +202,7 @@ function App() {
                   <Route path={"/supportcentre"} element={<Support />} />
                   <Route path={"/settings"} element={<Login />} />
                   <Route path={"/contact"} element={<Contactstaff />} />
-                  <Route path={"/adminDash"} element={<AdminDashboard />} />
+                  <Route path={"/AdminDash"} element={<AdminDashboard />} />
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
               </Container>
