@@ -15,7 +15,9 @@ import http from './http';
 import UserContext from './contexts/UserContext';
 import AdminLogin from './pages/admin/Adminlogin';
 import Contactstaff from './pages/faq/Contactstaff';
-import AdminDashboard from './pages/adminDash/adminDash';
+import AdminDashboard from './pages/admin/adminDash';
+import TonePersonality from './pages/Chatbot Config/tone_personality';
+import ChatbotPreview from './pages/ChatbotPreview'
 
 const logout = () => {
   localStorage.clear();
@@ -193,10 +195,11 @@ function App() {
                   <Route path={"/tutorials"} element={<Tutorials />} />
                   <Route path={"/addtutorial"} element={<AddTutorial />} />
                   <Route path={"/edittutorial/:id"} element={<EditTutorial />} />
+                  <Route path={"/admin-login"} element={<AdminLogin />} />
                   <Route path={"/register"} element={<Register />} />
                   <Route path={"/login"} element={<Login />} />
-                  <Route path={"/config"} element={<Login />} />
-                  <Route path={"/preview"} element={<Login />} />
+                  <Route path={"/config/tone_personality"} element={<TonePersonality />} />
+                  <Route path={"/preview"} element={<ChatbotPreview />} />
                   <Route path={"/notifications"} element={<Login />} />
                   <Route path={"/useranalytics"} element={<Login/>} />
                   <Route path={"/myclients"} element={<Login />} />
