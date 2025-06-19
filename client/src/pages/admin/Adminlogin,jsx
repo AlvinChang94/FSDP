@@ -7,7 +7,7 @@ import * as yup from 'yup';
 import http from '../http';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
-function Login() {
+function AdminLogin() {
     const navigate = useNavigate();
     const { setUser } = useContext(UserContext);
     const formik = useFormik({
@@ -86,4 +86,4 @@ function Login() {
         </Box>
     )
 }
-export default Login
+export default AdminLogin
