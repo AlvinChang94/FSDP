@@ -4,6 +4,7 @@ import MyTheme from './themes/mytheme';
 import { ThemeProvider } from '@mui/material/styles';
 import Tutorials from './pages/tutorials/Tutorials';
 import Home from './pages/Home';
+import AdminHome from './pages/admin/Adminhome';
 import EditTutorial from './pages/tutorials/EditTutorial';
 import AddTutorial from './pages/tutorials/AddTutorial';
 import Register from './pages/Register';
@@ -195,6 +196,7 @@ function App() {
               <Container>
                 <Routes>
                   <Route path={"/"} element={<Home />} />
+                  <Route path={'/admin-home'} element={< AdminHome/>}/>
                   <Route path={"/tutorials"} element={<Tutorials />} />
                   <Route path={"/addtutorial"} element={<AddTutorial />} />
                   <Route path={"/edittutorial/:id"} element={<EditTutorial />} />
