@@ -89,7 +89,3 @@ function AdminLogin() {
     )
 }
 export default AdminLogin
-        </Box>
-    )
-}
-export default AdminLogin

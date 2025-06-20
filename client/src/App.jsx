@@ -16,12 +16,13 @@ import http from './http';
 import UserContext from './contexts/UserContext';
 import AdminLogin from './pages/admin/Adminlogin';
 import Contactstaff from './pages/faq/Contactstaff';
-import AdminDashboard from './pages/admin/adminDash';
+import AdminDashboard from './pages/admin/AdminDash';
+import Notification from './pages/notification/Notifs';
 import TonePersonality from './pages/Chatbot Config/tone_personality';
 import Faq_Management from './pages/Chatbot Config/faq_management';
 import Security_privacy from './pages/Chatbot Config/security_privacy';
 import Intervention_threshold from './pages/Chatbot Config/intervetion_threshold';
-import ChatbotPreview from './pages/ChatbotPreview'
+import ChatbotPreview from './pages/ChatbotPreview';
 
 const logout = () => {
   localStorage.clear();
@@ -215,7 +216,7 @@ function App() {
                   <Route path={"/settings"} element={<Login />} />
                   <Route path={"/contact"} element={<Contactstaff />} />
                   <Route path={"/AdminDash"} element={<AdminDashboard />} />
-                  <Route path={'notification'} element={<Notification />}/>
+                  <Route path={'/Notification'} element={<Notification />}/>
                   
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
