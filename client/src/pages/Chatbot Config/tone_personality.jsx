@@ -25,7 +25,7 @@ const configNav = [
   {
     label: "Intervention Threshold",
     icon: <EmojiEmotionsIcon />,
-    path: "/config/intervetion_threshold"
+    path: "/config/intervention_threshold"
   }
 ];
 
@@ -50,7 +50,7 @@ function TonePersonality() {
     <Box sx={{ display: "flex", bgcolor: "#181617"}}>
       {/* Secondary Nav Bar */}
       <Box sx={{
-        width: 250,
+        width: 261,
         bgcolor: "#181f2a",
         color: "#fff",
         pt: 4,
