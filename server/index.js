@@ -27,6 +27,8 @@ const messageRoutes = require('./routes/messages');
 app.use('/api/messages', messageRoutes);
 const ticketRoutes = require('./routes/tickets')
 app.use('/api/ticket', ticketRoutes)
+const notificationRoutes = require('./routes/notification');
+app.use('/notification', notificationRoutes);
 
 const db = require('./models');
 db.sequelize.sync({ alter: false })
