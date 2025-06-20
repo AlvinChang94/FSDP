@@ -18,6 +18,7 @@ import AdminLogin from './pages/admin/Adminlogin';
 import Contactstaff from './pages/faq/Contactstaff';
 import AdminDashboard from './pages/admin/AdminDash';
 import Notification from './pages/notification/Notifs';
+import AddNotification from './pages/notification/AddNotif';
 import TonePersonality from './pages/Chatbot Config/tone_personality';
 import Faq_Management from './pages/Chatbot Config/faq_management';
 import Security_privacy from './pages/Chatbot Config/security_privacy';
@@ -209,7 +210,6 @@ function App() {
                   <Route path={"/config/security_privacy"} element={<Security_privacy />} />
                   <Route path={"/config/intervention_threshold"} element={<Intervention_threshold />} />
                   <Route path={"/preview"} element={<ChatbotPreview />} />
-                  <Route path={"/notifications"} element={<Login />} />
                   <Route path={"/useranalytics"} element={<Login/>} />
                   <Route path={"/myclients"} element={<Login />} />
                   <Route path={"/supportcentre"} element={<Support />} />
@@ -217,6 +217,7 @@ function App() {
                   <Route path={"/contact"} element={<Contactstaff />} />
                   <Route path={"/AdminDash"} element={<AdminDashboard />} />
                   <Route path={'/Notification'} element={<Notification />}/>
+                  <Route path={'/AddNotif'} element={<AddNotification />} />
                   
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
