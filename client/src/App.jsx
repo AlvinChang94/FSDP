@@ -117,6 +117,11 @@ function App() {
                           <ListItemText primary="Moderator Actions" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
+                        <ListItemButton component={Link} to="/AdminDash">
+                          <ListItemText primary="Admin Dashboard" sx={{ color: 'white' }} />
+                        </ListItemButton>
+                      </ListItem>
                     </>
                   ) : user ? (
                     <>
@@ -148,11 +153,6 @@ function App() {
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/supportcentre">
                           <ListItemText primary="Support Centre" sx={{ color: 'white' }} />
-                        </ListItemButton>
-                      </ListItem>
-                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/AdminDash">
-                          <ListItemText primary="Admin Dashboard (add to admin)" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
                     </>
