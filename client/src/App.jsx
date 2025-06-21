@@ -26,12 +26,14 @@ import Security_privacy from './pages/Chatbot Config/security_privacy';
 import Intervention_threshold from './pages/Chatbot Config/intervetion_threshold';
 import ChatbotPreview from './pages/ChatbotPreview';
 
+
 const logout = () => {
   localStorage.clear();
   window.location = "/";
 };
 
 function App() {
+
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -39,6 +41,7 @@ function App() {
     if (localStorage.getItem("accessToken")) {
       http.get('/user/auth').then((res) => {
         setUser(res.data.user);
+        console.log("User role:", res.data.user.role);
       });
     }
   }, []);
@@ -93,34 +96,57 @@ function App() {
                     </ListItemButton>
                   </ListItem>
                   {/* Tutorials is only listed for our own reference, we will remove it later */}
-                  {user && (
+                  { user && user.role == 'admin' ? (
                     <>
-                      <ListItem disablePadding sx={{ '&:hover': {backgroundColor: 'rgba(25, 118, 210, 0.1)'} }}>
+                      <ListItem disablePadding>
+                        <ListItemButton component={Link} to="/admin-notifications">
+                          <ListItemText primary="Admin Notifications" sx={{ color: 'white' }} />
+                        </ListItemButton>
+                      </ListItem>
+                      <ListItem disablePadding>
+                        <ListItemButton component={Link} to="/admin-analytics">
+                          <ListItemText primary="Admin Analytics" sx={{ color: 'white' }} />
+                        </ListItemButton>
+                      </ListItem>
+                      <ListItem disablePadding>
+                        <ListItemButton component={Link} to="/admin-support">
+                          <ListItemText primary="Admin Support Centre" sx={{ color: 'white' }} />
+                        </ListItemButton>
+                      </ListItem>
+                      <ListItem disablePadding>
+                        <ListItemButton component={Link} to="/moderator-actions">
+                          <ListItemText primary="Moderator Actions" sx={{ color: 'white' }} />
+                        </ListItemButton>
+                      </ListItem>
+                    </>
+                  ) : user ? (
+                    <>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/config/tone_personality">
                           <ListItemText primary="Chatbot Config" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
-                      <ListItem disablePadding sx={{ '&:hover': {backgroundColor: 'rgba(25, 118, 210, 0.1)'} }}>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/preview">
                           <ListItemText primary="Chatbot Preview" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
-                      <ListItem disablePadding sx={{ '&:hover': {backgroundColor: 'rgba(25, 118, 210, 0.1)'} }}>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/notifications">
                           <ListItemText primary="Notifications" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
-                      <ListItem disablePadding sx={{ '&:hover': {backgroundColor: 'rgba(25, 118, 210, 0.1)'} }}>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/useranalytics">
                           <ListItemText primary="My Analytics" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
-                      <ListItem disablePadding sx={{ '&:hover': {backgroundColor: 'rgba(25, 118, 210, 0.1)'} }}>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/myclients">
                           <ListItemText primary="My Clients" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
-                      <ListItem disablePadding sx={{ '&:hover': {backgroundColor: 'rgba(25, 118, 210, 0.1)'} }}>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/supportcentre">
                           <ListItemText primary="Support Centre" sx={{ color: 'white' }} />
                         </ListItemButton>
@@ -131,7 +157,7 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                     </>
-                  )}
+                  ) : null}
                 </List>
               </Box>
               {/* Bottom User Bar */}
@@ -147,7 +173,7 @@ function App() {
                     bgcolor: '#cdcdcd',
                     borderTopLeftRadius: 10,
                     borderTopRightRadius: 10,
-                    '&:hover': {backgroundColor: '#A0A0A0'}
+                    '&:hover': { backgroundColor: '#A0A0A0' }
                   }}
                   onClick={handleUserBarClick}
                 >
@@ -159,7 +185,7 @@ function App() {
                   />
                   <Typography variant="body1" sx={{ flexGrow: 1, fontSize: '1.4rem', mt: -2.2, fontWeight: 'bold' }}>
                     {user ? user.name : ""}
-                    <span style={{ display: 'block', fontSize: '0.8em',marginBottom: -20, marginTop: -4, fontWeight: '600', color: '#494db3' }}>{user ? "User" : ""}</span>
+                    <span style={{ display: 'block', fontSize: '0.8em', marginBottom: -20, marginTop: -4, fontWeight: '600', color: user && user.role === 'admin' ? 'red': '#494db3' }}>{user ? user.role == 'admin' ? "Admin" : "User": ""}</span>
                   </Typography>
                   <Typography variant="body2" sx={{ flexGrow: 1, fontSize: '1.3rem', mr: 10, fontWeight: 'bold' }}>
                     {user ? "" : "Guest"}
@@ -199,7 +225,7 @@ function App() {
               <Container>
                 <Routes>
                   <Route path={"/"} element={<Home />} />
-                  <Route path={'/admin-home'} element={< AdminHome/>}/>
+                  <Route path={'/admin-home'} element={< AdminHome />} />
                   <Route path={"/tutorials"} element={<Tutorials />} />
                   <Route path={"/addtutorial"} element={<AddTutorial />} />
                   <Route path={"/edittutorial/:id"} element={<EditTutorial />} />
@@ -211,17 +237,17 @@ function App() {
                   <Route path={"/config/security_privacy"} element={<Security_privacy />} />
                   <Route path={"/config/intervention_threshold"} element={<Intervention_threshold />} />
                   <Route path={"/preview"} element={<ChatbotPreview />} />
-                  <Route path={"/useranalytics"} element={<Login/>} />
+                  <Route path={"/useranalytics"} element={<Login />} />
                   <Route path={"/myclients"} element={<Login />} />
                   <Route path={"/supportcentre"} element={<Support />} />
                   <Route path={"/settings"} element={<Login />} />
                   <Route path={"/contact"} element={<Contactstaff />} />
                   <Route path={"/AdminDash"} element={<AdminDashboard />} />
-                  <Route path={'/Notification'} element={<Notification />}/>
+                  <Route path={'/Notification'} element={<Notification />} />
                   <Route path={'/AddNotif'} element={<AddNotification />} />
                   <Route path={'/notifications'} element={<Login />} />
                   <Route path={"/EditNotif/:id"} element={<EditNotification />} />
-                  
+
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
               </Container>

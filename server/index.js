@@ -5,11 +5,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
-
 // Simple Route
 app.use(cors({
     origin: process.env.CLIENT_URL
-    }));
+}));
 
 //request and response, respond a "Welcome" message
 app.get("/", (req, res) => {
@@ -33,13 +32,25 @@ const testChatRoutes = require('./routes/testChat')
 app.use('/api/testchat', testChatRoutes);
 
 const db = require('./models');
-db.sequelize.sync({ alter: false })
-    .then(() => {
-        let port = process.env.APP_PORT;
-        app.listen(port, () => {
-            console.log(`Sever running on http://localhost:${port}`);
+const bcrypt = require('bcrypt');
+db.sequelize.sync({ alter: false }).then(async () => {
+    // Check if admin exists
+    const admin = await db.User.findOne({ where: { email: 'joe@gmail.com' } });
+    if (!admin) {
+        const hashedPassword = await bcrypt.hash('Admin1234', 10);
+        await db.User.create({
+            id: 0,
+            name: 'Joe',
+            email: 'joe@gmail.com',
+            password: hashedPassword, // You should hash this in production!
+            role: 'admin'
         });
-    })
-    .catch((err) => {
-        console.log(err);
+        console.log('Default admin user created.');
+    }
+    let port = process.env.APP_PORT;
+    app.listen(port, () => {
+        console.log(`Server running on http://localhost:${port}`);
     });
+}).catch((err) => {
+    console.log(err);
+});

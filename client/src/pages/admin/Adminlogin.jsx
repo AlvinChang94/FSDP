@@ -32,19 +32,18 @@ function AdminLogin() {
         onSubmit: (data) => {
             data.email = data.email.trim().toLowerCase();
             data.password = data.password.trim();
-            if (data.email === "joe@gmail.com" && data.password === "Admin1234") {
-                const adminUser = {
-                    id: 0,
-                    name: "Joe",
-                    email: "joe@gmail.com",
-                    role: "admin"
-                };
-                localStorage.setItem("accessToken", "admin-fake-token");
-                setUser(adminUser);
-                navigate("/admin-home"); 
-             
-                return; 
-            }
+            http.post("/user/login", data)
+                .then((res) => {
+                    console.log(res.data);
+                    localStorage.setItem("accessToken", res.data.accessToken);
+                    localStorage.setItem("userId", res.data.user.id)
+                    setUser(res.data.user);
+                    navigate("/");
+                    window.location.reload();
+                })
+                .catch(function (err) {
+                    toast.error(`${err.response.data.message}`);
+                });
         }
     });
     return (
