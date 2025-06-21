@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Box, Typography, Paper, Checkbox, FormControlLabel, FormGroup, Radio, RadioGroup, TextField, Button, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Switch, Modal, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Grid } from "@mui/material";
-import { Link, useLocation } from "react-router-dom";
+import { Box, Typography, Paper, TextField, Button, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Switch, Modal, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Grid } from "@mui/material";
+import { Link } from "react-router-dom";
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import SecurityIcon from '@mui/icons-material/Security';
@@ -74,6 +74,8 @@ function Security_privacy() {
     const [type, setType] = useState("");
     const [rule, setRule] = useState("");
     const [example, setExample] = useState("");
+    const [deleteIdx, setDeleteIdx] = useState(null);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
     // Add filter
     const handleAddFilter = () => {
@@ -123,7 +125,9 @@ function Security_privacy() {
                     pt: 4,
                     px: 0,
                     borderRight: "1px solid #222",
-                    minHeight: "100%"
+                    height: "100vh",
+                    position: "fixed",
+
                 }}>
                     <Typography sx={{ color: "#bfcfff", fontWeight: 700, fontSize: 18, pl: 4, mb: 2 }}>
                         Chatbot boundaries
@@ -165,7 +169,7 @@ function Security_privacy() {
                 </Box>
 
                 {/* Main Content */}
-                <Box sx={{ flex: 1, bgcolor: "#f7f8fa", p: 5, minHeight: "100vh" }}>
+                <Box sx={{ flex: 1, bgcolor: "#f7f8fa", p: 5, minHeight: "100vh", ml: '261px', mr: '-48px' }}>
                     <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3 }}>
                         Security & Privacy
                     </Typography>
@@ -183,9 +187,17 @@ function Security_privacy() {
                             </Grid>
                             <Grid item>
                                 <Switch
+
                                     checked={dataRetention}
                                     onChange={e => setDataRetention(e.target.checked)}
-                                    color="primary"
+                                    sx={{
+                                        '& .MuiSwitch-switchBase.Mui-checked': {
+                                            color: '#4287f5',
+                                        },
+                                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                            backgroundColor: '#4287f5',
+                                        }
+                                    }}
                                 />
                             </Grid>
                         </Grid>
@@ -233,17 +245,19 @@ function Security_privacy() {
                             Data types that should be masked when the chatbot is referring to it
                         </Typography>
                         <Grid container spacing={2} sx={{ mb: 2 }}>
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={6}>
                                 <TextField
                                     fullWidth
                                     label="Keyword/phrase"
                                     placeholder="e.g. User address"
                                     value={keyword}
                                     onChange={e => setKeyword(e.target.value)}
+                                    variant="outlined"
+                                    InputLabelProps={{ shrink: true }}
                                     sx={{ bgcolor: "#fff", borderRadius: 2 }}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={6}>
                                 <TextField
                                     fullWidth
                                     label="Data type"
@@ -251,9 +265,11 @@ function Security_privacy() {
                                     value={type}
                                     onChange={e => setType(e.target.value)}
                                     sx={{ bgcolor: "#fff", borderRadius: 2 }}
+                                    variant="outlined"
+                                    InputLabelProps={{ shrink: true }}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={6}>
                                 <TextField
                                     fullWidth
                                     label="Masking rule"
@@ -261,9 +277,11 @@ function Security_privacy() {
                                     value={rule}
                                     onChange={e => setRule(e.target.value)}
                                     sx={{ bgcolor: "#fff", borderRadius: 2 }}
+                                    variant="outlined"
+                                    InputLabelProps={{ shrink: true }}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={6}>
                                 <TextField
                                     fullWidth
                                     label="Example transformation"
@@ -271,6 +289,8 @@ function Security_privacy() {
                                     value={example}
                                     onChange={e => setExample(e.target.value)}
                                     sx={{ bgcolor: "#fff", borderRadius: 2 }}
+                                    variant="outlined"
+                                    InputLabelProps={{ shrink: true }}
                                 />
                             </Grid>
                         </Grid>
@@ -318,12 +338,12 @@ function Security_privacy() {
                                 <TableBody>
                                     {filters.map((filter, idx) => (
                                         <TableRow key={idx}>
-                                            <TableCell>{filter.keyword}</TableCell>
-                                            <TableCell>{filter.type}</TableCell>
-                                            <TableCell>{filter.rule}</TableCell>
-                                            <TableCell>{filter.example}</TableCell>
+                                            <TableCell sx={{ whiteSpace: "pre-line", wordBreak: "break-word", }}>{filter.keyword}</TableCell>
+                                            <TableCell sx={{ whiteSpace: "pre-line", wordBreak: "break-word", }}>{filter.type}</TableCell>
+                                            <TableCell sx={{ whiteSpace: "pre-line", wordBreak: "break-word", }}>{filter.rule}</TableCell>
+                                            <TableCell sx={{ whiteSpace: "pre-line", wordBreak: "break-word", }}>{filter.example}</TableCell>
                                             <TableCell>
-                                                <IconButton onClick={() => handleDeleteFilter(idx)}>
+                                                <IconButton onClick={() => { setDeleteIdx(idx); setDeleteModalOpen(true); }}>
                                                     <DeleteIcon sx={{ color: "#e74c3c" }} />
                                                 </IconButton>
                                             </TableCell>
@@ -333,6 +353,42 @@ function Security_privacy() {
                             </Table>
                         </TableContainer>
                     </Paper>
+                    <Modal open={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
+                        <Box sx={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            bgcolor: "#fff",
+                            p: 4,
+                            borderRadius: 2,
+                            boxShadow: 24,
+                            minWidth: 350,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 2,
+                            alignItems: "center"
+                        }}>
+                            <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
+                                Are you sure you want to delete this filter?
+                            </Typography>
+                            <Box sx={{ display: "flex", gap: 2 }}>
+                                <Button
+                                    variant="contained"
+                                    color="error"
+                                    onClick={() => {
+                                        setFilters(filters.filter((_, i) => i !== deleteIdx));
+                                        setDeleteModalOpen(false);
+                                    }}
+                                >
+                                    Delete
+                                </Button>
+                                <Button variant="outlined" onClick={() => setDeleteModalOpen(false)}>
+                                    Cancel
+                                </Button>
+                            </Box>
+                        </Box>
+                    </Modal>
 
                     {/* Human-intervention log modal */}
                     <Modal open={logOpen} onClose={() => setLogOpen(false)}>
@@ -348,7 +404,16 @@ function Security_privacy() {
                             minWidth: 900,
                             maxWidth: "95vw",
                             maxHeight: "90vh",
-                            overflow: "auto"
+                            overflow: "auto",
+                            '::-webkit-scrollbar': {
+                                width: 8,
+                                borderRadius: 8,
+                                background: '#eee'
+                            },
+                            '::-webkit-scrollbar-thumb': {
+                                background: '#ccc',
+                                borderRadius: 8,
+                            }
                         }}>
                             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                                 <Typography variant="h5" sx={{ fontWeight: "bold" }}>
@@ -365,7 +430,7 @@ function Security_privacy() {
                                         mr: -50,
                                         '&:hover': { bgcolor: "#38b87c" }
                                     }}
-                                    onClick={() => { /* Download functionality placeholder */ }}
+                                    onClick={() => { /* download functionality */ }}
                                 >
                                     Download
                                 </Button>
@@ -382,7 +447,7 @@ function Security_privacy() {
                                         <TableRow>
                                             <TableCell>Time</TableCell>
                                             <TableCell>Question</TableCell>
-                                            <TableCell>Client name</TableCell>
+                                            <TableCell sx={{ minWidth: 73 }}>Client name</TableCell>
                                             <TableCell>Response (if any)</TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -392,7 +457,15 @@ function Security_privacy() {
                                                 <TableCell>{row[0]}</TableCell>
                                                 <TableCell>{row[1]}</TableCell>
                                                 <TableCell>{row[2]}</TableCell>
-                                                <TableCell>{row[3]}</TableCell>
+                                                <TableCell
+                                                    sx={
+                                                        row[3].startsWith("Pending")
+                                                            ? { color: "#e74c3c", fontWeight: 600 }
+                                                            : {}
+                                                    }
+                                                >
+                                                    {row[3]}
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>

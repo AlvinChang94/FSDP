@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Typography, IconButton, Modal, Button, TextField, InputAdornment, Fade, List, ListItem, ListItemText, ListItemButton} from '@mui/material';
+import { Box, Typography, IconButton, Modal, Button, TextField, InputAdornment, Fade, List, ListItem, ListItemText, ListItemButton } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
 import ListIcon from '@mui/icons-material/List';
 import Menu from '@mui/material/Menu';
@@ -9,8 +9,13 @@ import SendIcon from '@mui/icons-material/Send';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate } from 'react-router-dom';
 import http from '../../http';
+import * as yup from 'yup';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function Contactstaff() {
+    const messageSchema = yup.string().trim().max(2000, 'Message cannot exceed 2000 characters');
     const navigate = useNavigate();
     const isLoggedIn = Boolean(localStorage.getItem('accessToken'));
     useEffect(() => {
@@ -46,10 +51,20 @@ function Contactstaff() {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [deleteMessage, setDeleteMessage] = useState(null);
     const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+    const toastCooldownRef = useRef(0);
+
     const handleMenuOpen = (event, ticket) => {
         setAnchorEl(event.currentTarget);
         setSelectedTicket(ticket);
     };
+    const showToastWithCooldown = (msg) => {
+        const now = Date.now();
+        if (now - toastCooldownRef.current > 5000) { // 5 seconds
+            toast.error(msg);
+            toastCooldownRef.current = now;
+        }
+    };
+
 
     const handleMenuClose = () => {
         setAnchorEl(null);
@@ -60,18 +75,21 @@ function Contactstaff() {
         if (!ticketId) return;
         if (message.trim()) {
             try {
+                await messageSchema.validate(message);
                 const res = await http.post('/api/messages', {
                     senderId: localStorage.getItem('userId'),
                     recipientId: 0,
                     ticketId,
                     content: message
+                }).catch(function (err) {
+                    toast.error(`${err.response.data.message}`);
                 });
 
                 setMessages([...messages, res.data]);
                 setMessage('');
                 handleTicketClick(ticket.ticketId); //fixes timestamp issue, a little less smooth
             } catch (err) {
-                console.log(err)
+                console.log(err);
             }
         }
     };
@@ -216,6 +234,7 @@ function Contactstaff() {
             p: 0,
             overflow: 'hidden'
         }}>
+            <ToastContainer />
             {/* Header */}
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pl: 2.5, pt: 1.5, pr: 2.5, ml: 27 }}>
                 <Typography variant="h5" sx={{ color: '282424', fontWeight: 'bold' }}>
@@ -240,47 +259,61 @@ function Contactstaff() {
                         </IconButton>
                         <Typography variant="h6">Your Ticket History</Typography>
                         <List>
-                            {ticketHistory.map(ticket => (
-                                <ListItem
-                                    key={ticket.ticketId}
-                                    disablePadding
-                                    secondaryAction={
-                                        <IconButton
-                                            edge="end"
-                                            onClick={e => {
-                                                e.stopPropagation();
-                                                handleMenuOpen(e, ticket);
+                            {ticketHistory.length === 0 ? (
+                                <ListItem>
+                                    <ListItemText
+                                        primary={
+                                            <Typography
+                                                variant="body2"
+                                                sx={{ color: '#888', textAlign: 'center', width: '100%' }}
+                                            >
+                                                No tickets
+                                            </Typography>
+                                        }
+                                    />
+                                </ListItem>
+                            ) : (
+                                ticketHistory.map(ticket => (
+                                    <ListItem
+                                        key={ticket.ticketId}
+                                        disablePadding
+                                        secondaryAction={
+                                            <IconButton
+                                                edge="end"
+                                                onClick={e => {
+                                                    e.stopPropagation();
+                                                    handleMenuOpen(e, ticket);
+                                                }}
+                                            >
+                                                <ListIcon />
+                                            </IconButton>
+                                        }
+                                    >
+                                        <ListItemButton
+                                            onClick={() => handleTicketClick(ticket.ticketId)}
+                                            sx={{
+                                                '&:hover': {
+                                                    backgroundColor: '#f0f0f0',
+                                                }
                                             }}
                                         >
-                                            <ListIcon />
-                                        </IconButton>
-                                    }
-                                >
-                                    <ListItemButton
-                                        onClick={() => handleTicketClick(ticket.ticketId)}
-                                        sx={{
-                                            '&:hover': {
-                                                backgroundColor: '#f0f0f0',
-                                            }
-                                        }}
-                                    >
 
-                                        <ListItemText
-                                            primary={
-                                                <Typography
-                                                    variant="body1"
-                                                    sx={{
-                                                        color: ticket.ticketStatus === 'solved' ? 'green' : 'inherit'
-                                                    }}
-                                                >
-                                                    Ticket #{ticket.ticketId} ({ticket.ticketStatus})
-                                                </Typography>
-                                            }
-                                            secondary={`Last updated: ${new Date(ticket.updatedAt).toLocaleString()}`}
-                                        />
-                                    </ListItemButton>
-                                </ListItem>
-                            ))}
+                                            <ListItemText
+                                                primary={
+                                                    <Typography
+                                                        variant="body1"
+                                                        sx={{
+                                                            color: ticket.ticketStatus === 'solved' ? 'green' : 'inherit'
+                                                        }}
+                                                    >
+                                                        Ticket #{ticket.ticketId} ({ticket.ticketStatus})
+                                                    </Typography>
+                                                }
+                                                secondary={`Last updated: ${new Date(ticket.updatedAt).toLocaleString()}`}
+                                            />
+                                        </ListItemButton>
+                                    </ListItem>
+                                )))}
                         </List>
                         <Menu
                             anchorEl={anchorEl}
@@ -394,7 +427,13 @@ function Contactstaff() {
                     fullWidth
                     variant="outlined"
                     value={message}
-                    onChange={e => setMessage(e.target.value)}
+                    onChange={e => {
+                        if (e.target.value.length > 2000) {
+                            showToastWithCooldown('Message cannot exceed 2000 characters');
+                            return;
+                        }
+                        setMessage(e.target.value);
+                    }}
                     onFocus={() => setInputFocused(true)}
                     onBlur={() => setInputFocused(false)}
                     onKeyDown={e => {
@@ -408,11 +447,13 @@ function Contactstaff() {
                     }}
                     placeholder={inputFocused || message ? '' : "Ask anything"}
                     InputProps={{
+                        maxLength: 2000,
                         sx: {
                             bgcolor: textBoxColor,
                             borderRadius: 2,
                             '& input::placeholder': { color: placeholderColor, opacity: 1 }
                         },
+
                         endAdornment: (
                             <InputAdornment position="end">
                                 <IconButton onClick={() => {
@@ -562,20 +603,21 @@ function Contactstaff() {
                             open={Boolean(msgMenuAnchor)}
                             onClose={handleMsgMenuClose}
                         >
-                            <MenuItem onClick={() => {
+                            <MenuItem disabled={ticket?.ticketStatus === 'solved'} onClick={() => {
                                 setEditContent(msgMenuMessage.content);
                                 setEditMessage(msgMenuMessage);
                                 setEditModalOpen(true);
 
                                 handleMsgMenuClose();
                             }}>Edit</MenuItem>
-                            <MenuItem onClick={async () => {
-                                
+                            <MenuItem disabled={ticket?.ticketStatus === 'solved'} onClick={async () => {
+
                                 setDeleteMessage(msgMenuMessage);
                                 setDeleteConfirmOpen(true);
                                 handleMsgMenuClose();
-                                
-                            }}>Delete</MenuItem>
+
+                            }
+                            }>Delete</MenuItem>
                         </Menu>
                         <div ref={messagesEndRef} />
                     </Box>
@@ -625,40 +667,58 @@ function Contactstaff() {
             </Modal>
             <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
                 <Box sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
                     bgcolor: 'white',
                     p: 3,
                     borderRadius: 2,
                     maxWidth: 400,
-                    mx: 'auto',
-                    mt: '20vh',
+                    width: '90%',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: 2
+                    gap: 2,
+                    maxHeight: '80vh',
+                    overflow: 'auto'
                 }}>
                     <TextField
                         label="Edit Message"
                         value={editContent}
-                        onChange={e => setEditContent(e.target.value)}
+                        onChange={e => {
+                            if (e.target.value.length > 2000) {
+                                showToastWithCooldown('Message cannot exceed 2000 characters');
+                                return;
+                            }
+                            setEditContent(e.target.value)
+                        }}
                         fullWidth
                         multiline
                         minRows={2}
-                        placeholder={editMessage?.content || ''}
+                        placeholder={editMessage?.content.trim() || ''}
                     />
                     <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                         <Button
                             variant="contained"
                             onClick={async () => {
-                                await http.put(`/api/messages/${editMessage.message_uuid}`, { content: editContent });
-                                const messageUuid = editMessage.message_uuid;
-                                setEditModalOpen(false);
-                                setShouldAutoScroll(false);
-                                const res = await http.get(`/api/messages/conversation/${ticketId}`);
-                                setMessages(res.data);
-                                setMessages(prevMessages =>
-                                    prevMessages.map(m =>
-                                        m.message_uuid === editMessage.message_uuid
-                                            ? { ...m, isEdited: true }
-                                            : m))
+                                try {
+                                    await messageSchema.validate(editContent);
+                                    await http.put(`/api/messages/${editMessage.message_uuid}`, { content: editContent });
+                                    const messageUuid = editMessage.message_uuid;
+                                    setEditModalOpen(false);
+                                    setShouldAutoScroll(false);
+                                    const res = await http.get(`/api/messages/conversation/${ticketId}`);
+                                    setMessages(res.data);
+                                    setMessages(prevMessages =>
+                                        prevMessages.map(m =>
+                                            m.message_uuid === editMessage.message_uuid
+                                                ? { ...m, isEdited: true }
+                                                : m))
+                                }
+                                catch (err) {
+                                    showToastWithCooldown(err.response?.data?.error || 'An error occurred');
+                                    return;
+                                }
 
                             }}
                             disabled={editContent.trim() === ''}
