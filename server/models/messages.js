@@ -46,6 +46,7 @@ module.exports = (sequelize, DataTypes) => {
     // Associations (optional, for easier querying)
     Message.associate = (models) => {
         Message.belongsTo(models.Ticket, { foreignKey: 'ticketId' });
+        Message.belongsTo(models.User, { as: 'sender', foreignKey: 'senderId' });
     };
 
     return Message;

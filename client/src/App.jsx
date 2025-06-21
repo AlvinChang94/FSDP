@@ -4,7 +4,6 @@ import MyTheme from './themes/mytheme';
 import { ThemeProvider } from '@mui/material/styles';
 import Tutorials from './pages/tutorials/Tutorials';
 import Home from './pages/Home';
-import AdminHome from './pages/admin/Adminhome';
 import EditTutorial from './pages/tutorials/EditTutorial';
 import AddTutorial from './pages/tutorials/AddTutorial';
 import Register from './pages/Register';
@@ -25,6 +24,7 @@ import Faq_Management from './pages/Chatbot Config/faq_management';
 import Security_privacy from './pages/Chatbot Config/security_privacy';
 import Intervention_threshold from './pages/Chatbot Config/intervetion_threshold';
 import ChatbotPreview from './pages/ChatbotPreview';
+import AdminSupport from './pages/admin/AdminSupport';
 
 
 const logout = () => {
@@ -41,7 +41,6 @@ function App() {
     if (localStorage.getItem("accessToken")) {
       http.get('/user/auth').then((res) => {
         setUser(res.data.user);
-        console.log("User role:", res.data.user.role);
       });
     }
   }, []);
@@ -98,22 +97,22 @@ function App() {
                   {/* Tutorials is only listed for our own reference, we will remove it later */}
                   { user && user.role == 'admin' ? (
                     <>
-                      <ListItem disablePadding>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/admin-notifications">
                           <ListItemText primary="Admin Notifications" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
-                      <ListItem disablePadding>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/admin-analytics">
                           <ListItemText primary="Admin Analytics" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
-                      <ListItem disablePadding>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/admin-support">
                           <ListItemText primary="Admin Support Centre" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
-                      <ListItem disablePadding>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/moderator-actions">
                           <ListItemText primary="Moderator Actions" sx={{ color: 'white' }} />
                         </ListItemButton>
@@ -225,7 +224,6 @@ function App() {
               <Container>
                 <Routes>
                   <Route path={"/"} element={<Home />} />
-                  <Route path={'/admin-home'} element={< AdminHome />} />
                   <Route path={"/tutorials"} element={<Tutorials />} />
                   <Route path={"/addtutorial"} element={<AddTutorial />} />
                   <Route path={"/edittutorial/:id"} element={<EditTutorial />} />
@@ -247,6 +245,7 @@ function App() {
                   <Route path={'/AddNotif'} element={<AddNotification />} />
                   <Route path={'/notifications'} element={<Login />} />
                   <Route path={"/EditNotif/:id"} element={<EditNotification />} />
+                  <Route path={"/admin-support"} element={<AdminSupport />} />
 
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>

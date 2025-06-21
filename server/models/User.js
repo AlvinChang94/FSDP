@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: "userId",
             onDelete: "cascade"
         });
+        User.hasMany(models.Message, { as: 'sentMessages', foreignKey: 'senderId' });
     };
     return User;
 }

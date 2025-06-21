@@ -20,16 +20,20 @@ router.post('/', validateToken, async (req, res) => {
 });
 
 // Get all tickets (for admin)
-/*router.get('/', async (req, res) => {
+router.get('/adminget', validateToken, async (req, res) => {
     try {
+        if (!req.user || req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Forbidden: Admins only.' });
+        }
         const tickets = await db.Ticket.findAll({
-            include: [{ model: db.User, as: 'client' }]
+            include: [{ model: db.User, as: 'client' }],
+            order: [['updatedAt', 'DESC']]
         });
         res.json(tickets);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-});*/
+});
 
 // Get tickets for a specific user
 router.get('/user/:clientId', validateToken, async (req, res) => {

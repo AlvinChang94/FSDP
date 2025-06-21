@@ -52,9 +52,14 @@ router.get('/conversation/:ticketId', validateToken, async (req, res) => {
         
         const messages = await db.Message.findAll({
             where: { ticketId: Number(req.params.ticketId) },
+            include: [{ model: db.User, as: 'sender', attributes: ['id', 'name', 'role'] }],
             order: [['timestamp', 'ASC']],
         });
-        res.json(messages);
+        res.json(messages.map(msg => ({
+            ...msg.toJSON(),
+            senderRole: msg.sender?.role || 'user',
+            senderName: msg.sender?.name || 'User'
+        })));
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -109,6 +114,31 @@ router.put('/del/:message_uuid', validateToken, async (req, res) => {
         message.isEdited = false;
         await message.save();
         res.json(message);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/admin/conversation/:ticketId', validateToken, async (req, res) => {
+    try {
+        // Only allow admins
+        if (!req.user || req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Forbidden: Admins only.' });
+        }
+        const ticket = await db.Ticket.findByPk(req.params.ticketId);
+        if (!ticket) {
+            return res.status(404).json({ error: 'Ticket not found' });
+        }
+        const messages = await db.Message.findAll({
+            where: { ticketId: Number(req.params.ticketId) },
+            include: [{ model: db.User, as: 'sender', attributes: ['id', 'name', 'role'] }],
+            order: [['timestamp', 'ASC']],
+        });
+        res.json(messages.map(msg => ({
+            ...msg.toJSON(),
+            senderRole: msg.sender?.role || 'user',
+            senderName: msg.sender?.name || 'User'
+        })));
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

@@ -69,6 +69,7 @@ function Preview() {
             const res = await http.get(`/api/testchat/user/${localStorage.getItem('userId')}`);
             // Save chats to state (create a new state: userChats)
             setUserChats(res.data);
+            
         } catch (err) {
             console.error('Failed to fetch chats:', err);
         }
@@ -80,6 +81,7 @@ function Preview() {
         try {
             const res = await http.get(`/api/testchat/message/${chatId}`);
             setMessages(res.data);
+            setMessage('');
         } catch (err) {
             console.error('Failed to fetch messages:', err);
         }
@@ -283,7 +285,7 @@ function Preview() {
                                 right: 0,
                                 bottom: 90,
                                 width: '100vw',
-                                maxHeight: '78vh',
+                                maxHeight: '90vh',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 overflowY: 'auto',

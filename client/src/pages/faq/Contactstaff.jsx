@@ -147,6 +147,7 @@ function Contactstaff() {
         setMessages(res.data); // Set messages for the selected ticket
         setTicketId(ticketId); // Set the current ticket
         setStarted(true);      // Show the chat area if needed
+        setMessage('');
     };
 
     useEffect(() => {
@@ -250,9 +251,12 @@ function Contactstaff() {
                             sx={{ position: 'absolute', top: 10, right: 10 }}
                             onClick={() => {
                                 setHistoryOpen(false);
-                                setStarted(false); // This will show the "What do you need to ask today" screen
-                                setTicketId(null); // (optional) reset ticket selection
-                                setMessages([]);   // (optional) clear messages
+                                setStarted(false);
+                                setTicketId(null); 
+                                setMessages([]);  
+                                if (started){
+                                    setMessage('');
+                                }
                             }}
                         >
                             <EditIcon />
@@ -493,7 +497,7 @@ function Contactstaff() {
                     <Box sx={{ width: '100%' }}
                     >
                         {messages.map((msg, idx, arr) => {
-                            const isAdmin = msg.senderId <= 0;
+                            const isAdmin = msg.senderRole === 'admin';
                             const userId = Number(localStorage.getItem('userId'));
                             const showName = isAdmin && (idx === 0 || arr[idx - 1].senderId === userId);
                             const isLastInBlock = (() => {
