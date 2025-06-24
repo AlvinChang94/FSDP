@@ -68,6 +68,24 @@ router.put('/:ticketId', validateToken, async (req, res) => {
 
 });
 
+router.put('/admin/:ticketId', validateToken, async (req, res) => {
+    try {
+        if (!req.user || req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Forbidden: Admins only.' });
+        }
+        const ticket = await db.Ticket.findByPk(req.params.ticketId);
+        if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+        const { ticketStatus } = req.body;
+        ticket.ticketStatus = ticketStatus;
+        await ticket.save();
+        res.json(ticket);
+    }
+    catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+
+});
+
 router.delete('/:ticketId', validateToken, async (req, res) => {
     try {
         const ticket = await db.Ticket.findByPk(req.params.ticketId);
@@ -75,6 +93,22 @@ router.delete('/:ticketId', validateToken, async (req, res) => {
         if (ticket.clientId !== req.user.id) {
             return res.status(403).json({ error: 'Forbidden: does not match authenticated user.' });
         }
+        await ticket.destroy();
+        res.json({ success: true });
+    }
+    catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+
+});
+
+router.delete('/admin/:ticketId', validateToken, async (req, res) => {
+    try {
+        if (!req.user || req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Forbidden: Admins only.' });
+        }
+        const ticket = await db.Ticket.findByPk(req.params.ticketId);
+        if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
         await ticket.destroy();
         res.json({ success: true });
     }

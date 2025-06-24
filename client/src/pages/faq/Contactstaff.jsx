@@ -52,6 +52,8 @@ function Contactstaff() {
     const [deleteMessage, setDeleteMessage] = useState(null);
     const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
     const toastCooldownRef = useRef(0);
+    const prevTicketsRef = useRef([]);
+
 
     const handleMenuOpen = (event, ticket) => {
         setAnchorEl(event.currentTarget);
@@ -223,6 +225,42 @@ function Contactstaff() {
         setMsgMenuAnchor(null);
         setMsgMenuMessage(null);
     };
+
+    useEffect(() => {
+        if (!ticketId) return;
+        const interval = setInterval(async () => {
+            try {
+                const res = await http.get(`/api/ticket/user/${localStorage.getItem('userId')}`);
+                if (!res) {
+                    setTicketId(null);
+                    setStarted(false)
+                    setMessages([]);
+                }
+                const currentTickets = res.data;
+                const prevTickets = prevTicketsRef.current;
+                const prevString = JSON.stringify(prevTickets);
+                const currString = JSON.stringify(currentTickets);
+
+                if (prevString !== currString) {
+                    const current = currentTickets.find(t => t.ticketId === ticketId);
+                    if (current.ticketStatus === 'solved') {
+                        setTicketId(null);
+                        setStarted(false)
+                        setMessages([]);
+                    }
+                }
+                prevTicketsRef.current = currentTickets;
+            } catch (err) {
+                console.log(err)
+                setTicketId(null);
+                setStarted(false)
+                setMessages([]);
+            }
+        }, 2000);
+
+        return () => clearInterval(interval);
+    }, [ticketId]);
+
     return (
         <Box sx={{
             position: 'fixed',
@@ -252,9 +290,9 @@ function Contactstaff() {
                             onClick={() => {
                                 setHistoryOpen(false);
                                 setStarted(false);
-                                setTicketId(null); 
-                                setMessages([]);  
-                                if (started){
+                                setTicketId(null);
+                                setMessages([]);
+                                if (started) {
                                     setMessage('');
                                 }
                             }}
@@ -325,7 +363,7 @@ function Contactstaff() {
                             onClose={handleMenuClose}
                         >
                             <MenuItem onClick={() => setConfirmAction('solve')} disabled={selectedTicket?.ticketStatus !== 'open'}>Mark as Solved</MenuItem>
-                            <MenuItem onClick={() => setConfirmAction('delete')} sx={{ color: 'red' }} disabled={selectedTicket?.ticketStatus !== 'solved'}>Delete</MenuItem>
+                            {/*<MenuItem onClick={() => setConfirmAction('delete')} sx={{ color: 'red' }} disabled={selectedTicket?.ticketStatus !== 'solved'}>Delete</MenuItem>*/}
                         </Menu>
                     </Box>
                 </Modal>
@@ -524,7 +562,7 @@ function Contactstaff() {
                                 >
                                     {showName && (
                                         <Typography variant="caption" sx={{ color: '#888', mb: 0.5 }}>
-                                            {"Admin"}
+                                            {`Admin ${msg.senderName}`}
                                         </Typography>
                                     )}
                                     <Box
@@ -708,7 +746,6 @@ function Contactstaff() {
                                 try {
                                     await messageSchema.validate(editContent);
                                     await http.put(`/api/messages/${editMessage.message_uuid}`, { content: editContent });
-                                    const messageUuid = editMessage.message_uuid;
                                     setEditModalOpen(false);
                                     setShouldAutoScroll(false);
                                     const res = await http.get(`/api/messages/conversation/${ticketId}`);
