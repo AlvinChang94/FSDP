@@ -89,4 +89,17 @@ router.get("/auth", validateToken, (req, res) => {
         user: userInfo
     });
 });
+ router.get("/all", validateToken, async (req, res) => {
+        if (!req.user || req.user.role !== 'admin') {
+            return res.status(403).json({ message: "Forbidden: Admins only." });
+        }
+        try {
+            const users = await User.findAll({
+                attributes: ['id', 'name', 'email', 'role']
+            });
+            res.json(users);
+        } catch (err) {
+            res.status(500).json({ message: "Failed to fetch users." });
+        }
+    });
 module.exports = router;
