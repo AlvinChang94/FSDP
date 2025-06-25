@@ -1,96 +1,118 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Grid, Paper, Button, Link as MuiLink } from '@mui/material';
-import { Link } from 'react-router-dom';
-import http from '../../http';  // your axios/http instance
-import { toast, ToastContainer } from 'react-toastify';
+import http from '../../http';
+import {
+  Box, Typography, Grid, Paper, Button, Dialog,
+  DialogTitle, DialogContent, DialogContentText,
+  DialogActions
+} from '@mui/material';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AdminActions() {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
-  // Fetch users from backend
   const fetchUsers = async () => {
-    setLoading(true);
     try {
-      const res = await http.get('/user/all'); 
+      const res = await http.get('/user/all');
       setUsers(res.data);
     } catch (error) {
-      toast.error('Failed to load users');
+      toast.error("Failed to load users.");
     }
-    setLoading(false);
   };
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-
-  const toggleMute = async (userId) => {
+  const handleMute = async (id) => {
     try {
-      await http.put(`/moderator/users/${userId}/mute`);
-      toast.success('User mute status updated');
-      fetchUsers();
-    } catch {
-      toast.error('Failed to update mute status');
+      await http.put(`/user/mute/${id}`);
+      toast.info(`User ${id} muted`);
+      fetchUsers(); // ✅ Refresh user list
+    } catch (err) {
+      toast.error("Failed to mute user.");
     }
   };
 
-  // Delete user
-  const deleteUser = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+  const handleUnmute = async (id) => {
     try {
-      await http.delete(`/moderator/users/${userId}`);
-      toast.success('User deleted');
-      fetchUsers();
-    } catch {
-      toast.error('Failed to delete user');
+      await http.put(`/user/unmute/${id}`);
+      toast.success(`User ${id} unmuted`);
+      fetchUsers(); // ✅ Refresh user list
+    } catch (err) {
+      toast.error("Failed to unmute user.");
     }
+  };
+  const handleDelete = async () => {
+    try {
+      await http.delete(`/user/${selectedUser.id}`);
+      toast.success("User deleted successfully");
+      fetchUsers();
+    } catch (err) {
+      toast.error("Failed to delete user.");
+    } finally {
+      setOpenDeleteDialog(false);
+    }
+  };
+
+  const confirmDelete = (user) => {
+    setSelectedUser(user);
+    setOpenDeleteDialog(true);
+  };
+
+  const cancelDelete = () => {
+    setOpenDeleteDialog(false);
+    setSelectedUser(null);
   };
 
   return (
-    <Box p={3}>
+    <Box>
       <ToastContainer />
-      <Typography variant="h4" gutterBottom>
-        Moderator Actions - Manage Users
+      <Typography variant="h5" sx={{ my: 2 }}>
+        Moderator Actions
       </Typography>
-
-      {loading ? (
-        <Typography>Loading users...</Typography>
-      ) : users.length === 0 ? (
-        <Typography>No users found.</Typography>
-      ) : (
-        <Grid container spacing={2}>
-          {users.map(user => (
-            <Grid item xs={12} md={6} lg={4} key={user.id}>
-              <Paper sx={{ p: 2 }}>
-                <Typography variant="h6">{user.name}</Typography>
-                <Typography variant="body2" color="textSecondary">{user.email}</Typography>
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                  Muted: {user.isMuted ? 'Yes' : 'No'}
-                </Typography>
-
-                <Button
-                  variant="contained"
-                  size="small"
-                  sx={{ mt: 1, mr: 1 }}
-                  onClick={() => toggleMute(user.id)}
-                >
-                  {user.isMuted ? 'Unmute' : 'Mute'}
+      <Grid container spacing={2}>
+        {users.map(user => (
+          <Grid item xs={12} md={6} key={user.id}>
+            <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="subtitle1"><strong>Name:</strong> {user.name}</Typography>
+              <Typography variant="subtitle2"><strong>Email:</strong> {user.email}</Typography>
+              <Typography variant="subtitle2"><strong>Role:</strong> {user.role}</Typography>
+              <Typography variant="subtitle2"><strong>Status:</strong> {user.muted ? "Muted 🔇" : "Active 🔊"}</Typography>
+              <Box sx={{ mt: 1 }}>
+                <Button variant="contained" size="small" color="warning" onClick={() => handleMute(user.id)} sx={{ mr: 1 }}>
+                  Mute
                 </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  size="small"
-                  sx={{ mt: 1 }}
-                  onClick={() => deleteUser(user.id)}
-                >
+                <Button variant="contained" size="small" color="success" onClick={() => handleUnmute(user.id)} sx={{ mr: 1 }}>
+                  Unmute
+                </Button>
+                <Button variant="contained" size="small" color="error" onClick={() => confirmDelete(user)}>
                   Delete
                 </Button>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-      )}
+              </Box>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+
+      <Dialog open={openDeleteDialog} onClose={cancelDelete}>
+        <DialogTitle>Delete User</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete {selectedUser?.name}?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDelete} variant="contained" color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} variant="contained" color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
