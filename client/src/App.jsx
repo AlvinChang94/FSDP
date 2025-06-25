@@ -16,6 +16,7 @@ import UserContext from './contexts/UserContext';
 import AdminLogin from './pages/admin/Adminlogin';
 import Contactstaff from './pages/faq/Contactstaff';
 import AdminDashboard from './pages/admin/AdminDash';
+import AdminActions from './pages/admin/AdminActions';
 import Notification from './pages/notification/Notifs';
 import AddNotification from './pages/notification/AddNotif';
 import EditNotification from './pages/notification/EditNotif';
@@ -113,7 +114,7 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/moderator-actions">
+                        <ListItemButton component={Link} to="/AdminActions">
                           <ListItemText primary="Moderator Actions" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
@@ -241,6 +242,7 @@ function App() {
                   <Route path={"/settings"} element={<Login />} />
                   <Route path={"/contact"} element={<Contactstaff />} />
                   <Route path={"/AdminDash"} element={<AdminDashboard />} />
+                  <Route path={"/AdminActions"} element={<AdminActions />} />
                   <Route path={'/Notification'} element={<Notification />} />
                   <Route path={'/AddNotif'} element={<AddNotification />} />
                   <Route path={'/notifications'} element={<Login />} />
