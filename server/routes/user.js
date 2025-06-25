@@ -6,6 +6,7 @@ const yup = require("yup");
 const { sign } = require('jsonwebtoken');
 require('dotenv').config();
 const { validateToken } = require('../middlewares/auth');
+const mutedUsers = new Set();
 
 router.post("/register", async (req, res) => {
     let data = req.body;
@@ -89,17 +90,49 @@ router.get("/auth", validateToken, (req, res) => {
         user: userInfo
     });
 });
- router.get("/all", validateToken, async (req, res) => {
-        if (!req.user || req.user.role !== 'admin') {
-            return res.status(403).json({ message: "Forbidden: Admins only." });
-        }
-        try {
-            const users = await User.findAll({
-                attributes: ['id', 'name', 'email', 'role']
-            });
-            res.json(users);
-        } catch (err) {
-            res.status(500).json({ message: "Failed to fetch users." });
-        }
+
+router.get('/all', validateToken, async (req, res) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Admins only.' });
+  }
+  try {
+    const users = await User.findAll({
+      attributes: ['id', 'name', 'email', 'role']
     });
+    const usersWithMuted = users.map(u => ({
+      ...u.toJSON(),
+      muted: mutedUsers.has(String(u.id))
+    }));
+    res.json(usersWithMuted);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch users.' });
+  }
+});
+
+
+router.put('/mute/:id', validateToken, (req, res) => {
+  const id = req.params.id;
+  mutedUsers.add(id);
+  res.json({ message: `User ${id} muted.` });
+});
+
+
+router.put('/unmute/:id', validateToken, (req, res) => {
+  const id = req.params.id;
+  mutedUsers.delete(id);
+  res.json({ message: `User ${id} unmuted.` });
+});
+
+router.delete('/:id', validateToken, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    await user.destroy();
+    mutedUsers.delete(String(user.id)); // Clean up in-memory muted status
+    res.json({ message: 'User deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete user' });
+  }
+});
 module.exports = router;
