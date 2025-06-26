@@ -29,20 +29,20 @@ function AdminActions() {
   const handleMute = async (id) => {
     try {
       await http.put(`/user/mute/${id}`);
-      toast.info(`User ${id} muted`);
+      toast.info(`User's bot has been muted`);
       fetchUsers(); // ✅ Refresh user list
     } catch (err) {
-      toast.error("Failed to mute user.");
+      toast.error("Failed to mute user's bot.");
     }
   };
 
   const handleUnmute = async (id) => {
     try {
       await http.put(`/user/unmute/${id}`);
-      toast.success(`User ${id} unmuted`);
+      toast.success(`User's bot has been unmuted`);
       fetchUsers(); // ✅ Refresh user list
     } catch (err) {
-      toast.error("Failed to unmute user.");
+      toast.error("Failed to unmute user's bot.");
     }
   };
   const handleDelete = async () => {
