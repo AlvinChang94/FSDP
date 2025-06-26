@@ -118,12 +118,15 @@ function EditNotif() {
                                 />
                             </Grid>
                         </Grid>
-                        <Box sx={{ mt: 2 }}>
-                            <Button variant="contained" type="submit">
+                        <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
+                            <Button variant="contained" type="submit" color='secondary'>
                                 Update
                             </Button>
-                            <Button variant="contained" sx={{ ml: 2 }} color="error" onClick={handleOpen}>
+                            <Button variant="contained" color="error" onClick={handleOpen}>
                                 Delete
+                            </Button>
+                            <Button onClick={() => navigate(-1)} variant="contained" color='inherit'>
+                                cancel
                             </Button>
                         </Box>
                     </Box>

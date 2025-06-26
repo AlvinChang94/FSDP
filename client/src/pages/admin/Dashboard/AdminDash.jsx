@@ -30,7 +30,7 @@ function AdminDash() {
                 </Box>
             </Grid>
             <Grid item xs={12}>
-                <Link to='/AdminDash/OwnerRev' style={{textDecoration: 'none'}}>
+                <Link to='/AdminDash/Satisfaction' style={{textDecoration: 'none'}}>
                     <Box display="flex" justifyContent="center" my={2}>
                         <Paper
                             sx={{ p: 5, width: '100%', maxWidth: 700, textAlign: 'center', border: '2px dashed #ccc', bgcolor: '#fafafa', }}>
@@ -51,7 +51,7 @@ function AdminDash() {
                 </Box>
             </Grid>
             <Grid item xs={12}>
-                <Link to='/AdminDash/Satisfaction' style={{textDecoration: 'none'}}>
+                <Link to='/AdminDash/OwnerRev' style={{textDecoration: 'none'}}>
                     <Box display="flex" justifyContent="center" my={2}>
                         <Paper
                             sx={{ p: 5, width: '100%', maxWidth: 700, textAlign: 'center', border: '2px dashed #ccc', bgcolor: '#fafafa', }}>

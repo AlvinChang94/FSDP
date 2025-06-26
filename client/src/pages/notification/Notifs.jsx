@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Box, Typography, Grid, Card, CardContent, IconButton, Button } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import http from '../../http';
@@ -7,6 +7,7 @@ import { AccessTime, Edit } from '@mui/icons-material';
 
 function Notifs() {
     const [notificationList, setNotificationList] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         http.get("/notification")
@@ -53,6 +54,11 @@ function Notifs() {
                     </Grid>
                 ))}
             </Grid>
+            <Box sx={{ position: 'fixed', bottom: 16, right: 16, zIndex: 999 }}>
+                <Button variant="contained" onClick={() => navigate(-1)} color='inherit'>
+                    Back
+                </Button>
+            </Box>
         </Box>
     );
 }
