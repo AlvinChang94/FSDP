@@ -20,7 +20,7 @@ function Notifs() {
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} justifyContent='space-between'>
                 <Typography variant="h5">Notifications</Typography>
                 <Link to='/AddNotif'>
-                    <Button color='primary' variant='contained'>Add</Button>
+                    <Button color='secondary' variant='contained'>Add</Button>
                 </Link>
             </Box>
 
@@ -34,7 +34,7 @@ function Notifs() {
                                         {notif.title}
                                     </Typography>
                                     <Link to={`/EditNotif/${notif.id}`}>
-                                        <IconButton color='primary'>
+                                        <IconButton color='success'>
                                             <Edit />
                                         </IconButton>
                                     </Link>
@@ -54,7 +54,7 @@ function Notifs() {
                     </Grid>
                 ))}
             </Grid>
-            <Box sx={{ position: 'fixed', bottom: 16, right: 16, zIndex: 999 }}>
+            <Box sx={{ position: 'fixed', bottom: 32, right: 54, zIndex: 999 }}>
                 <Button variant="contained" onClick={() => navigate(-1)} color='inherit'>
                     Back
                 </Button>
