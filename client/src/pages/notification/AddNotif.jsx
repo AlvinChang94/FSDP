@@ -105,9 +105,12 @@ function AddNotification() {
             />
           </Grid>
         </Grid>
-        <Box sx={{ mt: 2 }}>
-          <Button variant="contained" type="submit">
+        <Box sx={{ mt: 2, gap : 2, display: 'flex' }}>
+          <Button variant="contained" type="submit" color='secondary'>
             Add Notification
+          </Button>
+          <Button onClick={() => navigate(-1)} variant="contained" color='inherit'>
+            cancel
           </Button>
         </Box>
       </Box>

@@ -15,7 +15,8 @@ import http from './http';
 import UserContext from './contexts/UserContext';
 import AdminLogin from './pages/admin/Adminlogin';
 import Contactstaff from './pages/faq/Contactstaff';
-import AdminDashboard from './pages/admin/AdminDash';
+import AdminDashboard from './pages/admin/Dashboard/AdminDash';
+import AdminActions from './pages/admin/AdminActions';
 import Notification from './pages/notification/Notifs';
 import AddNotification from './pages/notification/AddNotif';
 import EditNotification from './pages/notification/EditNotif';
@@ -25,6 +26,8 @@ import Security_privacy from './pages/Chatbot Config/security_privacy';
 import Intervention_threshold from './pages/Chatbot Config/intervetion_threshold';
 import ChatbotPreview from './pages/ChatbotPreview';
 import AdminSupport from './pages/admin/AdminSupport';
+import OwnerRev from './pages/admin/Dashboard/OwnerRev';
+import Satisfaction from './pages/admin/Dashboard/Satisfaction.jsx';
 
 
 const logout = () => {
@@ -113,7 +116,7 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/moderator-actions">
+                        <ListItemButton component={Link} to="/AdminActions">
                           <ListItemText primary="Moderator Actions" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
@@ -241,11 +244,14 @@ function App() {
                   <Route path={"/settings"} element={<Login />} />
                   <Route path={"/contact"} element={<Contactstaff />} />
                   <Route path={"/AdminDash"} element={<AdminDashboard />} />
+                  <Route path={"/AdminActions"} element={<AdminActions />} />
                   <Route path={'/Notification'} element={<Notification />} />
                   <Route path={'/AddNotif'} element={<AddNotification />} />
                   <Route path={'/notifications'} element={<Login />} />
                   <Route path={"/EditNotif/:id"} element={<EditNotification />} />
                   <Route path={"/admin-support"} element={<AdminSupport />} />
+                  <Route path={"/AdminDash/OwnerRev"} element={<OwnerRev />} />
+                  <Route path={"/AdminDash/Satisfaction"} element={<Satisfaction />} />
 
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Box, Typography, Grid, Card, CardContent, IconButton, Button } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import http from '../../http';
@@ -7,6 +7,7 @@ import { AccessTime, Edit } from '@mui/icons-material';
 
 function Notifs() {
     const [notificationList, setNotificationList] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         http.get("/notification")
@@ -18,9 +19,14 @@ function Notifs() {
         <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} justifyContent='space-between'>
                 <Typography variant="h5">Notifications</Typography>
-                <Link to='/AddNotif'>
-                    <Button color='primary' variant='contained'>Add</Button>
-                </Link>
+                <Box>
+                    <Button sx={{ mr: 2 }} variant="contained" onClick={() => navigate(-1)} color='inherit'>
+                        Back
+                    </Button>
+                    <Link to='/AddNotif'>
+                        <Button color='secondary' variant='contained'>Add</Button>
+                    </Link>
+                </Box>
             </Box>
 
             <Grid container spacing={2}>
@@ -33,7 +39,7 @@ function Notifs() {
                                         {notif.title}
                                     </Typography>
                                     <Link to={`/EditNotif/${notif.id}`}>
-                                        <IconButton color='primary'>
+                                        <IconButton color='success'>
                                             <Edit />
                                         </IconButton>
                                     </Link>
@@ -56,5 +62,5 @@ function Notifs() {
         </Box>
     );
 }
-
+ 
 export default Notifs;
