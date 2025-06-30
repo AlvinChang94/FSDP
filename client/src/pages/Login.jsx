@@ -36,11 +36,15 @@ function Login() {
             data.password = data.password.trim();
             http.post("/user/login", data)
                 .then((res) => {
-                    console.log(res.data);
+                    const user = res.data.user;
+                    if (user.role !== 'admin') {
+                        toast.error("Only admins can log in here.");
+                        return;
+                    }
                     localStorage.setItem("accessToken", res.data.accessToken);
-                    localStorage.setItem("userId", res.data.user.id)
-                    setUser(res.data.user);
-                    navigate("/");
+                    localStorage.setItem("userId", user.id);
+                    setUser(user);
+                    navigate("/admin-dashboard");
                     window.location.reload();
                 })
                 .catch(function (err) {

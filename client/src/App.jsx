@@ -28,6 +28,7 @@ import ChatbotPreview from './pages/ChatbotPreview';
 import AdminSupport from './pages/admin/AdminSupport';
 import OwnerRev from './pages/admin/Dashboard/OwnerRev';
 import Satisfaction from './pages/admin/Dashboard/Satisfaction.jsx';
+import ConversationDb from './pages/ConvDashboard/ConversationDb.jsx';
 
 
 const logout = () => {
@@ -144,7 +145,7 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/useranalytics">
+                        <ListItemButton component={Link} to="/ConversationDb"">
                           <ListItemText primary="My Analytics" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
@@ -252,6 +253,7 @@ function App() {
                   <Route path={"/admin-support"} element={<AdminSupport />} />
                   <Route path={"/AdminDash/OwnerRev"} element={<OwnerRev />} />
                   <Route path={"/AdminDash/Satisfaction"} element={<Satisfaction />} />
+                  <Route path={"/ConversationDb"} element={<ConversationDb />} />
 
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
