@@ -156,20 +156,16 @@ function AdminSupport() {
     useEffect(() => {
         const interval = setInterval(() => {
             try {
-                try {
-                    http.get(`/api/ticket/adminget`).then(res => {
+                http.get(`/api/ticket/adminget`).then(res => {
                         setTickets(res.data);
                     });
-                } catch (err) {
-                    console.error(err);
-                }
                 if (!selectedTicket) return;
                 http.get(`/api/messages/admin/conversation/${selectedTicket.ticketId}`).then(res => {
                     if (messagesRef.current.length == res.data.length) setShouldAutoScroll(false);
                     setMessages(res.data);
                 });
             } catch (err) {
-                console.error("No TicketId", err);
+                console.error(err);
             }
         }, 2000);
 

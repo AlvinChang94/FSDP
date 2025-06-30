@@ -161,22 +161,6 @@ function Contactstaff() {
     }, [messages]);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            try {
-                if (!ticketId) return;
-                http.get(`/api/messages/conversation/${ticketId}`).then(res => {
-                    if (messagesRef.current.length == res.data.length) setShouldAutoScroll(false);
-                    setMessages(res.data);
-                });
-            } catch (err) {
-                console.error("No TicketId", err);
-            }
-        }, 2000);
-
-        return () => clearInterval(interval);
-    }, [ticketId]);
-
-    useEffect(() => {
         messagesRef.current = messages;
     }, [messages]);
 
@@ -230,6 +214,10 @@ function Contactstaff() {
         if (!ticketId) return;
         const interval = setInterval(async () => {
             try {
+                http.get(`/api/messages/conversation/${ticketId}`).then(res => {
+                    if (messagesRef.current.length == res.data.length) setShouldAutoScroll(false);
+                    setMessages(res.data);
+                });
                 const res = await http.get(`/api/ticket/user/${localStorage.getItem('userId')}`);
                 if (!res) {
                     setTicketId(null);
