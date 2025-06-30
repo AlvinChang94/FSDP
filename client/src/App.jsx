@@ -145,7 +145,7 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/ConversationDb"">
+                        <ListItemButton component={Link} to="/ConversationDb">
                           <ListItemText primary="My Analytics" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
