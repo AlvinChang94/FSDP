@@ -16,7 +16,8 @@ function AdminActions() {
   const fetchUsers = async () => {
     try {
       const res = await http.get('/user/all');
-      setUsers(res.data);
+      const nonAdminUsers = res.data.filter(user => user.role !== 'admin');
+    setUsers(nonAdminUsers);
     } catch (error) {
       toast.error("Failed to load users.");
     }
