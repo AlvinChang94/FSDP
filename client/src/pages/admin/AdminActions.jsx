@@ -30,7 +30,7 @@ function AdminActions() {
     try {
       await http.put(`/user/mute/${id}`);
       toast.info(`User's bot has been muted`);
-      fetchUsers(); // ✅ Refresh user list
+      fetchUsers(); 
     } catch (err) {
       toast.error("Failed to mute user's bot.");
     }
@@ -40,7 +40,7 @@ function AdminActions() {
     try {
       await http.put(`/user/unmute/${id}`);
       toast.success(`User's bot has been unmuted`);
-      fetchUsers(); // ✅ Refresh user list
+      fetchUsers(); 
     } catch (err) {
       toast.error("Failed to unmute user's bot.");
     }
