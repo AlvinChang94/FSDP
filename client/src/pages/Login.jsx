@@ -37,14 +37,14 @@ function Login() {
             http.post("/user/login", data)
                 .then((res) => {
                     const user = res.data.user;
-                    if (user.role !== 'admin') {
-                        toast.error("Only admins can log in here.");
+                    if (user.role !== 'user') {
+                        toast.error("Only users can log in here.");
                         return;
                     }
                     localStorage.setItem("accessToken", res.data.accessToken);
                     localStorage.setItem("userId", user.id);
                     setUser(user);
-                    navigate("/admin-dashboard");
+                    navigate("/user-dashboard");
                     window.location.reload();
                 })
                 .catch(function (err) {
