@@ -19,9 +19,14 @@ function Notifs() {
         <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} justifyContent='space-between'>
                 <Typography variant="h5">Notifications</Typography>
-                <Link to='/AddNotif'>
-                    <Button color='secondary' variant='contained'>Add</Button>
-                </Link>
+                <Box>
+                    <Button sx={{ mr: 2 }} variant="contained" onClick={() => navigate(-1)} color='inherit'>
+                        Back
+                    </Button>
+                    <Link to='/AddNotif'>
+                        <Button color='secondary' variant='contained'>Add</Button>
+                    </Link>
+                </Box>
             </Box>
 
             <Grid container spacing={2}>
@@ -54,11 +59,6 @@ function Notifs() {
                     </Grid>
                 ))}
             </Grid>
-            <Box sx={{ position: 'fixed', bottom: 32, right: 54, zIndex: 999 }}>
-                <Button variant="contained" onClick={() => navigate(-1)} color='inherit'>
-                    Back
-                </Button>
-            </Box>
         </Box>
     );
 }
