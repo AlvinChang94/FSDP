@@ -4,6 +4,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 
 function ConversationAI() {
+    const navigate = useNavigate();
     return (
         <Box sx={{
             position: 'fixed',
