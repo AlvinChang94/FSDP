@@ -62,5 +62,5 @@ function Notifs() {
         </Box>
     );
 }
-
+ 
 export default Notifs;
