@@ -30,7 +30,7 @@ import OwnerRev from './pages/admin/Dashboard/OwnerRev';
 import Satisfaction from './pages/admin/Dashboard/Satisfaction.jsx';
 import ConversationDb from './pages/ConvDashboard/ConversationDb.jsx';
 import ConversationAI from './pages/ConvDashboard/ConversationAI.jsx';
-
+import RespTime from './pages/ConvDashboard/ConvAnalytics/RespTime';
 
 const logout = () => {
   localStorage.clear();
@@ -256,6 +256,7 @@ function App() {
                   <Route path={"/AdminDash/Satisfaction"} element={<Satisfaction />} />
                   <Route path={"/ConversationDb"} element={<ConversationDb />} />
                   <Route path="/ConversationAI" element={<ConversationAI />} />
+                  <Route path="/conv-analytics/response-time" element={<RespTime />} />
 
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
