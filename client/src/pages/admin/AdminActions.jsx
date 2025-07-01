@@ -3,21 +3,21 @@ import http from '../../http';
 import {
   Box, Typography, Grid, Paper, Button, Dialog,
   DialogTitle, DialogContent, DialogContentText,
-  DialogActions
+  DialogActions, TextField
 } from '@mui/material';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-function AdminActions() {
+function AdminActions() { 
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchUsers = async () => {
     try {
       const res = await http.get('/user/all');
       const nonAdminUsers = res.data.filter(user => user.role !== 'admin');
-    setUsers(nonAdminUsers);
+      setUsers(nonAdminUsers);
     } catch (error) {
       toast.error("Failed to load users.");
     }
@@ -31,7 +31,7 @@ function AdminActions() {
     try {
       await http.put(`/user/mute/${id}`);
       toast.info(`User's bot has been muted`);
-      fetchUsers(); 
+      fetchUsers();
     } catch (err) {
       toast.error("Failed to mute user's bot.");
     }
@@ -41,7 +41,7 @@ function AdminActions() {
     try {
       await http.put(`/user/unmute/${id}`);
       toast.success(`User's bot has been unmuted`);
-      fetchUsers(); 
+      fetchUsers();
     } catch (err) {
       toast.error("Failed to unmute user's bot.");
     }
@@ -67,15 +67,27 @@ function AdminActions() {
     setOpenDeleteDialog(false);
     setSelectedUser(null);
   };
-
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   return (
     <Box>
       <ToastContainer />
       <Typography variant="h5" sx={{ my: 2 }}>
         Moderator Actions
       </Typography>
+      <TextField
+        fullWidth
+        label="Search users by name or email"
+        variant="outlined"
+        margin="normal"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
       <Grid container spacing={2}>
-        {users.map(user => (
+        {filteredUsers.map(user => (
+
           <Grid item xs={12} md={6} key={user.id}>
             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
               <Typography variant="subtitle1"><strong>Name:</strong> {user.name}</Typography>
