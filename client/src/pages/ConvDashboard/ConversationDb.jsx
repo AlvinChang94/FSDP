@@ -22,8 +22,8 @@ function ConversationDb() {
             <Grid container spacing={3} justifyContent="center" sx={{ maxWidth: 1100, mx: 'auto', mb: 4 }}>
                 {[
                     { title: "Average response time for each question", value: "20.5s", to: "/conv-analytics/response-time" },
-                    { title: "Number of escalations", value: "30" },
-                    { title: "Escalation response delay", value: "10.2s" },
+                    { title: "Number of escalations", value: "30", to: "/conv-analytics/escalation-no" },
+                    { title: "Escalation response delay", value: "10.2s,", to: "/conv-analytics/escalation-delay" },
                 ].map((stat, index) => (
                     <Grid item xs={12} md={4} key={index}>
                         <Link to={stat.to} style={{ textDecoration: 'none' }}>
@@ -60,7 +60,6 @@ function ConversationDb() {
                     </Typography>
                 </Paper>
 
-
                 <Box textAlign="right">
                     <MuiLink component={Link} to="/ConversationAI" underline="hover" sx={{ color: '#1a73e8', fontWeight: 'bold' }}>
                         View AI Analytics Summary
@@ -72,4 +71,4 @@ function ConversationDb() {
 }
 
 export default ConversationDb;
- 
+   
