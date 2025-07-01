@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Box, Typography, Grid, Card, CardContent, IconButton, Button } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import http from '../../http';
+import http from '../../../../http';
 import dayjs from 'dayjs';
 import { AccessTime, Edit } from '@mui/icons-material';
 

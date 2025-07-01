@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, TextField, Button, Grid, Tooltip, IconButton } from '@mui/material';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import http from '../../http';
+import http from '../../../../http';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -46,6 +46,14 @@ function AddNotification() {
     }
   });
 
+  const setMessage = () =>{
+    formik.setFieldValue('message', 'Maintanence will be from ');
+  };
+  
+  const setDate = () =>{
+    formik.setFieldValue('sendDate', new Date().toISOString().slice(0, 10));
+  }
+
   return (
     <Box>
       <ToastContainer />
@@ -66,8 +74,8 @@ function AddNotification() {
               helperText={formik.touched.title && formik.errors.title}
             />
             {formik.values.title.trim() && (
-              <Tooltip title="Message suggestion">
-                <IconButton>
+              <Tooltip title="View AI message suggestion">
+                <IconButton onClick={(setMessage)}>
                   <InfoIcon color="secondary" />
                 </IconButton>
               </Tooltip>
@@ -84,8 +92,8 @@ function AddNotification() {
               helperText={formik.touched.message && formik.errors.message}
             />
             {formik.values.message.trim() && (
-              <Tooltip title="Date send suggestion">
-                <IconButton>
+              <Tooltip title="View AI Send Date suggestion">
+                <IconButton onClick={setDate}>
                   <InfoIcon color="secondary" />
                 </IconButton>
               </Tooltip>
