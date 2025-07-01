@@ -16,7 +16,6 @@ function AdminDash() {
                     </Link>
                 </Box>
                 <Typography variant="body1" color="text.secondary">
-                    {/* Your description here */}
                     Welcome to the admin dashboard
                 </Typography>
             </Paper>

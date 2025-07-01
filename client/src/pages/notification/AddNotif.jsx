@@ -1,11 +1,12 @@
 import React from 'react';
-import { Box, Typography, TextField, Button, Grid } from '@mui/material';
+import { Box, Typography, TextField, Button, Grid, Tooltip, IconButton } from '@mui/material';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import http from '../../http';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import InfoIcon from '@mui/icons-material/Info';
 
 function AddNotification() {
   const navigate = useNavigate();
@@ -29,7 +30,6 @@ function AddNotification() {
         .required('Send Date is required'),
     }),
     onSubmit: (data) => {
-      // trim text inputs just in case
       data.title = data.title.trim();
       data.message = data.message.trim();
 
@@ -65,6 +65,13 @@ function AddNotification() {
               error={formik.touched.title && Boolean(formik.errors.title)}
               helperText={formik.touched.title && formik.errors.title}
             />
+            {formik.values.title.trim() && (
+              <Tooltip title="Message suggestion">
+                <IconButton>
+                  <InfoIcon color="secondary" />
+                </IconButton>
+              </Tooltip>
+            )}
             <TextField
               fullWidth margin="normal" autoComplete="off"
               multiline minRows={3}
@@ -76,6 +83,13 @@ function AddNotification() {
               error={formik.touched.message && Boolean(formik.errors.message)}
               helperText={formik.touched.message && formik.errors.message}
             />
+            {formik.values.message.trim() && (
+              <Tooltip title="Date send suggestion">
+                <IconButton>
+                  <InfoIcon color="secondary" />
+                </IconButton>
+              </Tooltip>
+            )}
             <TextField
               fullWidth margin="normal" autoComplete="off"
               type="date"
@@ -90,7 +104,7 @@ function AddNotification() {
             />
           </Grid>
         </Grid>
-        <Box sx={{ mt: 2, gap : 2, display: 'flex' }}>
+        <Box sx={{ mt: 2, gap: 2, display: 'flex' }}>
           <Button variant="contained" type="submit" color='secondary'>
             Add Notification
           </Button>
