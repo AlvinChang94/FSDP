@@ -46,12 +46,14 @@ function AddNotification() {
     }
   });
 
-  const setMessage = () =>{
+  const setMessage = () => {
     formik.setFieldValue('message', 'Maintanence will be from ');
   };
-  
-  const setDate = () =>{
-    formik.setFieldValue('sendDate', new Date().toISOString().slice(0, 10));
+
+  const setDate = () => {
+    const now = new Date();
+    const formatted = now.toISOString().slice(0, 16);
+    formik.setFieldValue('sendDate', formatted);
   }
 
   return (
@@ -100,7 +102,7 @@ function AddNotification() {
             )}
             <TextField
               fullWidth margin="normal" autoComplete="off"
-              type="date"
+              type="datetime-local"
               label="Send Date"
               name="sendDate"
               InputLabelProps={{ shrink: true }}

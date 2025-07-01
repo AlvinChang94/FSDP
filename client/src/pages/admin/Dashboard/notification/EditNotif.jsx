@@ -92,7 +92,7 @@ function EditNotif() {
                                 />
                                 <TextField
                                     fullWidth margin="normal" autoComplete="off"
-                                    type="date"
+                                    type="datetime-local"
                                     label="Send Date"
                                     name="sendDate"
                                     InputLabelProps={{ shrink: true }}
