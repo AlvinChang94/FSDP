@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import http from '../../http';
+import http from '../../../../http';
 import {
     Box, Typography, TextField, Button, Dialog, DialogTitle, DialogContent, DialogContentText,
     DialogActions, Grid
