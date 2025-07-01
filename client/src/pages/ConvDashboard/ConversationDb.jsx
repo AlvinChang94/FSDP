@@ -23,7 +23,7 @@ function ConversationDb() {
                 {[
                     { title: "Average response time for each question", value: "20.5s", to: "/conv-analytics/response-time" },
                     { title: "Number of escalations", value: "30", to: "/conv-analytics/escalation-no" },
-                    { title: "Escalation response delay", value: "10.2s,", to: "/conv-analytics/escalation-delay" },
+                    { title: "Escalation response delay", value: "10.2s", to: "/conv-analytics/escalation-delay" },
                 ].map((stat, index) => (
                     <Grid item xs={12} md={4} key={index}>
                         <Link to={stat.to} style={{ textDecoration: 'none' }}>
