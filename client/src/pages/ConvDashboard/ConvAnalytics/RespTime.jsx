@@ -1,18 +1,20 @@
 import React from 'react';
 import { Box, Paper, Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { IconButton } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function AnalyticsDetail({ title }) {
   const navigate = useNavigate();
 
   return (
     <Box sx={{ p: 4, bgcolor: '#f5f6fa', minHeight: '100vh' }}>
-      <Button onClick={() => navigate(-1)} variant="outlined" sx={{ mb: 2 }}>
-        ← Back
-      </Button>
+      <IconButton onClick={() => navigate(-1)} sx={{ mb: 2 }}>
+      <ArrowBackIcon fontSize="large" />
+    </IconButton>
       
       <Typography variant="h4" fontWeight="bold" gutterBottom>
-        {title}
+        Response Time Analytics
       </Typography>
 
       <Paper elevation={3} sx={{ p: 4, mb: 3 }}>
@@ -34,3 +36,5 @@ function AnalyticsDetail({ title }) {
 }
 
 export default AnalyticsDetail;
+
+

@@ -14,7 +14,7 @@ function AnalyticsDetail({ title }) {
     </IconButton>
       
       <Typography variant="h4" fontWeight="bold" gutterBottom>
-        {title}
+        Escalation Number Analytics
       </Typography>
 
       <Paper elevation={3} sx={{ p: 4, mb: 3 }}>
