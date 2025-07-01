@@ -15,7 +15,6 @@ function AddNotification() {
       title: "",
       message: "",
       sendDate: "",
-      eventDate: ""
     },
     validationSchema: yup.object({
       title: yup.string().trim()
@@ -28,8 +27,6 @@ function AddNotification() {
         .required('Message is required'),
       sendDate: yup.date()
         .required('Send Date is required'),
-      eventDate: yup.date()
-        .required('Event Date is required')
     }),
     onSubmit: (data) => {
       // trim text inputs just in case
@@ -90,18 +87,6 @@ function AddNotification() {
               onBlur={formik.handleBlur}
               error={formik.touched.sendDate && Boolean(formik.errors.sendDate)}
               helperText={formik.touched.sendDate && formik.errors.sendDate}
-            />
-            <TextField
-              fullWidth margin="normal" autoComplete="off"
-              type="date"
-              label="Event Date"
-              name="eventDate"
-              InputLabelProps={{ shrink: true }}
-              value={formik.values.eventDate}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.eventDate && Boolean(formik.errors.eventDate)}
-              helperText={formik.touched.eventDate && formik.errors.eventDate}
             />
           </Grid>
         </Grid>

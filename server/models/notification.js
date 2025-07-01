@@ -12,10 +12,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
-    eventDate: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-    }
   });
 
   return Notification;

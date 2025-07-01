@@ -17,7 +17,6 @@ function EditNotif() {
         title: "",
         message: "",
         sendDate: "",
-        eventDate: ""
     });
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
@@ -36,7 +35,6 @@ function EditNotif() {
             title: yup.string().trim().min(3).max(100).required("Title is required"),
             message: yup.string().trim().min(3).max(500).required("Message is required"),
             sendDate: yup.date().required("Send Date is required"),
-            eventDate: yup.date().required("Event Date is required")
         }),
         onSubmit: (data) => {
             data.title = data.title.trim();
@@ -103,18 +101,6 @@ function EditNotif() {
                                     onBlur={formik.handleBlur}
                                     error={formik.touched.sendDate && Boolean(formik.errors.sendDate)}
                                     helperText={formik.touched.sendDate && formik.errors.sendDate}
-                                />
-                                <TextField
-                                    fullWidth margin="normal" autoComplete="off"
-                                    type="date"
-                                    label="Event Date"
-                                    name="eventDate"
-                                    InputLabelProps={{ shrink: true }}
-                                    value={formik.values.eventDate}
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                    error={formik.touched.eventDate && Boolean(formik.errors.eventDate)}
-                                    helperText={formik.touched.eventDate && formik.errors.eventDate}
                                 />
                             </Grid>
                         </Grid>

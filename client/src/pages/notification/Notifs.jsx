@@ -50,8 +50,7 @@ function Notifs() {
                                 <Box sx={{ display: 'flex', alignItems: 'center' }} color="text.secondary">
                                     <AccessTime sx={{ mr: 1 }} />
                                     <Typography variant="body2">
-                                        Send: {dayjs(notif.sendDate).format('YYYY-MM-DD')}<br />
-                                        Event: {dayjs(notif.eventDate).format('YYYY-MM-DD')}
+                                        Send: {dayjs(notif.sendDate).format('YYYY-MM-DD')}
                                     </Typography>
                                 </Box>
                             </CardContent>

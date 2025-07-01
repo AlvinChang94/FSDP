@@ -8,7 +8,6 @@ const validationSchema = yup.object({
   title: yup.string().trim().min(3).max(100).required(),
   message: yup.string().trim().min(3).max(500).required(),
   sendDate: yup.date().required(),
-  eventDate: yup.date().required()
 });
 
 router.post("/", async (req, res) => {
