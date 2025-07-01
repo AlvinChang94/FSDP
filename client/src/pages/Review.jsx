@@ -1,13 +1,33 @@
-import { Typography, Box, Paper, IconButton, TextField } from '@mui/material';
+import { Typography, Box, Paper, IconButton, TextField, Button } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import { useState } from 'react';
+import * as yup from 'yup';
+import { useFormik } from 'formik';
 
 function Review() {
     const [rating, setRating] = useState(0);
     const [hover, setHover] = useState(0);
 
+    const formik = useFormik({
+        initialValues: {
+            comment: "",
+        },
+        validationSchema: yup.object({
+            comment: yup.string().trim()
+                .min(3, 'Comment must be at least 3 characters')
+                .max(100, 'Comment must be at most 100 characters')
+                .required('Comment is required'),
+        }),
+        onSubmit: (values, { resetForm }) => {
+            console.log('Rating:', rating);
+            console.log('Comment:', values.comment);
+            resetForm();
+            setRating(0);
+        },
+    })
+
     return (
-        <Box>
+        <Box component='form' onSubmit={formik.handleSubmit}>
             <Paper elevation={3} sx={{ maxWidth: 1100, mx: 'auto', p: 4, mb: 4, bgcolor: 'white' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -25,7 +45,21 @@ function Review() {
             <Typography gutterBottom>
                 Comment
             </Typography>
-            <TextField fullWidth multiline minRows={3} placeholder="Write your feedback here..."/>
+            <TextField
+                fullWidth margin="normal" autoComplete="off"
+                multiline minRows={3}
+                name="comment"
+                value={formik.values.comment}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.comment && Boolean(formik.errors.comment)}
+                helperText={formik.touched.comment && formik.errors.comment}
+            />
+            <Box sx={{ mt: 2 }}>
+                <Button color='secondary' variant='contained' type='submit'>
+                    Submit
+                </Button>
+            </Box>
         </Box>
     );
 }
