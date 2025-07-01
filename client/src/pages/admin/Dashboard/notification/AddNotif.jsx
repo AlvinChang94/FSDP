@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, TextField, Button, Grid, Tooltip, IconButton } from '@mui/material';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
@@ -10,6 +10,7 @@ import InfoIcon from '@mui/icons-material/Info';
 
 function AddNotification() {
   const navigate = useNavigate();
+  const [submitMessage, setSubmitMessage] = useState('');
 
   const formik = useFormik({
     initialValues: {
@@ -94,11 +95,21 @@ function AddNotification() {
               helperText={formik.touched.message && formik.errors.message}
             />
             {formik.values.message.trim() && (
-              <Tooltip title="View AI Send Date suggestion">
-                <IconButton onClick={setDate}>
-                  <InfoIcon color="secondary" />
-                </IconButton>
-              </Tooltip>
+              <Box display='flex' alignItems='center'>
+                <Tooltip title="View AI Send Date suggestion">
+                  <IconButton onClick={() => {
+                    setDate();
+                    setSubmitMessage('Time was chosen because...');
+                  }}>
+                    <InfoIcon color="secondary" />
+                  </IconButton>
+                </Tooltip>
+                {submitMessage && (
+                  <Typography color='text.secondary'>
+                    {submitMessage}
+                  </Typography>
+                )}
+              </Box>
             )}
             <TextField
               fullWidth margin="normal" autoComplete="off"
