@@ -20,7 +20,7 @@ function Notifs() {
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} justifyContent='space-between'>
                 <Typography variant="h5">Notifications</Typography>
                 <Box>
-                    <Button sx={{ mr: 2 }} variant="contained" onClick={() => navigate(-1)} color='inherit'>
+                    <Button sx={{ mr: 2 }} variant="contained" onClick={() => navigate("/AdminDash")} color='inherit'>
                         Back
                     </Button>
                     <Link to='/AddNotif'>
