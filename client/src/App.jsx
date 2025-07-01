@@ -32,6 +32,8 @@ import ConversationDb from './pages/ConvDashboard/ConversationDb.jsx';
 import ConversationAI from './pages/ConvDashboard/ConversationAI.jsx';
 import RespTime from './pages/ConvDashboard/ConvAnalytics/RespTime';
 import Review from './pages/Review.jsx';
+import EscalationNo from './pages/ConvDashboard/ConvAnalytics/EscalationNo.jsx';    
+import EscalationDelay from './pages/ConvDashboard/ConvAnalytics/EscalationDelay.jsx';
 
 const logout = () => {
   localStorage.clear();
@@ -254,6 +256,8 @@ function App() {
                   <Route path="/ConversationAI" element={<ConversationAI />} />
                   <Route path="/conv-analytics/response-time" element={<RespTime />} />
                   <Route path="/Review" element={<Review />} />
+                  <Route path="/conv-analytics/escalation-no" element={<EscalationNo />} />
+                  <Route path="/conv-analytics/escalation-delay" element={<EscalationDelay />} />
 
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
