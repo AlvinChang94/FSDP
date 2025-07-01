@@ -31,6 +31,7 @@ import Satisfaction from './pages/admin/Dashboard/Satisfaction.jsx';
 import ConversationDb from './pages/ConvDashboard/ConversationDb.jsx';
 import ConversationAI from './pages/ConvDashboard/ConversationAI.jsx';
 import RespTime from './pages/ConvDashboard/ConvAnalytics/RespTime';
+import Review from './pages/Review.jsx';
 
 const logout = () => {
   localStorage.clear();
@@ -103,16 +104,6 @@ function App() {
                   { user && user.role == 'admin' ? (
                     <>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/admin-notifications">
-                          <ListItemText primary="Admin Notifications" sx={{ color: 'white' }} />
-                        </ListItemButton>
-                      </ListItem>
-                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/admin-analytics">
-                          <ListItemText primary="Admin Analytics" sx={{ color: 'white' }} />
-                        </ListItemButton>
-                      </ListItem>
-                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/admin-support">
                           <ListItemText primary="Admin Support Centre" sx={{ color: 'white' }} />
                         </ListItemButton>
@@ -158,6 +149,11 @@ function App() {
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/supportcentre">
                           <ListItemText primary="Support Centre" sx={{ color: 'white' }} />
+                        </ListItemButton>
+                      </ListItem>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
+                        <ListItemButton component={Link} to="/Review">
+                          <ListItemText primary="Review" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
                     </>
@@ -257,6 +253,7 @@ function App() {
                   <Route path={"/ConversationDb"} element={<ConversationDb />} />
                   <Route path="/ConversationAI" element={<ConversationAI />} />
                   <Route path="/conv-analytics/response-time" element={<RespTime />} />
+                  <Route path="/Review" element={<Review />} />
 
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
