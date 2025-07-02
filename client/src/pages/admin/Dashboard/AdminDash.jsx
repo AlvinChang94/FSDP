@@ -55,7 +55,7 @@ function AdminDash() {
                         <Paper
                             sx={{ p: 5, width: '100%', maxWidth: 700, textAlign: 'center', border: '2px dashed #ccc', bgcolor: '#fafafa', }}>
                             <Typography variant="body1" color="text.secondary">
-                                [Review placeholder]
+                                [AI Overview Placeholder]
                             </Typography>
                         </Paper>
                     </Box>
