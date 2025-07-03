@@ -28,6 +28,7 @@ function AddAlerts() {
         .max(500, 'Message must be at most 500 characters')
         .required('Message is required'),
       sendDate: yup.date()
+        .min(new Date(Date.now() - 60 * 1000), 'Send Date is in the past')
         .required('Send Date is required'),
     }),
     onSubmit: (data) => {
@@ -114,7 +115,9 @@ function AddAlerts() {
               </Box>
             )}
             <TextField
-              fullWidth margin="normal" autoComplete="off"
+              fullWidth
+              margin="normal"
+              autoComplete="off"
               type="datetime-local"
               label="Send Date"
               name="sendDate"
@@ -124,6 +127,9 @@ function AddAlerts() {
               onBlur={formik.handleBlur}
               error={formik.touched.sendDate && Boolean(formik.errors.sendDate)}
               helperText={formik.touched.sendDate && formik.errors.sendDate}
+              inputProps={{
+                min: new Date(Date.now() - 60 * 1000).toISOString().slice(0, 16)
+              }}
             />
           </Grid>
         </Grid>
