@@ -3,6 +3,8 @@ import StarIcon from '@mui/icons-material/Star';
 import { useState } from 'react';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Review() {
     const [rating, setRating] = useState(0);
@@ -21,6 +23,7 @@ function Review() {
         onSubmit: (values, { resetForm }) => {
             console.log('Rating:', rating);
             console.log('Comment:', values.comment);
+            toast.success('Review submitted successfully!');
             resetForm();
             setRating(0);
         },
@@ -60,6 +63,7 @@ function Review() {
                     Submit
                 </Button>
             </Box>
+            <ToastContainer />
         </Box>
     );
 }
