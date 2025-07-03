@@ -12,7 +12,7 @@ function Alert() {
     useEffect(() => {
         http.get("/alert")
             .then((res) =>{
-                const sort = res.data.sort((b, a) => new Date(b.sendDate) - new Date(a.sendDate));        
+                const sort = res.data.sort((a, b) => new Date(a.sendDate) - new Date(b.sendDate));        
                 setAlertList(sort)})
             .catch((err) => console.error("Failed to fetch alert", err));
     }, []);
