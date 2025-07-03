@@ -23,7 +23,16 @@ function EditAlerts() {
 
     useEffect(() => {
         http.get(`/alert/${id}`).then((res) => {
-            setAlert(res.data);
+            const data = res.data;
+
+            const localDate = new Date(data.sendDate);
+            const offsetDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+            const formattedDate = offsetDate.toISOString().slice(0, 16);
+
+            setAlert({
+                ...data,
+                sendDate: formattedDate,
+            });
             setLoading(false);
         });
     }, [id]);
@@ -34,7 +43,9 @@ function EditAlerts() {
         validationSchema: yup.object({
             title: yup.string().trim().min(3).max(100).required("Title is required"),
             message: yup.string().trim().min(3).max(500).required("Message is required"),
-            sendDate: yup.date().required("Send Date is required"),
+            sendDate: yup.date()
+                .min(new Date(Date.now() - 60 * 1000), 'Send Date is in the past')
+                .required('Send Date is required'),
         }),
         onSubmit: (data) => {
             data.title = data.title.trim();
@@ -51,7 +62,7 @@ function EditAlerts() {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
-    const deleteAlert = () => { 
+    const deleteAlert = () => {
         http.delete(`/alert/${id}`).then(() => {
             toast.success("Alert deleted");
             navigate("/alert");
@@ -91,7 +102,9 @@ function EditAlerts() {
                                     helperText={formik.touched.message && formik.errors.message}
                                 />
                                 <TextField
-                                    fullWidth margin="normal" autoComplete="off"
+                                    fullWidth
+                                    margin="normal"
+                                    autoComplete="off"
                                     type="datetime-local"
                                     label="Send Date"
                                     name="sendDate"
@@ -101,6 +114,9 @@ function EditAlerts() {
                                     onBlur={formik.handleBlur}
                                     error={formik.touched.sendDate && Boolean(formik.errors.sendDate)}
                                     helperText={formik.touched.sendDate && formik.errors.sendDate}
+                                    inputProps={{
+                                        min: new Date(Date.now() - 60 * 1000).toISOString().slice(0, 16)
+                                    }}
                                 />
                             </Grid>
                         </Grid>
