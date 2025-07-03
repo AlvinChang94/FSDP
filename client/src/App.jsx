@@ -34,6 +34,10 @@ import RespTime from './pages/ConvDashboard/ConvAnalytics/RespTime';
 import Review from './pages/Review.jsx';
 import EscalationNo from './pages/ConvDashboard/ConvAnalytics/EscalationNo.jsx';    
 import EscalationDelay from './pages/ConvDashboard/ConvAnalytics/EscalationDelay.jsx';
+import CreateAnnouncement from './pages/Announcements/CreateAnnouncement.jsx';
+import Announcements from './pages/Announcements/Announcements.jsx';
+import EditAnnouncement from './pages/Announcements/EditAnnouncement.jsx';
+import Escalations from './pages/Escalations.jsx';
 
 const logout = () => {
   localStorage.clear();
@@ -120,6 +124,11 @@ function App() {
                           <ListItemText primary="Admin Dashboard" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
+                        <ListItemButton component={Link} to="/Announcements">
+                          <ListItemText primary="Announcements" sx={{ color: 'white' }} />
+                        </ListItemButton>
+                      </ListItem>
                     </>
                   ) : user ? (
                     <>
@@ -156,6 +165,11 @@ function App() {
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/Review">
                           <ListItemText primary="Review" sx={{ color: 'white' }} />
+                        </ListItemButton>
+                      </ListItem>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
+                        <ListItemButton component={Link} to="/Escalations">
+                          <ListItemText primary="Escalations" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
                     </>
@@ -258,6 +272,10 @@ function App() {
                   <Route path="/Review" element={<Review />} />
                   <Route path="/conv-analytics/escalation-no" element={<EscalationNo />} />
                   <Route path="/conv-analytics/escalation-delay" element={<EscalationDelay />} />
+                  <Route path={'/CreateAnnouncement'} element={<CreateAnnouncement />} />
+                  <Route path={'/Announcements'} element={<Announcements />} />
+                  <Route path={'/EditAnnouncement/:id'} element={<EditAnnouncement />} />
+                  <Route path={'/Escalations'} element={<Escalations />} />
 
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
