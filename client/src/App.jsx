@@ -17,9 +17,9 @@ import AdminLogin from './pages/admin/Adminlogin';
 import Contactstaff from './pages/faq/Contactstaff';
 import AdminDashboard from './pages/admin/Dashboard/AdminDash';
 import AdminActions from './pages/admin/AdminActions';
-import Notification from './pages/admin/Dashboard/notification/Notifs';
-import AddNotification from './pages/admin/Dashboard/notification/AddNotif';
-import EditNotification from './pages/admin/Dashboard/notification/EditNotif';
+import Alert from './pages/admin/Dashboard/Alerts/Alert.jsx';
+import AddAlerts from './pages/admin/Dashboard/Alerts/AddAlert.jsx';
+import EditAlerts from './pages/admin/Dashboard/Alerts/EditAlert.jsx';
 import TonePersonality from './pages/Chatbot Config/tone_personality';
 import Faq_Management from './pages/Chatbot Config/faq_management';
 import Security_privacy from './pages/Chatbot Config/security_privacy';
@@ -245,10 +245,10 @@ function App() {
                   <Route path={"/contact"} element={<Contactstaff />} />
                   <Route path={"/AdminDash"} element={<AdminDashboard />} />
                   <Route path={"/AdminActions"} element={<AdminActions />} />
-                  <Route path={'/Notification'} element={<Notification />} />
-                  <Route path={'/AddNotif'} element={<AddNotification />} />
+                  <Route path={'/Alert'} element={<Alert />} />
+                  <Route path={'/AddAlert'} element={<AddAlerts />} />
                   <Route path={'/notifications'} element={<Login />} />
-                  <Route path={"/EditNotif/:id"} element={<EditNotification />} />
+                  <Route path={"/EditAlert/:id"} element={<EditAlerts />} />
                   <Route path={"/admin-support"} element={<AdminSupport />} />
                   <Route path={"/AdminDash/OwnerRev"} element={<OwnerRev />} />
                   <Route path={"/AdminDash/Satisfaction"} element={<Satisfaction />} />

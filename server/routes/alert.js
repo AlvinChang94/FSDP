@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Notification } = require('../models');
+const { Alert } = require('../models');
 const { Op } = require('sequelize');
 const yup = require('yup');
 
@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
   let data = req.body;
   try {
     data = await validationSchema.validate(data, { abortEarly: false });
-    const result = await Notification.create(data);
+    const result = await Alert.create(data);
     res.json(result);
   } catch (err) {
     res.status(400).json({ errors: err.errors });
@@ -32,7 +32,7 @@ router.get("/", async (req, res) => {
     ];
   }
 
-  const list = await Notification.findAll({
+  const list = await Alert.findAll({
     where: condition,
     order: [['createdAt', 'DESC']]
   });
@@ -42,14 +42,14 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   const id = req.params.id;
-  const notification = await Notification.findByPk(id);
+  const alert = await Alert.findByPk(id);
 
-  if (!notification) {
+  if (!alert) {
     res.sendStatus(404);
     return;
   }
 
-  res.json(notification);
+  res.json(alert);
 });
 
 router.put("/:id", async (req, res) => {
@@ -59,17 +59,17 @@ router.put("/:id", async (req, res) => {
   try {
     data = await validationSchema.validate(data, { abortEarly: false });
 
-    const notification = await Notification.findByPk(id);
-    if (!notification) {
+    const alert = await Alert.findByPk(id);
+    if (!alert) {
       res.sendStatus(404);
       return;
     }
 
-    const num = await Notification.update(data, { where: { id } });
+    const num = await Alert.update(data, { where: { id } });
     if (num[0] === 1) {
-      res.json({ message: "Notification updated successfully." });
+      res.json({ message: "Alert updated successfully." });
     } else {
-      res.status(400).json({ message: `Cannot update notification with id ${id}.` });
+      res.status(400).json({ message: `Cannot update alert with id ${id}.` });
     }
   } catch (err) {
     res.status(400).json({ errors: err.errors });
@@ -78,18 +78,18 @@ router.put("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   const id = req.params.id;
-  const notification = await Notification.findByPk(id);
+  const alert = await Alert.findByPk(id);
 
-  if (!notification) {
+  if (!alert) {
     res.sendStatus(404);
     return;
   }
 
-  const num = await Notification.destroy({ where: { id } });
+  const num = await Alert.destroy({ where: { id } });
   if (num === 1) {
-    res.json({ message: "Notification deleted successfully." });
+    res.json({ message: "Alert deleted successfully." });
   } else {
-    res.status(400).json({ message: `Cannot delete notification with id ${id}.` });
+    res.status(400).json({ message: `Cannot delete alert with id ${id}.` });
   }
 });
 

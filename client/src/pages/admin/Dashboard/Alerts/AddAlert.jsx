@@ -8,7 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import InfoIcon from '@mui/icons-material/Info';
 
-function AddNotification() {
+function AddAlerts() {
   const navigate = useNavigate();
   const [submitMessage, setSubmitMessage] = useState('');
 
@@ -34,14 +34,14 @@ function AddNotification() {
       data.title = data.title.trim();
       data.message = data.message.trim();
 
-      http.post("/notification", data)
+      http.post("/alert", data)
         .then((res) => {
           console.log(res.data);
-          toast.success("Notification added!");
-          navigate("/notification");
+          toast.success("Alert added!");
+          navigate("/Alert");
         })
         .catch((err) => {
-          toast.error("Failed to add notification.");
+          toast.error("Failed to add alert.");
           console.error(err);
         });
     }
@@ -53,7 +53,9 @@ function AddNotification() {
 
   const setDate = () => {
     const now = new Date();
-    const formatted = now.toISOString().slice(0, 16);
+    const offset = now.getTimezoneOffset();
+    const localDate = new Date(now.getTime() - offset * 60000);
+    const formatted = localDate.toISOString().slice(0, 16);
     formik.setFieldValue('sendDate', formatted);
   }
 
@@ -61,7 +63,7 @@ function AddNotification() {
     <Box>
       <ToastContainer />
       <Typography variant="h5" sx={{ my: 2 }}>
-        Add Notification
+        Add Alerts
       </Typography>
       <Box component="form" onSubmit={formik.handleSubmit}>
         <Grid container spacing={2}>
@@ -127,7 +129,7 @@ function AddNotification() {
         </Grid>
         <Box sx={{ mt: 2, gap: 2, display: 'flex' }}>
           <Button variant="contained" type="submit" color='secondary'>
-            Add Notification
+            Add Alerts
           </Button>
           <Button onClick={() => navigate(-1)} variant="contained" color='inherit'>
             cancel
@@ -138,4 +140,4 @@ function AddNotification() {
   );
 }
 
-export default AddNotification;
+export default AddAlerts;

@@ -9,9 +9,9 @@ function AdminDash() {
                     <Typography variant="h4" fontWeight="bold" gutterBottom>
                         Admin Dashboard
                     </Typography>
-                    <Link to='/Notification' style={{ textDecoration: 'none' }}>
+                    <Link to='/Alert' style={{ textDecoration: 'none' }}>
                         <Button variant='contained' color='secondary'>
-                            View Notifications
+                            View Alerts
                         </Button>
                     </Link>
                 </Box>

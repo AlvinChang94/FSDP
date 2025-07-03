@@ -26,8 +26,8 @@ const messageRoutes = require('./routes/messages');
 app.use('/api/messages', messageRoutes);
 const ticketRoutes = require('./routes/tickets')
 app.use('/api/ticket', ticketRoutes)
-const notificationRoutes = require('./routes/notification');
-app.use('/notification', notificationRoutes);
+const alertRoutes = require('./routes/alert');
+app.use('/alert', alertRoutes);
 const testChatRoutes = require('./routes/testChat')
 app.use('/api/testchat', testChatRoutes);
 

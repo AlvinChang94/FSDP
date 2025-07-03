@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Notification = sequelize.define('Notification', {
+  const Alert = sequelize.define('Alert', {
     title: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -14,5 +14,5 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
-  return Notification;
+  return Alert;
 };

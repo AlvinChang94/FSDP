@@ -10,10 +10,10 @@ import * as yup from 'yup';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function EditNotif() {
+function EditAlerts() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [notification, setNotification] = useState({
+    const [alert, setAlert] = useState({
         title: "",
         message: "",
         sendDate: "",
@@ -22,14 +22,14 @@ function EditNotif() {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
-        http.get(`/notification/${id}`).then((res) => {
-            setNotification(res.data);
+        http.get(`/alert/${id}`).then((res) => {
+            setAlert(res.data);
             setLoading(false);
         });
     }, [id]);
 
     const formik = useFormik({
-        initialValues: notification,
+        initialValues: alert,
         enableReinitialize: true,
         validationSchema: yup.object({
             title: yup.string().trim().min(3).max(100).required("Title is required"),
@@ -39,22 +39,22 @@ function EditNotif() {
         onSubmit: (data) => {
             data.title = data.title.trim();
             data.message = data.message.trim();
-            http.put(`/notification/${id}`, data)
+            http.put(`/alert/${id}`, data)
                 .then((res) => {
-                    toast.success("Notification updated!");
-                    navigate("/notification");
+                    toast.success("Alert updated!");
+                    navigate("/alert");
                 })
-                .catch(() => toast.error("Failed to update notification."));
+                .catch(() => toast.error("Failed to update alert."));
         }
     });
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
-    const deleteNotification = () => {
-        http.delete(`/notification/${id}`).then(() => {
-            toast.success("Notification deleted");
-            navigate("/notification");
+    const deleteAlert = () => { 
+        http.delete(`/alert/${id}`).then(() => {
+            toast.success("Alert deleted");
+            navigate("/alert");
         });
     };
 
@@ -62,7 +62,7 @@ function EditNotif() {
         <Box>
             <ToastContainer />
             <Typography variant="h5" sx={{ my: 2 }}>
-                Edit Notification
+                Edit Alert
             </Typography>
             {
                 !loading && (
@@ -119,17 +119,17 @@ function EditNotif() {
                 )
             }
             <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Delete Notification</DialogTitle>
+                <DialogTitle>Delete Alert</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Are you sure you want to delete this notification?
+                        Are you sure you want to delete this alert?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button variant="contained" color="inherit" onClick={handleClose}>
                         Cancel
                     </Button>
-                    <Button variant="contained" color="error" onClick={deleteNotification}>
+                    <Button variant="contained" color="error" onClick={deleteAlert}>
                         Delete
                     </Button>
                 </DialogActions>
@@ -138,4 +138,4 @@ function EditNotif() {
     );
 }
 
-export default EditNotif;
+export default EditAlerts;
