@@ -84,7 +84,7 @@ function Contactstaff() {
                     ticketId,
                     content: message
                 }).catch(function (err) {
-                    toast.error(`${err.response.data.message}`);
+                    toast.error(`Error encountered. Please try and refresh the page`);
                 });
 
                 setMessages([...messages, res.data]);
@@ -229,14 +229,14 @@ function Contactstaff() {
                 const prevString = JSON.stringify(prevTickets);
                 const currString = JSON.stringify(currentTickets);
 
-                if (prevString !== currString) {
+                /*if (prevString !== currString) {
                     const current = currentTickets.find(t => t.ticketId === ticketId);
                     if (current.ticketStatus === 'solved') {
                         setTicketId(null);
                         setStarted(false)
                         setMessages([]);
                     }
-                }
+                }*/
                 prevTicketsRef.current = currentTickets;
             } catch (err) {
                 console.log(err)

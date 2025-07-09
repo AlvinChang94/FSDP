@@ -20,7 +20,7 @@ router.post('/', validateToken, async (req, res) => {
         const ticket = await db.Ticket.findByPk(ticketId);
         if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
         if (ticket.ticketStatus === 'solved') {
-            return res.status(403).json({ error: 'Cannot send messages to a solved ticket.' });
+            return res.status(400).json({ error: 'Cannot send messages to a solved ticket.' });
         }
         
         const message = await db.Message.create({
