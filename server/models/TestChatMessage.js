@@ -33,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
     timestamp: {
       type: DataTypes.DATE,
       allowNull: false
+    },
+    sender: {
+      type: DataTypes.TEXT,
+      allowNull: false
     }
   }, {
     tableName: 'test_chat_messages',

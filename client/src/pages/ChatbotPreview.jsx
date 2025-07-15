@@ -6,6 +6,7 @@ import http from '../http';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 //Later: Add 'chat title' to schema
 function Preview() {
     const navigate = useNavigate();
@@ -22,13 +23,14 @@ function Preview() {
     const messagesEndRef = useRef(null);
     const [userChats, setUserChats] = useState([]);
     const toastCooldownRef = useRef(0);
+    const [loading, setLoading] = useState(false);
     const showToastWithCooldown = (msg) => {
-            const now = Date.now();
-            if (now - toastCooldownRef.current > 5000) { // 5 seconds
-                toast.error(msg);
-                toastCooldownRef.current = now;
-            }
-        };
+        const now = Date.now();
+        if (now - toastCooldownRef.current > 5000) { // 5 seconds
+            toast.error(msg);
+            toastCooldownRef.current = now;
+        }
+    };
 
     // Group chats by date for section headers
     const groupedChats = userChats.reduce((acc, chat) => {
@@ -46,6 +48,7 @@ function Preview() {
 
     const handleSend = async () => {
         if (message.trim()) {
+            setLoading(true);
             try {
                 let currentChatId = chatId;
                 if (!chatId) {
@@ -53,15 +56,28 @@ function Preview() {
                     currentChatId = res.data.chat_id;
                     setChatId(currentChatId)
                     await fetchChats();
-
                 }
-                await http.post(`/api/testchat/message`, { sender_id: localStorage.getItem('userId'), chat_id: currentChatId, content: message });
-                setMessages(prev => [...prev, { content: message }]);
+                setMessages(prev => [...prev, { content: message, sender: 'user' }]);
+                const updatedMessages = [...messages, { content: message, sender: 'user' }];
                 setMessage('');
+
+                const bedrockMessages = updatedMessages.map(msg => ({
+                    role: msg.sender === 'user' ? 'user' : 'assistant',
+                    content: [msg.content]
+                }));
+                const res = await http.post('/api/testchat/botmessage', {
+                    messages: bedrockMessages,
+                    sender_id: localStorage.getItem('userId'),
+                    chat_id: currentChatId,
+                    content: message,
+                    sender: 'user'
+                });
+                setMessages(prev => [...prev, { content: res.data.llmReply, sender: 'assistant' }]);
 
             } catch (err) {
                 console.error('Failed to send message:', err);
             }
+            setLoading(false);
         }
     };
     const fetchChats = async () => {
@@ -69,7 +85,7 @@ function Preview() {
             const res = await http.get(`/api/testchat/user/${localStorage.getItem('userId')}`);
             // Save chats to state (create a new state: userChats)
             setUserChats(res.data);
-            
+
         } catch (err) {
             console.error('Failed to fetch chats:', err);
         }
@@ -86,6 +102,56 @@ function Preview() {
             console.error('Failed to fetch messages:', err);
         }
     };
+    function formatBotMessage(text) {
+        if (!text) return '';
+        // Bold: **text**
+        let html = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        // Paragraphs: split on double newlines
+        html = html.split('\n\n').map(p => `<p>${p}</p>`).join('');
+        // Line breaks: single newline to <br>
+        html = html.replace(/\n/g, '<br>');
+        html = html.replace(/###/g, '•');
+
+        return html;
+    }
+    function AnimatedDots() {
+        return (
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    height: 30,
+                    px: 1.5,
+                    borderRadius: 2,
+                    background: '#7ec4fa'
+                }}
+            >
+                {[0, 1, 2].map(i => (
+                    <Box
+                        key={i}
+                        sx={{
+                            width: 6,
+                            height: 7,
+                            borderRadius: '50%',
+                            background: '#cdcdcdff',
+                            mx: 0.5,
+                            opacity: 0.5,
+                            animation: `dotFade 1.2s infinite`,
+                            animationDelay: `${i * 0.2}s`,
+                        }}
+                    />
+                ))}
+                <style>
+                    {`
+          @keyframes dotFade {
+            0%, 80%, 100% { opacity: 0.5; }
+            40% { opacity: 1; }
+          }
+        `}
+                </style>
+            </Box>
+        );
+    }
 
     const inputBoxClass = messages.length > 0 ? "slide-to-bottom" : "centered-input";
 
@@ -233,16 +299,20 @@ function Preview() {
                             position: 'absolute',
                             left: '57.75%',
                             transform: 'translate(-50%, -50%)',
-                            top: messages.length > 0 ? 'calc(100vh - 50px)' : '53%',
+                            top: messages.length > 0 ? 'calc(100vh - 67px)' : '53%',
                             width: '100%',
                             maxWidth: '76vw',
                             transition: 'all 0.6s cubic-bezier(.68,-0.55,.27,1.55)',
+                            marginTop: '15px',
                         }}
                     >
                         <TextField
                             fullWidth
                             variant="outlined"
                             value={message}
+                            multiline
+                            minRows={1}
+                            maxRows={3}
                             onChange={e => {
                                 if (e.target.value.length > 2000) {
                                     showToastWithCooldown('Message cannot exceed 2000 characters');
@@ -253,7 +323,7 @@ function Preview() {
                             onFocus={() => setInputFocused(true)}
                             onBlur={() => setInputFocused(false)}
                             onKeyDown={e => {
-                                if (e.key === 'Enter') handleSend();
+                                if (e.key === 'Enter' && !loading && !e.shiftKey) handleSend();
                             }}
                             placeholder={inputFocused || message ? '' : "Test a prompt"}
                             InputProps={{
@@ -267,7 +337,7 @@ function Preview() {
                                 },
                                 endAdornment: (
                                     <InputAdornment position="end">
-                                        <IconButton onClick={handleSend} edge="end" sx={{ color: '#7ec4fa' }}>
+                                        <IconButton onClick={handleSend} edge="end" sx={{ color: loading ? '#b0b0b0' : '#7ec4fa', cursor: loading ? 'not-allowed' : 'pointer' }} disabled={loading}>
                                             <SendIcon />
                                         </IconButton>
                                     </InputAdornment>
@@ -283,9 +353,9 @@ function Preview() {
                             sx={{
                                 position: 'fixed',
                                 right: 0,
-                                bottom: 90,
+                                bottom: 105,
                                 width: '100vw',
-                                maxHeight: '90vh',
+                                maxHeight: '85vh',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 overflowY: 'auto',
@@ -298,33 +368,68 @@ function Preview() {
                                     <Box
                                         key={idx}
                                         sx={{
-                                            position: 'relative',
-                                            marginLeft: '260px',
                                             display: 'flex',
                                             flexDirection: 'column',
-                                            alignItems: 'flex-end',
-                                            mb: 1
+                                            alignItems: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                                            mt: 1.5,
+                                            mb: 1,
+                                            ml: msg.sender == 'assistant' ? 65 : 0, // assistant on left, user on right
+                                            mr: msg.sender == 'user' ? 0 : 'auto',
+
                                         }}
                                     >
                                         <Box
                                             sx={{
-                                                position: 'relative',
-                                                bgcolor: '#232325',
-                                                color: '#fff',
+                                                bgcolor: msg.sender === 'user' ? '#232325' : '#7ec4fa',
+                                                color: msg.sender === 'user' ? '#fff' : '#181617',
                                                 px: 2,
-                                                py: 1,
-                                                maxWidth: '40%',
-                                                paddingRight: '30px',
-                                                borderRadius: '16px 16px 1px 16px',
+                                                py: 0,
+                                                maxWidth: '50%',
+                                                borderRadius: msg.sender === 'user'
+                                                    ? '16px 16px 1px 16px'
+                                                    : '16px 16px 16px 1px',
                                                 boxShadow: 1,
                                                 wordBreak: 'break-word',
-                                                alignSelf: 'flex-end'
+                                                whiteSpace: 'pre-line',
+                                                fontWeight: msg.sender === 'assistant' ? 500 : 400,
+                                                minWidth: '2    0px',
                                             }}
-                                        >
-                                            {msg.content}
-                                        </Box>
+                                            // Render markdown/bold/paragraphs
+                                            dangerouslySetInnerHTML={{ __html: formatBotMessage(msg.content) }}
+                                        />
                                     </Box>
                                 ))}
+                                {loading && (
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'flex-start',
+                                            mt: 5,
+                                            mb: 1,
+                                            ml: 65,
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                bgcolor: '#7ec4fa',
+                                                color: '#181617',
+                                                px: 2,
+                                                py: 0,
+                                                maxWidth: '50%',
+                                                borderRadius: '16px 16px 16px 1px',
+                                                boxShadow: 1,
+                                                fontWeight: 500,
+                                                fontSize: 18,
+                                                minHeight: '32px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                            }}
+                                        >
+                                            <AnimatedDots />
+                                        </Box>
+                                    </Box>
+                                )}
                                 <div ref={messagesEndRef} />
                             </Box>
                         </Box>
