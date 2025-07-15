@@ -107,8 +107,8 @@ function Preview() {
         // Bold: **text**
         let html = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
         // Paragraphs: split on double newlines
-        html = html.split('\n\n').map(p => `<p>${p}</p>`).join('');
         // Line breaks: single newline to <br>
+        html = html.replace(/<pre>/g, '').replace(/<\/pre>/g, '');
         html = html.replace(/\n/g, '<br>');
         html = html.replace(/###/g, '•');
 
@@ -323,7 +323,7 @@ function Preview() {
                             onFocus={() => setInputFocused(true)}
                             onBlur={() => setInputFocused(false)}
                             onKeyDown={e => {
-                                if (e.key === 'Enter' && !loading && !e.shiftKey) handleSend();
+                                if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); if (!loading) handleSend();}
                             }}
                             placeholder={inputFocused || message ? '' : "Test a prompt"}
                             InputProps={{
@@ -383,16 +383,17 @@ function Preview() {
                                                 bgcolor: msg.sender === 'user' ? '#232325' : '#7ec4fa',
                                                 color: msg.sender === 'user' ? '#fff' : '#181617',
                                                 px: 2,
-                                                py: 0,
-                                                maxWidth: '50%',
+                                                py: 1.5,
+                                                maxWidth: msg.sender === 'user' ? '30%': '50%',
                                                 borderRadius: msg.sender === 'user'
                                                     ? '16px 16px 1px 16px'
                                                     : '16px 16px 16px 1px',
                                                 boxShadow: 1,
                                                 wordBreak: 'break-word',
                                                 whiteSpace: 'pre-line',
-                                                fontWeight: msg.sender === 'assistant' ? 500 : 400,
+                                                fontWeight: 400,
                                                 minWidth: '2    0px',
+                                                overflowX: 'hidden'
                                             }}
                                             // Render markdown/bold/paragraphs
                                             dangerouslySetInnerHTML={{ __html: formatBotMessage(msg.content) }}

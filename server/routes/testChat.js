@@ -111,7 +111,7 @@ router.post('/botmessage', validateToken, async (req, res) => {
       timestamp: now,
       sender: sender
     });
-    const systemPrompt = "You are a Chatbot named 'QueryBot' meant for customers to build. You are developed by Amazon, currently assisting QueryEase in operations, offering the aforementioned solutions. Right now, it is in preview mode, where the business owners test out settings. Please keep your response under 1000 characters. Be concise and try your best not to not exceed this limit. The first message from the user is: "
+    const systemPrompt = "You are a Chatbot named 'QueryBot' meant for customers to build. You are developed by Amazon, currently assisting QueryEase in operations, offering the aforementioned solutions. Right now, it is in preview mode, where the business owners test out settings. Please keep your response under 1000 characters. Be concise and try your best not to not exceed this limit. Do not use <pre> tags under any circumstance. The first message from the user is: "
     let messages;
     if (req.body.messages) {
       messages = req.body.messages.map(msg => ({
