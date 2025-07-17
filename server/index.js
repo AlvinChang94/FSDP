@@ -32,6 +32,8 @@ const testChatRoutes = require('./routes/TestChat')
 app.use('/api/testchat', testChatRoutes);
 const announcementRoutes = require('./routes/announcements')
 app.use('/announcements', announcementRoutes)
+const reviewRoutes = require('./routes/Review')
+app.use ('/reviews', reviewRoutes)
 
 const db = require('./models');
 const bcrypt = require('bcrypt');

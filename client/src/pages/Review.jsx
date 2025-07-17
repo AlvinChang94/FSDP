@@ -5,6 +5,7 @@ import * as yup from 'yup';
 import { useFormik } from 'formik';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import http from '../http';
 
 function Review() {
     const [rating, setRating] = useState(0);
@@ -21,12 +22,27 @@ function Review() {
                 .required('Comment is required'),
         }),
         onSubmit: (values, { resetForm }) => {
-            console.log('Rating:', rating);
-            console.log('Comment:', values.comment);
-            toast.success('Review submitted successfully!');
-            resetForm();
-            setRating(0);
-        },
+            if (rating === 0){
+                toast.error("Please select a rating before submitting")
+                return
+            }
+
+            const reviewData = {
+                rating,
+                comment: values.comment.trim(),
+            };   
+
+            http.post('/reviews', reviewData)
+                .then(() => {
+                    toast.success('Review submitted successfully!');
+                    resetForm();
+                    setRating(0);
+                })
+                .catch (() => {
+                    toast.error("Failed to submit review")
+                    
+                })
+        }
     })
 
     return (
