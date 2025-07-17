@@ -47,7 +47,6 @@ function OwnerRev() {
                             </CardContent>
                         </Card>
                     </Grid>
-
                 ))}
             </Grid>
         </Box>
