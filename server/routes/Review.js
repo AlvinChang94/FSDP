@@ -29,6 +29,22 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/summary', async (req, res) => {
+  try {
+    const { Review } = require('../models');
+    const reviews = await Review.findAll();
+
+    const summary = [1, 2, 3, 4, 5].map(rating => ({
+      rating,
+      count: reviews.filter(r => r.rating === rating).length
+    }));
+
+    res.json(summary);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to summarize ratings' });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const review = await Review.findByPk(req.params.id);
