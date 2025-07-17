@@ -52,7 +52,7 @@ function Preview() {
             try {
                 let currentChatId = chatId;
                 if (!chatId) {
-                    const res = await http.post(`/api/testchat/`, { clientId: localStorage.getItem('userId') });
+                    const res = await http.post(`/api/testchat/`, { clientId: localStorage.getItem('userId'), content: message });
                     currentChatId = res.data.chat_id;
                     setChatId(currentChatId)
                     await fetchChats();
@@ -255,7 +255,7 @@ function Preview() {
                                                     }}
                                                 >
                                                     <ListItemText
-                                                        primary={`Chat ${chat.chat_id}`}
+                                                        primary={`${chat.title}`}
                                                         primaryTypographyProps={{
                                                             fontSize: 15,
                                                             fontWeight: 500,
@@ -371,7 +371,7 @@ function Preview() {
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                                            mt: 1.5,
+                                            mt: 2.5,
                                             mb: 1,
                                             ml: msg.sender == 'assistant' ? 65 : 0, // assistant on left, user on right
                                             mr: msg.sender == 'user' ? 0 : 'auto',
@@ -392,7 +392,7 @@ function Preview() {
                                                 wordBreak: 'break-word',
                                                 whiteSpace: 'pre-line',
                                                 fontWeight: 400,
-                                                minWidth: '2    0px',
+                                                minWidth: '20px',
                                                 overflowX: 'hidden'
                                             }}
                                             // Render markdown/bold/paragraphs

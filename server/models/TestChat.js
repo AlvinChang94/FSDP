@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false
+    },
+    title: {
+      type: DataTypes.TEXT,
+      allownull: false
     }
   }, {
     tableName: 'test_chats',

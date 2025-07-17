@@ -1,7 +1,16 @@
-import { Box, Typography, Grid, Paper, Button, Link as MuiLink } from '@mui/material';
+import { Box, Typography, Grid, Paper, Button, Link as MuiLink, Icon, Card, CardContent } from '@mui/material';
 import { Link } from 'react-router-dom';
+import RatingBarChart from './RatingBarChart';
+import StarIcon from '@mui/icons-material/Star';
 
 function AdminDash() {
+    const reviews = [
+        {
+            id: 1,
+            rating: 4,
+            comment: "Good experience overall. Would recommend!",
+        }]
+
     return (
         <Box sx={{ position: 'fixed', minHeight: '100vh', minWidth: 'calc(100vw - 284px)', bgcolor: '#f5f6fa', top: 0, left: '220px', p: 4 }}>
             <Paper elevation={3} sx={{ maxWidth: 1100, mx: 'auto', p: 4, mb: 4, bgcolor: 'white' }}>
@@ -29,13 +38,11 @@ function AdminDash() {
                 </Box>
             </Grid>
             <Grid item xs={12}>
-                <Link to='/AdminDash/Satisfaction' style={{textDecoration: 'none'}}>
+                <Link to='/AdminDash/Satisfaction' style={{ textDecoration: 'none' }}>
                     <Box display="flex" justifyContent="center" my={2}>
                         <Paper
-                            sx={{ p: 5, width: '100%', maxWidth: 700, textAlign: 'center', border: '2px dashed #ccc', bgcolor: '#fafafa', }}>
-                            <Typography variant="body1" color="text.secondary">
-                                [Graph Placeholder]
-                            </Typography>
+                            sx={{ p: 5, width: '100%', maxWidth: 700, textAlign: 'center', border: '2px dashed #ccc', bgcolor: '#fafafa', height: 250 }}>
+                            <RatingBarChart />
                         </Paper>
                     </Box>
                 </Link>
@@ -50,14 +57,30 @@ function AdminDash() {
                 </Box>
             </Grid>
             <Grid item xs={12}>
-                <Link to='/AdminDash/OwnerRev' style={{textDecoration: 'none'}}>
+                <Link to='/AdminDash/OwnerRev' style={{ textDecoration: 'none' }}>
                     <Box display="flex" justifyContent="center" my={2}>
-                        <Paper
-                            sx={{ p: 5, width: '100%', maxWidth: 700, textAlign: 'center', border: '2px dashed #ccc', bgcolor: '#fafafa', }}>
-                            <Typography variant="body1" color="text.secondary">
-                                [AI Overview Placeholder]
-                            </Typography>
-                        </Paper>
+                        {reviews.map((review) => (
+                            <Grid item xs={12} md={6} lg={4} key={review.id}>
+                                <Card key={review.id} sx={{ mb: 2, height: '100%' }}>
+                                    <CardContent>
+                                        <Box sx={{ display: 'flex', mb: 1 }}>
+                                            <Typography variant='h6' sx={{ flexGrow: 1 }}>
+                                                <Box>
+                                                    {review.comment}
+                                                </Box>
+                                                <Box>
+                                                    {[1, 2, 3, 4, 5].map((star) => (
+                                                        <Icon key={star}>
+                                                            <StarIcon color={(review.rating) >= star ? 'warning' : 'disabled'} />
+                                                        </Icon>
+                                                    ))}
+                                                </Box>
+                                            </Typography>
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))}
                     </Box>
                 </Link>
             </Grid>

@@ -10,7 +10,6 @@ import InfoIcon from '@mui/icons-material/Info';
 
 function AddAlerts() {
   const navigate = useNavigate();
-  const [submitMessage, setSubmitMessage] = useState('');
 
   const formik = useFormik({
     initialValues: {
@@ -48,6 +47,8 @@ function AddAlerts() {
     }
   });
 
+
+  // Change to Ai, now is hard coded
   const setMessage = () => {
     formik.setFieldValue('message', 'Maintanence will be from ');
   };
@@ -59,6 +60,8 @@ function AddAlerts() {
     const formatted = localDate.toISOString().slice(0, 16);
     formik.setFieldValue('sendDate', formatted);
   }
+
+  const [submitMessage, setSubmitMessage] = useState('');
 
   return (
     <Box>
