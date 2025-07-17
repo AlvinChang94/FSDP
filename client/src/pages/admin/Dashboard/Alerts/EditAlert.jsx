@@ -3,12 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import http from '../../../../http';
 import {
     Box, Typography, TextField, Button, Dialog, DialogTitle, DialogContent, DialogContentText,
-    DialogActions, Grid
+    DialogActions, Grid, Tooltip, IconButton
 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import InfoIcon from '@mui/icons-material/Info';
 
 function EditAlerts() {
     const { id } = useParams();
@@ -69,6 +70,22 @@ function EditAlerts() {
         });
     };
 
+
+    //Change to Ai, now i hard coded
+    const setMessage = () => {
+        formik.setFieldValue('message', 'Maintanence will be from ');
+    };
+
+    const setDate = () => {
+        const now = new Date();
+        const offset = now.getTimezoneOffset();
+        const localDate = new Date(now.getTime() - offset * 60000);
+        const formatted = localDate.toISOString().slice(0, 16);
+        formik.setFieldValue('sendDate', formatted);
+    }
+
+    const [submitMessage, setSubmitMessage] = useState('');
+
     return (
         <Box>
             <ToastContainer />
@@ -90,6 +107,13 @@ function EditAlerts() {
                                     error={formik.touched.title && Boolean(formik.errors.title)}
                                     helperText={formik.touched.title && formik.errors.title}
                                 />
+                                {formik.values.title.trim() && (
+                                    <Tooltip title="View AI message suggestion">
+                                        <IconButton onClick={setMessage}>
+                                            <InfoIcon color="secondary" />
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
                                 <TextField
                                     fullWidth margin="normal" autoComplete="off"
                                     multiline minRows={3}
@@ -101,6 +125,23 @@ function EditAlerts() {
                                     error={formik.touched.message && Boolean(formik.errors.message)}
                                     helperText={formik.touched.message && formik.errors.message}
                                 />
+                                {formik.values.message.trim() && (
+                                    <Box display='flex' alignItems='center'>
+                                        <Tooltip title="View AI Send Date suggestion">
+                                            <IconButton onClick={() => {
+                                                setDate();
+                                                setSubmitMessage('Time was chosen because...');
+                                            }}>
+                                                <InfoIcon color="secondary" />
+                                            </IconButton>
+                                        </Tooltip>
+                                        {submitMessage && (
+                                            <Typography color='text.secondary'>
+                                                {submitMessage}
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                )}
                                 <TextField
                                     fullWidth
                                     margin="normal"
