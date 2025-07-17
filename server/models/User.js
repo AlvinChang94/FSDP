@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         muted: {
             type: DataTypes.BOOLEAN,
             defaultValue: false,
+        },
+        link_code: {
+            type: DataTypes.TEXT,
+            allowNull: true
         }
     }, {
         tableName: 'users'
@@ -30,6 +34,14 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: "cascade"
         });
         User.hasMany(models.Message, { as: 'sentMessages', foreignKey: 'senderId' });
+        User.belongsToMany(models.Client, {
+            through: models.ClientUser,
+            foreignKey: 'userId',      // column in ClientUser referring to User
+            otherKey: 'clientId'       // column in ClientUser referring to Client
+        });
+
+        // Optional: also allow accessing the join table records directly
+        User.hasMany(models.ClientUser, { foreignKey: 'userId' });
     };
     return User;
 }

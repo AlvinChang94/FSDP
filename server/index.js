@@ -35,6 +35,7 @@ app.use('/announcements', announcementRoutes)
 const reviewRoutes = require('./routes/Review')
 app.use ('/reviews', reviewRoutes)
 
+
 const db = require('./models');
 const bcrypt = require('bcrypt');
 db.sequelize.sync({ alter: false }).then(async () => {
@@ -46,8 +47,9 @@ db.sequelize.sync({ alter: false }).then(async () => {
             id: 0,
             name: 'Joe',
             email: 'joe@gmail.com',
-            password: hashedPassword, // You should hash this in production!
-            role: 'admin'
+            password: hashedPassword,
+            role: 'admin',
+            link_code: 'ADMIN'
         });
         console.log('Default admin user created.');
     }

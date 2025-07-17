@@ -6,7 +6,23 @@ const yup = require("yup");
 const { sign } = require('jsonwebtoken');
 require('dotenv').config();
 const { validateToken } = require('../middlewares/auth');
-
+function generateLinkCode(length = 8) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no confusing chars
+  let code = '';
+  for (let i = 0; i < length; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+async function generateUniqueLinkCode() {
+  let code;
+  let exists = true;
+  while (exists) {
+    code = generateLinkCode();
+    exists = await User.findOne({ where: { link_code: code } });
+  }
+  return code;
+}
 
 router.post("/register", async (req, res) => {
   let data = req.body;
@@ -27,6 +43,7 @@ router.post("/register", async (req, res) => {
     }
     // Hash passowrd
     data.password = await bcrypt.hash(data.password, 10);
+    data.link_code = await generateUniqueLinkCode();
     // Create user
     let result = await User.create(data);
     res.json({
@@ -141,4 +158,21 @@ router.delete('/:id', validateToken, async (req, res) => {
     res.status(500).json({ message: 'Failed to delete user' });
   }
 });
+
+router.get('/me', validateToken, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['id', 'name', 'email', 'link_code']
+    });
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.json(user); // send user data to frontend
+  } catch (err) {
+    console.error("Error in /user/me:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+  
 module.exports = router;
