@@ -52,7 +52,8 @@ function Alert() {
                                 <Box sx={{ display: 'flex', alignItems: 'center' }} color="text.secondary">
                                     <AccessTime sx={{ mr: 1 }} />
                                     <Typography variant="body2">
-                                        Send: {dayjs(alert.sendDate).format('YYYY-MM-DD HH:mm')}
+                                        Send: {dayjs(alert.sendDate).format('YYYY-MM-DD HH:mm')} <br/>
+                                        End: {dayjs(alert.endDate).format('YYYY-MM-DD HH:mm')}
                                     </Typography>
                                 </Box>
                             </CardContent>

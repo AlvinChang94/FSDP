@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
     },
+    endDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   });
 
   return Alert;

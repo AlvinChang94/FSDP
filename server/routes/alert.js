@@ -8,6 +8,10 @@ const validationSchema = yup.object({
   title: yup.string().trim().min(3).max(100).required(),
   message: yup.string().trim().min(3).max(500).required(),
   sendDate: yup.date().required(),
+  endDate: yup
+    .date()
+    .min(yup.ref('sendDate'), 'End Date must be after Send Date')
+    .required('End Date is required'),
 });
 
 router.post("/", async (req, res) => {

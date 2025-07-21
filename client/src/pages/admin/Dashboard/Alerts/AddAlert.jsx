@@ -16,6 +16,7 @@ function AddAlerts() {
       title: "",
       message: "",
       sendDate: "",
+      endDate: "",
     },
     validationSchema: yup.object({
       title: yup.string().trim()
@@ -29,6 +30,9 @@ function AddAlerts() {
       sendDate: yup.date()
         .min(new Date(Date.now() - 60 * 1000), 'Send Date is in the past')
         .required('Send Date is required'),
+      endDate: yup.date()
+        .min(yup.ref('sendDate'), 'End Date must be after Send Date')
+        .required('End Date is required'),
     }),
     onSubmit: (data) => {
       data.title = data.title.trim();
@@ -133,6 +137,21 @@ function AddAlerts() {
               inputProps={{
                 min: new Date(Date.now() - 60 * 1000).toISOString().slice(0, 16)
               }}
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              autoComplete="off"
+              type="datetime-local"
+              label="End Date"
+              name="endDate"
+              InputLabelProps={{ shrink: true }}
+              value={formik.values.endDate}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+              helperText={formik.touched.endDate && formik.errors.endDate}
+              inputProps={{min: formik.values.sendDate || new Date().toISOString().slice(0, 16)}}
             />
           </Grid>
         </Grid>

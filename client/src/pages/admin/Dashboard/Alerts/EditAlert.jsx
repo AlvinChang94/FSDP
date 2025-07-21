@@ -18,6 +18,7 @@ function EditAlerts() {
         title: "",
         message: "",
         sendDate: "",
+        endDate: "",
     });
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
@@ -30,9 +31,14 @@ function EditAlerts() {
             const offsetDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
             const formattedDate = offsetDate.toISOString().slice(0, 16);
 
+            const localEndDate = new Date(data.endDate);
+            const offendDate = new Date(localEndDate.getTime() - localEndDate.getTimezoneOffset() * 60000)
+            const formattedendDate = offendDate.toISOString().slice(0, 16);
+
             setAlert({
                 ...data,
                 sendDate: formattedDate,
+                endDate: formattedendDate,
             });
             setLoading(false);
         });
@@ -47,6 +53,9 @@ function EditAlerts() {
             sendDate: yup.date()
                 .min(new Date(Date.now() - 60 * 1000), 'Send Date is in the past')
                 .required('Send Date is required'),
+            endDate: yup.date()
+                .min(yup.ref('sendDate'), 'End Date must be after Send Date')
+                .required('End Date is required'),
         }),
         onSubmit: (data) => {
             data.title = data.title.trim();
@@ -158,6 +167,21 @@ function EditAlerts() {
                                     inputProps={{
                                         min: new Date(Date.now() - 60 * 1000).toISOString().slice(0, 16)
                                     }}
+                                />
+                                <TextField
+                                    fullWidth
+                                    margin="normal"
+                                    autoComplete="off"
+                                    type="datetime-local"
+                                    label="End Date"
+                                    name="endDate"
+                                    InputLabelProps={{ shrink: true }}
+                                    value={formik.values.endDate}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+                                    helperText={formik.touched.endDate && formik.errors.endDate}
+                                    inputProps={{ min: formik.values.sendDate || new Date().toISOString().slice(0, 16) }}
                                 />
                             </Grid>
                         </Grid>
