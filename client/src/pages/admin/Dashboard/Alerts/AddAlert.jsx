@@ -67,6 +67,16 @@ function AddAlerts() {
 
   const [submitMessage, setSubmitMessage] = useState('');
 
+  const setendDate = () => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset();
+    const localDate = new Date(now.getTime() - offset * 60000);
+    const formatted = localDate.toISOString().slice(0, 16);
+    formik.setFieldValue('endDate', formatted);
+  }
+
+  const [submitendMessage, setSubmitendMessage] = useState('');
+
   return (
     <Box>
       <ToastContainer />
@@ -134,10 +144,25 @@ function AddAlerts() {
               onBlur={formik.handleBlur}
               error={formik.touched.sendDate && Boolean(formik.errors.sendDate)}
               helperText={formik.touched.sendDate && formik.errors.sendDate}
-              inputProps={{
-                min: new Date(Date.now() - 60 * 1000).toISOString().slice(0, 16)
-              }}
+              inputProps={{ min: new Date(Date.now() - 60 * 1000).toISOString().slice(0, 16) }}
             />
+            {formik.values.sendDate.trim() && (
+              <Box display='flex' alignItems='center'>
+                <Tooltip title="View AI Send Date suggestion">
+                  <IconButton onClick={() => {
+                    setendDate();
+                    setSubmitendMessage('Time was chosen because...');
+                  }}>
+                    <InfoIcon color="secondary" />
+                  </IconButton>
+                </Tooltip>
+                {submitendMessage && (
+                  <Typography color='text.secondary'>
+                    {submitendMessage}
+                  </Typography>
+                )}
+              </Box>
+            )}
             <TextField
               fullWidth
               margin="normal"
@@ -151,7 +176,7 @@ function AddAlerts() {
               onBlur={formik.handleBlur}
               error={formik.touched.endDate && Boolean(formik.errors.endDate)}
               helperText={formik.touched.endDate && formik.errors.endDate}
-              inputProps={{min: formik.values.sendDate || new Date().toISOString().slice(0, 16)}}
+              inputProps={{ min: formik.values.sendDate || new Date().toISOString().slice(0, 16) }}
             />
           </Grid>
         </Grid>
