@@ -251,12 +251,12 @@ function App() {
               <Container>
                 <Routes>
                   <Route path={"/login"} element={<Login />} />
+                  <Route path={"/admin-login"} element={<AdminLogin />} />
                   <Route element={<LayoutWithBanner />}>
                     <Route path={"/"} element={<Home />} />
                     <Route path={"/tutorials"} element={<Tutorials />} />
                     <Route path={"/addtutorial"} element={<AddTutorial />} />
                     <Route path={"/edittutorial/:id"} element={<EditTutorial />} />
-                    <Route path={"/admin-login"} element={<AdminLogin />} />
                     <Route path={"/register"} element={<Register />} />
                     <Route path={"/config/tone_personality"} element={<TonePersonality />} />
                     <Route path={"/config/faq_management"} element={<Faq_Management />} />

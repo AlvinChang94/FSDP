@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import InfoIcon from '@mui/icons-material/Info';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function AddAlerts() {
   const navigate = useNavigate();
@@ -120,7 +121,7 @@ function AddAlerts() {
             {formik.values.message.trim() && (
               <Tooltip title="Click to let AI suggest title, send time and end time">
                 <IconButton onClick={generateMessageAndDates} disabled={isGeneratingMessage}>
-                  <InfoIcon color="secondary" />
+                  {isGeneratingMessage ? <CircularProgress size={20} /> : <InfoIcon color="secondary" />}
                 </IconButton>
               </Tooltip>
             )}
