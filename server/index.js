@@ -34,6 +34,8 @@ const announcementRoutes = require('./routes/announcements')
 app.use('/announcements', announcementRoutes)
 const reviewRoutes = require('./routes/Review')
 app.use ('/reviews', reviewRoutes)
+const generateAlertRoutes = require('./routes/generate-alert');
+app.use('/generate-alert', generateAlertRoutes);
 
 
 const db = require('./models');

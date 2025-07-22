@@ -10,7 +10,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Support from './pages/Support';
 import { Avatar, Container, Toolbar, Typography, Box, Drawer, List, ListItem, ListItemText, ListItemButton, Menu, MenuItem, Divider } from '@mui/material';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Outlet } from 'react-router-dom';
 import http from './http';
 import UserContext from './contexts/UserContext';
 import AdminLogin from './pages/admin/Adminlogin';
@@ -38,11 +38,21 @@ import CreateAnnouncement from './pages/Announcements/CreateAnnouncement.jsx';
 import Announcements from './pages/Announcements/Announcements.jsx';
 import EditAnnouncement from './pages/Announcements/EditAnnouncement.jsx';
 import Escalations from './pages/Escalations.jsx';
+import GlobalBanner from './components/GlobalBanner.jsx';
 
 const logout = () => {
   localStorage.clear();
   window.location = "/";
 };
+
+function LayoutWithBanner() {
+  return (
+    <>
+      <GlobalBanner />
+      <Outlet />
+    </>
+  );
+}
 
 function App() {
 
@@ -237,46 +247,47 @@ function App() {
               </Box>
             </Drawer>
             {/* Main Content */}
-            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+            <Box component="main" sx={{ flexGrow: 1, p: 3, pt: '70px' }}>
               <Container>
                 <Routes>
-                  <Route path={"/"} element={<Home />} />
-                  <Route path={"/tutorials"} element={<Tutorials />} />
-                  <Route path={"/addtutorial"} element={<AddTutorial />} />
-                  <Route path={"/edittutorial/:id"} element={<EditTutorial />} />
-                  <Route path={"/admin-login"} element={<AdminLogin />} />
-                  <Route path={"/register"} element={<Register />} />
-                  <Route path={"/login"} element={<Login />} />
-                  <Route path={"/config/tone_personality"} element={<TonePersonality />} />
-                  <Route path={"/config/faq_management"} element={<Faq_Management />} />
-                  <Route path={"/config/security_privacy"} element={<Security_privacy />} />
-                  <Route path={"/config/intervention_threshold"} element={<Intervention_threshold />} />
-                  <Route path={"/preview"} element={<ChatbotPreview />} />
-                  <Route path={"/useranalytics"} element={<Login />} />
-                  <Route path={"/myclients"} element={<Login />} />
-                  <Route path={"/supportcentre"} element={<Support />} />
-                  <Route path={"/settings"} element={<Login />} />
-                  <Route path={"/contact"} element={<Contactstaff />} />
-                  <Route path={"/AdminDash"} element={<AdminDashboard />} />
-                  <Route path={"/AdminActions"} element={<AdminActions />} />
-                  <Route path={'/Alert'} element={<Alert />} />
-                  <Route path={'/AddAlert'} element={<AddAlerts />} />
-                  <Route path={'/notifications'} element={<Login />} />
-                  <Route path={"/EditAlert/:id"} element={<EditAlerts />} />
-                  <Route path={"/admin-support"} element={<AdminSupport />} />
-                  <Route path={"/AdminDash/OwnerRev"} element={<OwnerRev />} />
-                  <Route path={"/AdminDash/Satisfaction"} element={<Satisfaction />} />
-                  <Route path={"/ConversationDb"} element={<ConversationDb />} />
-                  <Route path="/ConversationAI" element={<ConversationAI />} />
-                  <Route path="/conv-analytics/response-time" element={<RespTime />} />
-                  <Route path="/Review" element={<Review />} />
-                  <Route path="/conv-analytics/escalation-no" element={<EscalationNo />} />
-                  <Route path="/conv-analytics/escalation-delay" element={<EscalationDelay />} />
-                  <Route path={'/CreateAnnouncement'} element={<CreateAnnouncement />} />
-                  <Route path={'/Announcements'} element={<Announcements />} />
-                  <Route path={'/EditAnnouncement/:id'} element={<EditAnnouncement />} />
-                  <Route path={'/Escalations'} element={<Escalations />} />
-
+                  <Route element={<LayoutWithBanner />}>
+                    <Route path={"/"} element={<Home />} />
+                    <Route path={"/tutorials"} element={<Tutorials />} />
+                    <Route path={"/addtutorial"} element={<AddTutorial />} />
+                    <Route path={"/edittutorial/:id"} element={<EditTutorial />} />
+                    <Route path={"/admin-login"} element={<AdminLogin />} />
+                    <Route path={"/register"} element={<Register />} />
+                    <Route path={"/login"} element={<Login />} />
+                    <Route path={"/config/tone_personality"} element={<TonePersonality />} />
+                    <Route path={"/config/faq_management"} element={<Faq_Management />} />
+                    <Route path={"/config/security_privacy"} element={<Security_privacy />} />
+                    <Route path={"/config/intervention_threshold"} element={<Intervention_threshold />} />
+                    <Route path={"/preview"} element={<ChatbotPreview />} />
+                    <Route path={"/useranalytics"} element={<Login />} />
+                    <Route path={"/myclients"} element={<Login />} />
+                    <Route path={"/supportcentre"} element={<Support />} />
+                    <Route path={"/settings"} element={<Login />} />
+                    <Route path={"/contact"} element={<Contactstaff />} />
+                    <Route path={"/AdminDash"} element={<AdminDashboard />} />
+                    <Route path={"/AdminActions"} element={<AdminActions />} />
+                    <Route path={'/Alert'} element={<Alert />} />
+                    <Route path={'/AddAlert'} element={<AddAlerts />} />
+                    <Route path={'/notifications'} element={<Login />} />
+                    <Route path={"/EditAlert/:id"} element={<EditAlerts />} />
+                    <Route path={"/admin-support"} element={<AdminSupport />} />
+                    <Route path={"/AdminDash/OwnerRev"} element={<OwnerRev />} />
+                    <Route path={"/AdminDash/Satisfaction"} element={<Satisfaction />} />
+                    <Route path={"/ConversationDb"} element={<ConversationDb />} />
+                    <Route path="/ConversationAI" element={<ConversationAI />} />
+                    <Route path="/conv-analytics/response-time" element={<RespTime />} />
+                    <Route path="/Review" element={<Review />} />
+                    <Route path="/conv-analytics/escalation-no" element={<EscalationNo />} />
+                    <Route path="/conv-analytics/escalation-delay" element={<EscalationDelay />} />
+                    <Route path={'/CreateAnnouncement'} element={<CreateAnnouncement />} />
+                    <Route path={'/Announcements'} element={<Announcements />} />
+                    <Route path={'/EditAnnouncement/:id'} element={<EditAnnouncement />} />
+                    <Route path={'/Escalations'} element={<Escalations />} />
+                  </Route>
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
               </Container>

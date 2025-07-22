@@ -3,3 +3,4 @@
 3. When you upload your files here, remember NOT to include 'node modules' folder
 4. To add a new page, go to App.jsx, then add your item, then add it to routes, and then create it in the 'pages' folder. 
 5. FAQ Management: revolves around product enquiries, cannot be used for personal customer information
+6. If you dont want banner on your page move your route above 'Route element = 'LayoutWithBanner'
