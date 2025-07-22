@@ -1,50 +1,122 @@
-import React from 'react';
-import { Box, Typography, Paper, IconButton } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Paper, Button, TextField } from '@mui/material';
+import axios from 'axios';
+
+const hardcodedData = {
+  average_response_time: '20.5 seconds',
+  payment_schedule_response_time: '22.3 seconds',
+  escalation_count: 30,
+  escalation_delay: '10.2 seconds',
+  faq: [
+    'How can I update my billing information?',
+    'What is the status of my recent order?',
+    'How do I reset my password?',
+    'What are your working hours?',
+    'How can I speak to a human agent?'
+  ],
+};
 
 function ConversationAI() {
-    const navigate = useNavigate();
-    return (
-        <Box sx={{
-            position: 'fixed',
-            minHeight: '100vh',
-            minWidth: 'calc(100vw - 284px)',
-            bgcolor: '#f5f6fa',
-            top: 0,
-            left: '220px',
-            p: 4
-        }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <IconButton onClick={() => navigate(-1)}>
-                    <ArrowBackIcon fontSize="large" />
-                </IconButton>
-                <Typography variant="h6" sx={{ ml: 1 }}>
-                    Conversation Analytics
-                </Typography>
-            </Box>
+  const [summary, setSummary] = useState('');
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [question, setQuestion] = useState('');
+  const [chatResponse, setChatResponse] = useState('');
+  const [loadingAnswer, setLoadingAnswer] = useState(false);
 
-            <Paper elevation={3} sx={{
-                p: 4,
-                maxWidth: 900,
-                mx: 'auto',
-                borderRadius: '16px',
-                backgroundColor: '#e0e0e0'
-            }}>
-                <Typography variant="body1" sx={{ fontSize: '18px', mb: 2 }}>
-                    This week, the average response time across all queries was <strong>20.5 seconds</strong>. However, queries related to
-                    <strong> 'payment schedules'</strong> showed a notably higher average of <strong>22.3 seconds</strong> —
-                    <Box component="span" sx={{ color: 'red', fontWeight: 'bold' }}> 8.8% slower </Box>
-                    than the general response time.
-                </Typography>
-                <Typography variant="body1" sx={{ fontSize: '18px' }}>
-                    A total of <strong>30 conversations</strong> were escalated to human agents. While the volume remains within normal range,
-                    the average escalation response delay increased to <strong>10.2 seconds</strong>. This suggests a potential strain on
-                    agent availability during peak periods, possibly affecting resolution speed and customer satisfaction.
-                </Typography>
-            </Paper>
-        </Box>
-    );
+  // Get token from localStorage
+  const token = localStorage.getItem('accessToken');
+
+  // Auto-generate summary on mount
+  useEffect(() => {
+    const fetchSummary = async () => {
+      setLoadingSummary(true);
+      try {
+        const res = await axios.post(
+          'http://localhost:3001/api/testchat/summary',
+          { data: hardcodedData },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setSummary(res.data.summary || 'No summary available.');
+      } catch (err) {
+        console.error(err);
+        setSummary('Failed to generate summary.');
+      }
+      setLoadingSummary(false);
+    };
+    fetchSummary();
+  }, [token]);
+
+  // Ask follow-up question
+  const handleAsk = async () => {
+    if (!question.trim()) return;
+    setLoadingAnswer(true);
+    try {
+      const res = await axios.post(
+        'http://localhost:3001/api/testchat/summary',
+        {
+          question,
+          data: hardcodedData,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setChatResponse(res.data.answer || 'No answer returned.');
+    } catch (err) {
+      console.error(err);
+      setChatResponse('Failed to get response.');
+    }
+    setLoadingAnswer(false);
+  };
+
+  return (
+    <Box sx={{ p: 4, maxWidth: 900, mx: 'auto' }}>
+      <Typography variant="h4" mb={3}>Conversation Analytics</Typography>
+
+      {loadingSummary ? (
+        <Typography>Loading summary...</Typography>
+      ) : (
+
+        <Paper sx={{ p: 3, mb: 4 }}>
+          <Typography
+            sx={{ whiteSpace: 'pre-wrap' }}
+            dangerouslySetInnerHTML={{ __html: summary }}
+          />
+        </Paper>
+      )}
+
+      <Typography variant="h6" gutterBottom>Ask more about the data:</Typography>
+      <TextField
+        fullWidth
+        multiline
+        minRows={2}
+        maxRows={4}
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        placeholder="Ask a question about the data..."
+        sx={{ mb: 2 }}
+      />
+      <Button variant="contained" onClick={handleAsk} disabled={loadingAnswer || !question.trim()}>
+        {loadingAnswer ? 'Waiting for answer...' : 'Ask'}
+      </Button>
+
+      {chatResponse && (
+        <Paper sx={{ p: 3, mt: 3 }}>
+
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>Your question:</Typography>
+          <Typography sx={{ whiteSpace: 'pre-wrap' }}>{question}</Typography>
+          <Typography variant="subtitle1" fontWeight="bold" mt={2} gutterBottom>AI answer:</Typography>
+          <Typography sx={{ whiteSpace: 'pre-wrap' }}>{chatResponse}</Typography>
+        </Paper>
+      )}
+    </Box>
+  );
 }
 
 export default ConversationAI;

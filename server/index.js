@@ -38,7 +38,8 @@ app.use ('/reviews', reviewRoutes)
 
 const db = require('./models');
 const bcrypt = require('bcrypt');
-db.sequelize.sync({ alter: false }).then(async () => {
+const router = require('./routes/tutorial');
+db.sequelize.sync({ alter: true}).then(async () => {
     // Check if admin exists
     const admin = await db.User.findOne({ where: { email: 'joe@gmail.com' } });
     if (!admin) {
