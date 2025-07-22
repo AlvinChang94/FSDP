@@ -250,6 +250,7 @@ function App() {
             <Box component="main" sx={{ flexGrow: 1, p: 3, pt: '70px' }}>
               <Container>
                 <Routes>
+                  <Route path={"/login"} element={<Login />} />
                   <Route element={<LayoutWithBanner />}>
                     <Route path={"/"} element={<Home />} />
                     <Route path={"/tutorials"} element={<Tutorials />} />
@@ -257,7 +258,6 @@ function App() {
                     <Route path={"/edittutorial/:id"} element={<EditTutorial />} />
                     <Route path={"/admin-login"} element={<AdminLogin />} />
                     <Route path={"/register"} element={<Register />} />
-                    <Route path={"/login"} element={<Login />} />
                     <Route path={"/config/tone_personality"} element={<TonePersonality />} />
                     <Route path={"/config/faq_management"} element={<Faq_Management />} />
                     <Route path={"/config/security_privacy"} element={<Security_privacy />} />
