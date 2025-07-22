@@ -12,7 +12,7 @@ function AdminDash() {
         }]
 
     return (
-        <Box sx={{ position: 'fixed', minHeight: '100vh', minWidth: 'calc(100vw - 284px)', bgcolor: '#f5f6fa', top: 0, left: '220px', p: 4 }}>
+        <Box sx = {{minHeight: '100vh',overflowY: 'auto'}}>
             <Paper elevation={3} sx={{ maxWidth: 1100, mx: 'auto', p: 4, mb: 4, bgcolor: 'white' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -40,8 +40,7 @@ function AdminDash() {
             <Grid item xs={12}>
                 <Link to='/AdminDash/Satisfaction' style={{ textDecoration: 'none' }}>
                     <Box display="flex" justifyContent="center" my={2}>
-                        <Paper
-                            sx={{ p: 5, width: '100%', maxWidth: 700, textAlign: 'center', border: '2px dashed #ccc', bgcolor: '#fafafa', height: 250 }}>
+                        <Paper sx={{ p: 5, width: '100%', maxWidth: 700, textAlign: 'center', border: '2px dashed #ccc', bgcolor: '#fafafa', height: 250 }}>
                             <RatingBarChart />
                         </Paper>
                     </Box>
