@@ -34,6 +34,8 @@ const announcementRoutes = require('./routes/announcements')
 app.use('/announcements', announcementRoutes)
 const reviewRoutes = require('./routes/Review')
 app.use ('/reviews', reviewRoutes)
+const configRoute = require('./routes/user_chatbot_config')
+app.use ('/api/config', configRoute)
 
 
 const db = require('./models');

@@ -32,13 +32,14 @@ import ConversationDb from './pages/ConvDashboard/ConversationDb.jsx';
 import ConversationAI from './pages/ConvDashboard/ConversationAI.jsx';
 import RespTime from './pages/ConvDashboard/ConvAnalytics/RespTime';
 import Review from './pages/Review.jsx';
-import EscalationNo from './pages/ConvDashboard/ConvAnalytics/EscalationNo.jsx';    
+import EscalationNo from './pages/ConvDashboard/ConvAnalytics/EscalationNo.jsx';
 import EscalationDelay from './pages/ConvDashboard/ConvAnalytics/EscalationDelay.jsx';
 import CreateAnnouncement from './pages/Announcements/CreateAnnouncement.jsx';
 import Announcements from './pages/Announcements/Announcements.jsx';
 import EditAnnouncement from './pages/Announcements/EditAnnouncement.jsx';
 import Escalations from './pages/Escalations.jsx';
 import GlobalBanner from './components/GlobalBanner.jsx';
+import user_settings from './pages/user_settings.jsx';
 
 const logout = () => {
   localStorage.clear();
@@ -117,7 +118,7 @@ function App() {
                     </ListItemButton>
                   </ListItem>
                   {/* Tutorials is only listed for our own reference, we will remove it later */}
-                  { user && user.role == 'admin' ? (
+                  {user && user.role == 'admin' ? (
                     <>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/admin-support">
@@ -211,7 +212,7 @@ function App() {
                   />
                   <Typography variant="body1" sx={{ flexGrow: 1, fontSize: '1.4rem', mt: -2.2, fontWeight: 'bold' }}>
                     {user ? user.name : ""}
-                    <span style={{ display: 'block', fontSize: '0.8em', marginBottom: -20, marginTop: -4, fontWeight: '600', color: user && user.role === 'admin' ? 'red': '#494db3' }}>{user ? user.role == 'admin' ? "Admin" : "User": ""}</span>
+                    <span style={{ display: 'block', fontSize: '0.8em', marginBottom: -20, marginTop: -4, fontWeight: '600', color: user && user.role === 'admin' ? 'red' : '#494db3' }}>{user ? user.role == 'admin' ? "Admin" : "User" : ""}</span>
                   </Typography>
                   <Typography variant="body2" sx={{ flexGrow: 1, fontSize: '1.3rem', mr: 10, fontWeight: 'bold' }}>
                     {user ? "" : "Guest"}
@@ -250,6 +251,10 @@ function App() {
             <Box component="main" sx={{ flexGrow: 1, p: 3, pt: '70px' }}>
               <Container>
                 <Routes>
+                  <Route path={"/config/tone_personality"} element={<TonePersonality />} />
+                  <Route path={"/config/faq_management"} element={<Faq_Management />} />
+                  <Route path={"/config/security_privacy"} element={<Security_privacy />} />
+                  <Route path={"/config/intervention_threshold"} element={<Intervention_threshold />} />
                   <Route element={<LayoutWithBanner />}>
                     <Route path={"/"} element={<Home />} />
                     <Route path={"/tutorials"} element={<Tutorials />} />
@@ -258,10 +263,7 @@ function App() {
                     <Route path={"/admin-login"} element={<AdminLogin />} />
                     <Route path={"/register"} element={<Register />} />
                     <Route path={"/login"} element={<Login />} />
-                    <Route path={"/config/tone_personality"} element={<TonePersonality />} />
-                    <Route path={"/config/faq_management"} element={<Faq_Management />} />
-                    <Route path={"/config/security_privacy"} element={<Security_privacy />} />
-                    <Route path={"/config/intervention_threshold"} element={<Intervention_threshold />} />
+                    <Route path ={"/settings"} element = {<user_settings />} />
                     <Route path={"/preview"} element={<ChatbotPreview />} />
                     <Route path={"/useranalytics"} element={<Login />} />
                     <Route path={"/myclients"} element={<Login />} />
