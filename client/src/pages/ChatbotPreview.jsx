@@ -52,7 +52,7 @@ function Preview() {
             try {
                 let currentChatId = chatId;
                 if (!chatId) {
-                    const res = await http.post(`/api/testchat/`, { clientId: localStorage.getItem('userId'), content: message });
+                    const res = await http.post(`/api/testchat/`, { clientId: localStorage.getItem('userId'), content: message, chatId: chatId });
                     currentChatId = res.data.chat_id;
                     setChatId(currentChatId)
                     await fetchChats();
