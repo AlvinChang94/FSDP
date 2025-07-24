@@ -115,7 +115,7 @@ function Security_privacy() {
     ];
 
     return (
-        <Box sx={{ ml: -6, mt: -4, mb: -30 }}>
+        <Box sx={{ ml: -6, mt: -9, mb: -30 }}>
             <Box sx={{ display: "flex", bgcolor: "#181617" }}>
                 {/* Secondary Nav Bar */}
                 <Box sx={{
@@ -182,7 +182,7 @@ function Security_privacy() {
                                     Data retention settings
                                 </Typography>
                                 <Typography variant="body2" sx={{ color: "#444" }}>
-                                    Your session information and other analytics will be stored and shared with QueryEase so that we can keep improving our platform
+                                    Enabled: Your chatbot will have access to the full conversation of each client <br /> Disabled: Your chatbot's context expires after every session
                                 </Typography>
                             </Grid>
                             <Grid item>

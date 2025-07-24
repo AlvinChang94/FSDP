@@ -5,7 +5,7 @@ import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import SecurityIcon from '@mui/icons-material/Security';
 import PsychologyIcon from '@mui/icons-material/Psychology';
-import http from "../../http";
+import http from "../http";
 
 const configNav = [
   {
