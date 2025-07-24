@@ -7,9 +7,44 @@ import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import InfoIcon from '@mui/icons-material/Info';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function AddAlerts() {
   const navigate = useNavigate();
+
+  const [isGeneratingMessage, setIsGeneratingMessage] = useState(false);
+
+  const generateMessageAndDates = async () => {
+    const message = formik.values.message.trim();
+    if (!message) return;
+
+    setIsGeneratingMessage(true);
+    try {
+      const response = await http.post("/generate-alert", { message });
+
+      if (response.data && response.data.title && response.data.sendDate && response.data.endDate) {
+        const { title, sendDate, endDate } = response.data;
+
+        formik.setFieldValue('title', title);
+        const sendDateLocal = new Date(sendDate).toISOString().slice(0, 16);
+        const endDateLocal = new Date(endDate).toISOString().slice(0, 16);
+
+        formik.setFieldValue('sendDate', sendDateLocal);
+        formik.setFieldValue('endDate', endDateLocal);
+
+        toast.success("AI generated title and dates set.");
+      } else {
+        toast.error("Unexpected response from server");
+        console.error("Unexpected response", response.data);
+      }
+    } catch (error) {
+      toast.error("Failed to generate message and time.");
+      console.error(error);
+    } finally {
+      setIsGeneratingMessage(false);
+    }
+  };
+
 
   const formik = useFormik({
     initialValues: {
@@ -51,32 +86,6 @@ function AddAlerts() {
     }
   });
 
-
-  // Change to Ai, now is hard coded
-  const setMessage = () => {
-    formik.setFieldValue('message', 'Maintanence will be from ');
-  };
-
-  const setDate = () => {
-    const now = new Date();
-    const offset = now.getTimezoneOffset();
-    const localDate = new Date(now.getTime() - offset * 60000);
-    const formatted = localDate.toISOString().slice(0, 16);
-    formik.setFieldValue('sendDate', formatted);
-  }
-
-  const [submitMessage, setSubmitMessage] = useState('');
-
-  const setendDate = () => {
-    const now = new Date();
-    const offset = now.getTimezoneOffset();
-    const localDate = new Date(now.getTime() - offset * 60000);
-    const formatted = localDate.toISOString().slice(0, 16);
-    formik.setFieldValue('endDate', formatted);
-  }
-
-  const [submitendMessage, setSubmitendMessage] = useState('');
-
   return (
     <Box>
       <ToastContainer />
@@ -87,7 +96,9 @@ function AddAlerts() {
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
-              fullWidth margin="normal" autoComplete="off"
+              fullWidth
+              margin="normal"
+              autoComplete="off"
               label="Title"
               name="title"
               value={formik.values.title}
@@ -96,13 +107,6 @@ function AddAlerts() {
               error={formik.touched.title && Boolean(formik.errors.title)}
               helperText={formik.touched.title && formik.errors.title}
             />
-            {formik.values.title.trim() && (
-              <Tooltip title="View AI message suggestion">
-                <IconButton onClick={(setMessage)}>
-                  <InfoIcon color="secondary" />
-                </IconButton>
-              </Tooltip>
-            )}
             <TextField
               fullWidth margin="normal" autoComplete="off"
               multiline minRows={3}
@@ -115,21 +119,16 @@ function AddAlerts() {
               helperText={formik.touched.message && formik.errors.message}
             />
             {formik.values.message.trim() && (
-              <Box display='flex' alignItems='center'>
-                <Tooltip title="View AI Send Date suggestion">
-                  <IconButton onClick={() => {
-                    setDate();
-                    setSubmitMessage('Time was chosen because...');
-                  }}>
-                    <InfoIcon color="secondary" />
-                  </IconButton>
-                </Tooltip>
-                {submitMessage && (
-                  <Typography color='text.secondary'>
-                    {submitMessage}
-                  </Typography>
-                )}
-              </Box>
+              <Tooltip title="Click to let AI suggest title, send time and end time">
+                <IconButton onClick={generateMessageAndDates} disabled={isGeneratingMessage}>
+                  {isGeneratingMessage ? <CircularProgress size={20} /> : <InfoIcon color="secondary" />}
+                </IconButton>
+              </Tooltip>
+            )}
+            {isGeneratingMessage && (
+              <Typography variant="body2" color="text.secondary">
+                Generating message suggestion...
+              </Typography>
             )}
             <TextField
               fullWidth
@@ -146,23 +145,6 @@ function AddAlerts() {
               helperText={formik.touched.sendDate && formik.errors.sendDate}
               inputProps={{ min: new Date(Date.now() - 60 * 1000).toISOString().slice(0, 16) }}
             />
-            {formik.values.sendDate.trim() && (
-              <Box display='flex' alignItems='center'>
-                <Tooltip title="View AI Send Date suggestion">
-                  <IconButton onClick={() => {
-                    setendDate();
-                    setSubmitendMessage('Time was chosen because...');
-                  }}>
-                    <InfoIcon color="secondary" />
-                  </IconButton>
-                </Tooltip>
-                {submitendMessage && (
-                  <Typography color='text.secondary'>
-                    {submitendMessage}
-                  </Typography>
-                )}
-              </Box>
-            )}
             <TextField
               fullWidth
               margin="normal"
