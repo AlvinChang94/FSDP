@@ -3,22 +3,34 @@ import { Box, Typography, Grid, Card, CardContent, IconButton, Button } from '@m
 import React, { useEffect, useState } from 'react';
 import http from '../../../../http';
 import dayjs from 'dayjs';
-import { AccessTime, Edit } from '@mui/icons-material';
+import { AccessTime, Edit, Delete } from '@mui/icons-material';
+import isSameOrAfter from 'dayjs/plugin/isSameOrBefore';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Alert() {
     const [alertList, setAlertList] = useState([]);
     const navigate = useNavigate();
 
+    const deleteAlert = (id) => {
+        http.delete(`/alert/${id}`).then(() => {
+            toast.success("Deleted expired alert");
+            setAlertList(prev => prev.filter(alert => alert.id !== Number(id)));
+        });
+    };
+
     useEffect(() => {
         http.get("/alert")
-            .then((res) =>{
-                const sort = res.data.sort((a, b) => new Date(a.sendDate) - new Date(b.sendDate));        
-                setAlertList(sort)})
+            .then((res) => {
+                const sort = res.data.sort((a, b) => new Date(a.sendDate) - new Date(b.sendDate));
+                setAlertList(sort)
+            })
             .catch((err) => console.error("Failed to fetch alert", err));
     }, []);
 
     return (
         <Box>
+            <ToastContainer/>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} justifyContent='space-between'>
                 <Typography variant="h5">Alerts</Typography>
                 <Box>
@@ -52,10 +64,20 @@ function Alert() {
                                 <Box sx={{ display: 'flex', alignItems: 'center' }} color="text.secondary">
                                     <AccessTime sx={{ mr: 1 }} />
                                     <Typography variant="body2">
-                                        Send: {dayjs(alert.sendDate).format('YYYY-MM-DD HH:mm')} <br/>
+                                        Send: {dayjs(alert.sendDate).format('YYYY-MM-DD HH:mm')} <br />
                                         End: {dayjs(alert.endDate).format('YYYY-MM-DD HH:mm')}
                                     </Typography>
                                 </Box>
+                                {dayjs().isSameOrAfter(dayjs(alert.endDate)) && (
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }} color="text.secondary">
+                                        <Typography variant='body2'>
+                                            Alert Expired, Delete?
+                                        </Typography>
+                                        <IconButton onClick={() => deleteAlert(alert.id)}>
+                                            <Delete color = 'error' />
+                                        </IconButton>
+                                    </Box>
+                                )}
                             </CardContent>
                         </Card>
                     </Grid>
@@ -64,5 +86,5 @@ function Alert() {
         </Box>
     );
 }
- 
+
 export default Alert;
