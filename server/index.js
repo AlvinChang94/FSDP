@@ -38,6 +38,8 @@ const configRoute = require('./routes/user_chatbot_config')
 app.use ('/api/config', configRoute)
 const generateAlertRoutes = require('./routes/generate-alert');
 app.use('/generate-alert', generateAlertRoutes);
+const chooseReviews = require('./routes/choose-review')
+app.use('/choose-review', chooseReviews)
 
 
 const db = require('./models');

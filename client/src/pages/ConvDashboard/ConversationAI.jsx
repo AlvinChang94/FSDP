@@ -8,11 +8,12 @@ const hardcodedData = {
   escalation_count: 30,
   escalation_delay: '10.2 seconds',
   faq: [
-    'How can I update my billing information?',
-    'What is the status of my recent order?',
-    'How do I reset my password?',
+    'What does my insurance policy cover?',
+    'How do I update or change my policy details?',
+    'How do I check my upcoming payment dates?',
     'What are your working hours?',
-    'How can I speak to a human agent?'
+    'Can I defer or reschedule a payment?',
+    'How do I view my account statement?'
   ],
 };
 
@@ -83,7 +84,16 @@ function ConversationAI() {
         <Typography>Loading summary...</Typography>
       ) : (
 
-        <Paper sx={{ p: 3, mb: 4 }}>
+        <Paper
+          sx={{
+            p: 3,
+            mb: 4,
+            backgroundColor: '#D3D3D3', // dark grey
+            color: '#000000',           // light text
+            borderRadius: 2,
+            boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.5)',
+          }}
+        >
           <Typography
             sx={{ whiteSpace: 'pre-wrap' }}
             dangerouslySetInnerHTML={{ __html: summary }}
@@ -107,12 +117,29 @@ function ConversationAI() {
       </Button>
 
       {chatResponse && (
-        <Paper sx={{ p: 3, mt: 3 }}>
+        <Paper
+          sx={{
+            p: 3,
+            mt: 3,
+            backgroundColor: '#D3D3D3', // same light grey as summary
+            color: '#000000',           // matching text color
+            borderRadius: 2,
+            boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.5)',
+          }}
+        >
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            Your question:
+          </Typography>
+          <Typography sx={{ whiteSpace: 'pre-wrap', mb: 2 }}>
+            {question}
+          </Typography>
 
-          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>Your question:</Typography>
-          <Typography sx={{ whiteSpace: 'pre-wrap' }}>{question}</Typography>
-          <Typography variant="subtitle1" fontWeight="bold" mt={2} gutterBottom>AI answer:</Typography>
-          <Typography sx={{ whiteSpace: 'pre-wrap' }}>{chatResponse}</Typography>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            AI answer:
+          </Typography>
+          <Typography sx={{ whiteSpace: 'pre-wrap' }}>
+            {chatResponse}
+          </Typography>
         </Paper>
       )}
     </Box>
