@@ -98,15 +98,6 @@ function AdminDash() {
             </Box>
             {chosenReview ? (
                 <Box>
-                    <Box display="flex" justifyContent="center" my={2}>
-                        <Button
-                            variant="contained"
-                            onClick={handleChooseReview}
-                            disabled={isChoosingReview || allReviews.length === 0}
-                        >
-                            Select Most Important Review
-                        </Button>
-                    </Box>
                     <Link to='/AdminDash/OwnerRev' style={{ textDecoration: 'none' }}>
                         <Box display="flex" justifyContent="center" my={2}>
                             <Paper sx={{ p: 3, width: '100%', maxWidth: 500, textAlign: 'center' }}>
@@ -123,6 +114,15 @@ function AdminDash() {
                             </Paper>
                         </Box>
                     </Link>
+                    <Box display="flex" justifyContent="center" my={2}>
+                        <Button
+                            variant="contained"
+                            onClick={handleChooseReview}
+                            disabled={isChoosingReview || allReviews.length === 0}
+                        >
+                            Select Most Important Review
+                        </Button>
+                    </Box>
                 </Box>
             ) : (
                 <Box display="flex" justifyContent="center" my={2}>
@@ -131,8 +131,8 @@ function AdminDash() {
                         onClick={handleChooseReview}
                         disabled={isChoosingReview || allReviews.length === 0}
                     >
-                        No review selected yet. <br />
-                        Select Most Important Review
+                        No review selected yet <br />
+                        (Select Most Important Review)
                     </Button>
                 </Box>
             )}
