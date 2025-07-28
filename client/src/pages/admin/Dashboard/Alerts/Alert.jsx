@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Box, Typography, Grid, Card, CardContent, IconButton, Button, Icon, Tooltip } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, IconButton, Button } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import http from '../../../../http';
 import dayjs from 'dayjs';
@@ -39,13 +39,16 @@ function Alert() {
         <Box>
             <ToastContainer />
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} justifyContent='space-between'>
-                <Box display='flex'>
+                <Box>
                     <Typography variant="h5">Alerts</Typography>
-                    <Tooltip title={`Sort by ${sortedby === 'send' ? 'end date' : 'send date'}`} arrow>
+                    <Box display='flex' alignItems='center'>
                         <IconButton onClick={() => changeSortedBy(prev => prev === 'send' ? 'end' : 'send')}>
                             <Refresh />
                         </IconButton>
-                    </Tooltip>
+                        <Typography variant='body2' color='text.secondary'>
+                            {`Sorted by ${sortedby === 'end' ? 'end date' : 'send date'}`}
+                        </Typography>
+                    </Box>
                 </Box>
                 <Box>
                     <Button sx={{ mr: 2 }} variant="contained" onClick={() => navigate("/AdminDash")} color='inherit'>
