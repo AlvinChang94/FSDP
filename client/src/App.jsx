@@ -174,13 +174,13 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/Review">
-                          <ListItemText primary="Review" sx={{ color: 'white' }} />
+                        <ListItemButton component={Link} to="/Escalations">
+                          <ListItemText primary="Escalations" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/Escalations">
-                          <ListItemText primary="Escalations" sx={{ color: 'white' }} />
+                        <ListItemButton component={Link} to="/Review">
+                          <ListItemText primary="Review" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
                     </>

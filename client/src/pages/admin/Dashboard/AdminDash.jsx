@@ -89,13 +89,15 @@ function AdminDash() {
                     </Paper>
                 </Box>
             </Link>
-            <Box display="flex" justifyContent="center">
-                <Paper sx={{ p: 3, width: '100%', maxWidth: 500, textAlign: 'center' }}>
-                    <Typography variant="h6" fontWeight="bold">
-                        Business owners' review
-                    </Typography>
-                </Paper>
-            </Box>
+            <Link to='/AdminDash/OwnerRev' style={{ textDecoration: 'none' }}>
+                <Box display="flex" justifyContent="center">
+                    <Paper sx={{ p: 3, width: '100%', maxWidth: 500, textAlign: 'center' }}>
+                        <Typography variant="h6" fontWeight="bold">
+                            Business owners' review
+                        </Typography>
+                    </Paper>
+                </Box>
+            </Link>
             {chosenReview ? (
                 <Box>
                     <Link to='/AdminDash/OwnerRev' style={{ textDecoration: 'none' }}>
