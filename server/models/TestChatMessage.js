@@ -1,3 +1,4 @@
+const Sequelize = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   const TestChatMessage = sequelize.define('TestChatMessage', {
     id: {
@@ -31,8 +32,9 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: false
     },
     timestamp: {
-      type: DataTypes.DATE,
-      allowNull: false
+      type: DataTypes.DATE(3), 
+      allowNull: false,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP(3)')
     },
     sender: {
       type: DataTypes.TEXT,

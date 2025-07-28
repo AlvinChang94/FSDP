@@ -130,17 +130,17 @@ router.post('/botmessage', validateToken, async (req, res) => {
     }
     const userSettings = await ConfigSettings.findOne({ where: { userId: req.user.id } });
     await schema.validate(req.body);
-    const now = new Date();
+    const userTimestamp = new Date();
     await TestChatMessage.create({
       sender_id,
       chat_id,
       content,
-      timestamp: now,
+      timestamp: userTimestamp,
       sender: sender
     });
-    
+
     let systemPrompt =
-    `You are "QueryBot", a concise and helpful AI chatbot built for QueryEase, typically operating on Whatsapp. 
+      `You are "QueryBot", a concise and helpful AI chatbot built for QueryEase, typically operating on Whatsapp. 
     However, you are currently on preview mode for business owners to test out the settings they applied onto you.  
     Your primary job is to assist customers by responding clearly and efficiently, always within a 1000-character limit.`
     if (userSettings) {
@@ -173,19 +173,19 @@ router.post('/botmessage', validateToken, async (req, res) => {
     The next message you will respond to is from the user:`
     let messages;
     messages = req.body.messages.map((msg, idx, arr) => {
-  // If this is the last message in the array (latest message)
-  if (idx === arr.length - 1 && msg.role === "user") {
-    return {
-      role: msg.role,
-      content: msg.content.map(text => ({ text: systemPrompt + text }))
-    };
-  }
-  // For all other messages, keep as is
-  return {
-    role: msg.role,
-    content: msg.content.map(text => ({ text }))
-  };
-});
+      // If this is the last message in the array (latest message)
+      if (idx === arr.length - 1 && msg.role === "user") {
+        return {
+          role: msg.role,
+          content: msg.content.map(text => ({ text: systemPrompt + text }))
+        };
+      }
+      // For all other messages, keep as is
+      return {
+        role: msg.role,
+        content: msg.content.map(text => ({ text }))
+      };
+    });
     const apiKey = process.env.AWS_BEARER_TOKEN_BEDROCK;
     const response = await axios.post(
       'https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/amazon.nova-pro-v1:0/invoke',
@@ -200,15 +200,18 @@ router.post('/botmessage', validateToken, async (req, res) => {
     );
     const reply = response.data.output?.message?.content?.[0]?.text;
     const chatbot_id = 0
+    const assistantTimestamp = new Date();
+
     await TestChatMessage.create({
       sender_id: chatbot_id,
       chat_id,
       content: reply,
-      timestamp: now,
+      timestamp: assistantTimestamp,
       sender: 'assistant'
     });
+
+    await TestChat.update({ updatedAt: assistantTimestamp }, { where: { chat_id } });
     res.json({ llmReply: reply });
-    // Update chat's updatedAt
 
     await TestChat.update({ updatedAt: now }, { where: { chat_id } });
   } catch (err) {
