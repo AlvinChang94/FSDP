@@ -6,7 +6,13 @@ import React from 'react';
 import http from '../../../http';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 function AdminDash() {
     const [allReviews, setAllReviews] = React.useState([]);
@@ -111,6 +117,11 @@ function AdminDash() {
                                                 <StarIcon color={chosenReview.rating >= star ? 'warning' : 'disabled'} />
                                             </Icon>
                                         ))}
+                                    </Box>
+                                    <Box variant='body2'>
+                                        <Typography color='text.secondary'>
+                                            Sent on: {dayjs(chosenReview.createdAt).tz('Asia/Singapore').format('ddd, MMM D YYYY, h:mm A')}
+                                        </Typography>
                                     </Box>
                                 </Typography>
                             </Paper>

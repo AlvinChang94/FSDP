@@ -5,6 +5,13 @@ import http from '../../../http';
 import { Star, Delete } from '@mui/icons-material'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 function OwnerRev() {
     const navigate = useNavigate();
@@ -55,6 +62,11 @@ function OwnerRev() {
                                                     <Star color={(review.rating) >= star ? 'warning' : 'disabled'} />
                                                 </Icon>
                                             ))}
+                                        </Box>
+                                        <Box variant='body2'>
+                                            <Typography color='text.secondary'>
+                                                Sent on: {dayjs(review.createdAt).tz('Asia/Singapore').format('ddd, MMM D YYYY, h:mm A')}
+                                            </Typography>
                                         </Box>
                                     </Typography>
                                 </Box>
