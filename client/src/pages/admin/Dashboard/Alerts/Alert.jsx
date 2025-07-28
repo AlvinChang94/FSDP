@@ -87,7 +87,7 @@ function Alert() {
                     onClick={onClickClear}>
                     <Clear />
                 </IconButton>
-                <IconButton onClick={() => changeSortedBy(prev => prev === 'send' ? 'end' : 'send')}>
+                <IconButton onClick={() => {changeSortedBy(prev => prev === 'send' ? 'end' : 'send'); setSearch('')}}>
                     <Refresh />
                 </IconButton>
                 <Typography variant='body2' color='text.secondary'>
