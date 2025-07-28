@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Box, Typography, Grid, Card, CardContent, IconButton, Button } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, IconButton, Button, Icon, Tooltip } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import http from '../../../../http';
 import dayjs from 'dayjs';
-import { AccessTime, Edit, Delete } from '@mui/icons-material';
+import { AccessTime, Edit, Delete, Refresh } from '@mui/icons-material';
 import isSameOrAfter from 'dayjs/plugin/isSameOrBefore';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 function Alert() {
     const [alertList, setAlertList] = useState([]);
     const navigate = useNavigate();
+    const [sortedby, changeSortedBy] = useState('send')
 
     const deleteAlert = (id) => {
         http.delete(`/alert/${id}`).then(() => {
@@ -22,17 +23,30 @@ function Alert() {
     useEffect(() => {
         http.get("/alert")
             .then((res) => {
-                const sort = res.data.sort((a, b) => new Date(a.sendDate) - new Date(b.sendDate));
+                const sort = res.data.sort((a, b) => {
+                    if (sortedby == 'send') {
+                        return new Date(a.sendDate) - new Date(b.sendDate);
+                    } else {
+                        return new Date(a.endDate) - new Date(b.endDate);
+                    }
+                });
                 setAlertList(sort)
             })
             .catch((err) => console.error("Failed to fetch alert", err));
-    }, []);
+    }, [sortedby]);
 
     return (
         <Box>
-            <ToastContainer/>
+            <ToastContainer />
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} justifyContent='space-between'>
-                <Typography variant="h5">Alerts</Typography>
+                <Box display='flex'>
+                    <Typography variant="h5">Alerts</Typography>
+                    <Tooltip title={`Sort by ${sortedby === 'send' ? 'end date' : 'send date'}`} arrow>
+                        <IconButton onClick={() => changeSortedBy(prev => prev === 'send' ? 'end' : 'send')}>
+                            <Refresh />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
                 <Box>
                     <Button sx={{ mr: 2 }} variant="contained" onClick={() => navigate("/AdminDash")} color='inherit'>
                         Back
@@ -74,7 +88,7 @@ function Alert() {
                                             Alert Expired, Delete?
                                         </Typography>
                                         <IconButton onClick={() => deleteAlert(alert.id)}>
-                                            <Delete color = 'error' />
+                                            <Delete color='error' />
                                         </IconButton>
                                     </Box>
                                 )}
