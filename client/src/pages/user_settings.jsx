@@ -1,237 +1,130 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Paper, Checkbox, FormControlLabel, FormGroup, Radio, RadioGroup, TextField, Button, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import { Link, useLocation } from "react-router-dom";
-import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
-import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
-import SecurityIcon from '@mui/icons-material/Security';
-import PsychologyIcon from '@mui/icons-material/Psychology';
+import {
+  Box, Typography, Paper, TextField, Button, Avatar, Divider
+} from "@mui/material";
 import http from "../http";
 
-const configNav = [
-  {
-    label: "Tone & Personality",
-    icon: <PsychologyIcon />,
-    path: "/config/tone_personality"
-  },
-  {
-    label: "FAQ Management",
-    icon: <QuestionMarkIcon />,
-    path: "/config/faq_management"
-  },
-  {
-    label: "Security & Privacy",
-    icon: <SecurityIcon />,
-    path: "/config/security_privacy"
-  },
-  {
-    label: "Intervention Threshold",
-    icon: <EmojiEmotionsIcon />,
-    path: "/config/intervention_threshold"
-  }
-];
-
-function TonePersonality() {
-  const userId = localStorage.getItem('userId');
-  const location = useLocation();
-  const [saveStatus, setSaveStatus] = useState('');
-  const [tones, setTones] = useState({
-    Professional: false,
-    Neutral: false,
-    Formal: false,
-    Friendly: false,
-    Empathetic: false
+function UserSettings() {
+  // Example state (replace with real user data/fetch logic)
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    businessName: "",
+    businessDesc: "",
+    profilePic: "",
   });
-  const [emojiUsage, setEmojiUsage] = useState("None");
-  const [signature, setSignature] = useState("");
+  const [password, setPassword] = useState("");
+  const [profilePicFile, setProfilePicFile] = useState(null);
+  const [saveStatus, setSaveStatus] = useState("");
 
-  const handleToneChange = (event) => {
-    setTones({ ...tones, [event.target.name]: event.target.checked });
-  };
-  const handleSave = async () => {
-    try {
-      await http.post('/api/config/save', {
-        userId,
-        tone: Object.keys(tones).filter(t => tones[t]).join(', '),
-        emojiUsage,
-        signature
-      });
-      setSaveStatus('Settings saved!');
-      setTimeout(() => setSaveStatus(''), 2000);
-    } catch (err) {
-      setSaveStatus('Failed to save settings.');
-      setTimeout(() => setSaveStatus(''), 2000);
-    }
-  };
+  // Fetch user data on mount (pseudo code)
   useEffect(() => {
-  const fetchSettings = async () => {
-    const res = await http.get(`/api/config/${userId}`);
-    if (res.data) {
-      // Example: setTones, setEmojiUsage, setSignature
-      if (res.data.tone) {
-        const toneArr = res.data.tone.split(', ');
-        setTones(prev => {
-          const newTones = { ...prev };
-          Object.keys(newTones).forEach(t => newTones[t] = toneArr.includes(t));
-          return newTones;
-        });
-      }
-      if (res.data.emojiUsage) setEmojiUsage(res.data.emojiUsage);
-      if (res.data.signature) setSignature(res.data.signature);
-    }
+    // http.get("/api/user/profile").then(res => setProfile(res.data));
+  }, []);
+
+  const handleChange = (e) => {
+    setProfile({ ...profile, [e.target.name]: e.target.value });
   };
-  fetchSettings();
-}, [userId]);
+
+  const handlePicChange = (e) => {
+    setProfilePicFile(e.target.files[0]);
+    setProfile({ ...profile, profilePic: URL.createObjectURL(e.target.files[0]) });
+  };
+
+  const handleSave = async () => {
+    // Save logic here (send profile and password to backend)
+    setSaveStatus("Settings saved!");
+    setTimeout(() => setSaveStatus(""), 2000);
+  };
 
   return (
-    <Box sx={{ml: -6, mt: -9, mb: -30}}>
-    <Box sx={{ display: "flex", bgcolor: "#181617"}}>
-      {/* Secondary Nav Bar */}
-      <Box sx={{
-        width: 261,
-        bgcolor: "#181f2a",
-        color: "#fff",
-        pt: 4,
-        px: 0,
-        borderRight: "1px solid #222",
-        height: "100vh",
-        position: "fixed",
-      }}>
-        <Typography sx={{ color: "#bfcfff", fontWeight: 700, fontSize: 18, pl: 4, mb: 2 }}>
-          Chatbot boundaries
+    <Box sx={{ maxWidth: 600, mx: "auto", mt: -5, mb: 6, ml: -2 }}>
+      <Typography variant="h4" sx={{ fontWeight: "bold", mb: 1 }}>
+        User Settings
+      </Typography>
+      <Paper elevation={2} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
+        <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
+          Profile
         </Typography>
-        <List>
-          {configNav.map((item) => (
-            <ListItem key={item.label} disablePadding>
-              <ListItemButton
-                component={Link}
-                to={item.path}
-                selected={location.pathname === item.path}
-                sx={{
-                  borderRadius: 2,
-                  mx: 1,
-                  my: 0.5,
-                  color: location.pathname === item.path ? "#4287f5" : "#fff",
-                  bgcolor: location.pathname === item.path ? "#e6edff" : "transparent",
-                  '&:hover': {
-                    bgcolor: "#232b33",
-                    color: "#7ec4fa"
-                  },
-                  transition: 'background 0.2s, color 0.2s'
-                }}
-              >
-                <ListItemIcon sx={{ color: location.pathname === item.path ? "#4287f5" : "#fff", minWidth: 36 }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.label}
-                  primaryTypographyProps={{
-                    fontWeight: location.pathname === item.path ? 700 : 500,
-                    fontSize: 16
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Box>
-
-      {/* Main Content */}
-      <Box sx={{ flex: 1, bgcolor: "#f7f8fa", p: 5, mr:'-48px', ml: '261px', minHeight: "90vh", }}>
-        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3 }}>
-          Tone & Personality
-        </Typography>
-
-        {/* Tone Selector */}
-        <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-            Tone selector
-          </Typography>
-          <FormGroup row>
-            {Object.keys(tones).map((tone) => (
-              <FormControlLabel
-                key={tone}
-                control={
-                  <Checkbox
-                    checked={tones[tone]}
-                    onChange={handleToneChange}
-                    name={tone}
-                  />
-                }
-                label={tone}
-                sx={{ mr: 3 }}
-              />
-            ))}
-          </FormGroup>
-        </Paper>
-
-        {/* Emoji Usage */}
-        <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-            Emoji Usage
-          </Typography>
-          <RadioGroup
-            row
-            value={emojiUsage}
-            onChange={e => setEmojiUsage(e.target.value)}
-          >
-            {["None", "Light", "Moderate", "Heavy"].map(option => (
-              <FormControlLabel
-                key={option}
-                value={option}
-                control={<Radio />}
-                label={option}
-                sx={{ mr: 3 }}
-              />
-            ))}
-          </RadioGroup>
-        </Paper>
-
-        {/* Signature Style */}
-        <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-            Signature style
-          </Typography>
-          <TextField
-            fullWidth
-            multiline
-            minRows={3}
-            placeholder="e.g. Let us know if you need anything else!"
-            value={signature}
-            onChange={e => setSignature(e.target.value)}
-            sx={{ bgcolor: "#fff", borderRadius: 2 }}
+        <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+          <Avatar
+            src={profile.profilePic}
+            sx={{ width: 72, height: 72, mr: 3 }}
           />
-        </Paper>
-
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            variant="contained"
-            sx={{
-              bgcolor: "#4d8af0",
-              color: "#fff",
-              px: 4,
-              py: 1.5,
-              fontWeight: 600,
-              fontSize: 18,
-              borderRadius: 3,
-              boxShadow: 2,
-              '&:hover': { bgcolor: "#2e6fd8" },
-              mt: 4
-            }}
-            onClick={handleSave}
-          >
-            Save changes
+          <Button variant="outlined" component="label">
+            Upload Picture
+            <input type="file" accept="image/*" hidden onChange={handlePicChange} />
           </Button>
         </Box>
+        <TextField
+          label="Full Name"
+          name="name"
+          value={profile.name}
+          onChange={handleChange}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          label="Email"
+          name="email"
+          value={profile.email}
+          onChange={handleChange}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          label="Phone Number"
+          name="phone"
+          value={profile.phone}
+          onChange={handleChange}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          label="New Password"
+          type="password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <Divider sx={{ my: 3 }} />
+        <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
+          Business Context
+        </Typography>
+        <TextField
+          label="Business Name"
+          name="businessName"
+          value={profile.businessName}
+          onChange={handleChange}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          label="Business Overview"
+          name="businessDesc"
+          value={profile.businessDesc}
+          onChange={handleChange}
+          fullWidth
+          multiline
+          minRows={3}
+          placeholder="Describe what your business does, your target audience, and any important details."
+          sx={{ mb: 2 }}
+        />
+        <Button
+          variant="contained"
+          sx={{ mt: 2, px: 4, py: 1.5, fontWeight: 600, fontSize: 18, borderRadius: 3 }}
+          onClick={handleSave}
+        >
+          Save Changes
+        </Button>
         {saveStatus && (
-  <Typography sx={{ color: saveStatus === 'Settings saved!' ? 'green' : 'red', mb: 2 }}>
-    {saveStatus}
-  </Typography>
-)}
-      </Box>
-    </Box>
+          <Typography sx={{ color: "green", mt: 2 }}>{saveStatus}</Typography>
+        )}
+      </Paper>
     </Box>
   );
 }
 
-
-export default TonePersonality;
+export default UserSettings;

@@ -6,7 +6,13 @@ import React from 'react';
 import http from '../../../http';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 function AdminDash() {
     const [allReviews, setAllReviews] = React.useState([]);
@@ -89,24 +95,17 @@ function AdminDash() {
                     </Paper>
                 </Box>
             </Link>
-            <Box display="flex" justifyContent="center">
-                <Paper sx={{ p: 3, width: '100%', maxWidth: 500, textAlign: 'center' }}>
-                    <Typography variant="h6" fontWeight="bold">
-                        Business owners' review
-                    </Typography>
-                </Paper>
-            </Box>
+            <Link to='/AdminDash/OwnerRev' style={{ textDecoration: 'none' }}>
+                <Box display="flex" justifyContent="center">
+                    <Paper sx={{ p: 3, width: '100%', maxWidth: 500, textAlign: 'center' }}>
+                        <Typography variant="h6" fontWeight="bold">
+                            Business owners' review
+                        </Typography>
+                    </Paper>
+                </Box>
+            </Link>
             {chosenReview ? (
                 <Box>
-                    <Box display="flex" justifyContent="center" my={2}>
-                        <Button
-                            variant="contained"
-                            onClick={handleChooseReview}
-                            disabled={isChoosingReview || allReviews.length === 0}
-                        >
-                            Select Most Important Review
-                        </Button>
-                    </Box>
                     <Link to='/AdminDash/OwnerRev' style={{ textDecoration: 'none' }}>
                         <Box display="flex" justifyContent="center" my={2}>
                             <Paper sx={{ p: 3, width: '100%', maxWidth: 500, textAlign: 'center' }}>
@@ -119,10 +118,24 @@ function AdminDash() {
                                             </Icon>
                                         ))}
                                     </Box>
+                                    <Box variant='body2'>
+                                        <Typography color='text.secondary'>
+                                            Sent on: {dayjs(chosenReview.createdAt).tz('Asia/Singapore').format('ddd, MMM D YYYY, h:mm A')}
+                                        </Typography>
+                                    </Box>
                                 </Typography>
                             </Paper>
                         </Box>
                     </Link>
+                    <Box display="flex" justifyContent="center" my={2}>
+                        <Button
+                            variant="contained"
+                            onClick={handleChooseReview}
+                            disabled={isChoosingReview || allReviews.length === 0}
+                        >
+                            Select Most Important Review
+                        </Button>
+                    </Box>
                 </Box>
             ) : (
                 <Box display="flex" justifyContent="center" my={2}>
@@ -131,8 +144,8 @@ function AdminDash() {
                         onClick={handleChooseReview}
                         disabled={isChoosingReview || allReviews.length === 0}
                     >
-                        No review selected yet. <br />
-                        Select Most Important Review
+                        No review selected yet <br />
+                        (Select Most Important Review)
                     </Button>
                 </Box>
             )}

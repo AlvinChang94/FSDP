@@ -39,7 +39,7 @@ import Announcements from './pages/Announcements/Announcements.jsx';
 import EditAnnouncement from './pages/Announcements/EditAnnouncement.jsx';
 import Escalations from './pages/Escalations.jsx';
 import GlobalBanner from './components/GlobalBanner.jsx';
-import user_settings from './pages/user_settings.jsx';
+import UserSettings from './pages/user_settings.jsx';
 
 const logout = () => {
   localStorage.clear();
@@ -174,13 +174,13 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/Review">
-                          <ListItemText primary="Review" sx={{ color: 'white' }} />
+                        <ListItemButton component={Link} to="/Escalations">
+                          <ListItemText primary="Escalations" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/Escalations">
-                          <ListItemText primary="Escalations" sx={{ color: 'white' }} />
+                        <ListItemButton component={Link} to="/Review">
+                          <ListItemText primary="Review" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
                     </>
@@ -264,16 +264,11 @@ function App() {
                     <Route path={"/edittutorial/:id"} element={<EditTutorial />} />
                     <Route path={"/register"} element={<Register />} />
                     <Route path={"/login"} element={<Login />} />
-                    <Route path ={"/settings"} element = {<user_settings />} />
-                    <Route path={"/config/tone_personality"} element={<TonePersonality />} />
-                    <Route path={"/config/faq_management"} element={<Faq_Management />} />
-                    <Route path={"/config/security_privacy"} element={<Security_privacy />} />
-                    <Route path={"/config/intervention_threshold"} element={<Intervention_threshold />} />
                     <Route path={"/preview"} element={<ChatbotPreview />} />
                     <Route path={"/useranalytics"} element={<Login />} />
                     <Route path={"/myclients"} element={<Login />} />
                     <Route path={"/supportcentre"} element={<Support />} />
-                    <Route path={"/settings"} element={<Login />} />
+                    <Route path={"/settings"} element={<UserSettings />} />
                     <Route path={"/contact"} element={<Contactstaff />} />
                     <Route path={"/AdminDash"} element={<AdminDashboard />} />
                     <Route path={"/AdminActions"} element={<AdminActions />} />
