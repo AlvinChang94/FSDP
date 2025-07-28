@@ -40,6 +40,7 @@ import EditAnnouncement from './pages/Announcements/EditAnnouncement.jsx';
 import Escalations from './pages/Escalations.jsx';
 import GlobalBanner from './components/GlobalBanner.jsx';
 import UserSettings from './pages/user_settings.jsx';
+import AnnouncementsPanel from './pages/Announcements/AnnouncementsPanel.jsx';
 
 const logout = () => {
   localStorage.clear();
@@ -136,9 +137,7 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/Announcements">
-                          <ListItemText primary="Announcements" sx={{ color: 'white' }} />
-                        </ListItemButton>
+                        <AnnouncementsPanel/>
                       </ListItem>
                     </>
                   ) : user ? (
@@ -182,6 +181,9 @@ function App() {
                         <ListItemButton component={Link} to="/Escalations">
                           <ListItemText primary="Escalations" sx={{ color: 'white' }} />
                         </ListItemButton>
+                      </ListItem>
+                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
+                        <AnnouncementsPanel/>
                       </ListItem>
                     </>
                   ) : null}
@@ -289,6 +291,7 @@ function App() {
                     <Route path={'/Announcements'} element={<Announcements />} />
                     <Route path={'/EditAnnouncement/:id'} element={<EditAnnouncement />} />
                     <Route path={'/Escalations'} element={<Escalations />} />
+                    
                   </Route>
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
