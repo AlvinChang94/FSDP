@@ -1,8 +1,10 @@
-import { Typography, Box, Button, Grid, Card, CardContent, Icon } from "@mui/material";
+import { Typography, Box, Button, Grid, Card, CardContent, Icon, IconButton } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import http from '../../../http';
-import StarIcon from '@mui/icons-material/Star';
+import { Star, Delete } from '@mui/icons-material'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function OwnerRev() {
     const navigate = useNavigate();
@@ -11,34 +13,46 @@ function OwnerRev() {
     useEffect(() => {
         http.get('/reviews')
             .then((res) => {
-                setReviewList(res.data)})
+                setReviewList(res.data)
+            })
             .catch((err) => console.error("Failed to fetch review data"))
-    })
+    }, []);
+
+    const deleteReview = (id) => {
+        if (!window.confirm('Are you sure you want to delete this review?')) return;
+        http.delete(`/reviews/${id}`)
+            .then(() => setReviewList(prev => prev.filter(r => r.id !== id)))
+            .catch(() => toast.error('Failed to delete review'));
+    };
 
     return (
         <Box>
-            <Box sx ={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <Typography variant='h5' sx={{my:2}}>
+            <ToastContainer />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant='h5' sx={{ my: 2 }}>
                     Owner reviews
                 </Typography>
                 <Button onClick={() => navigate(-1)} variant="contained" color='inherit'>
                     back
                 </Button>
             </Box>
-            <Grid container spacing = {2}>
+            <Grid container spacing={2}>
                 {reviewList.map((review) => (
-                    <Grid item xs={12} md={6} lg ={4} key={review.id}>
+                    <Grid item xs={12} md={6} lg={4} key={review.id}>
                         <Card>
                             <CardContent>
-                                <Box sx={{ display: 'flex', mb: 1}}>
-                                    <Typography variant='h6' sx={{flexGrow: 1}}>
-                                        <Box>
+                                <Box sx={{ display: 'flex', mb: 1 }}>
+                                    <Typography variant='h6' sx={{ flexGrow: 1 }}>
+                                        <Box justifyContent='space-between' display='flex'>
                                             {review.comment}
+                                            <IconButton onClick={() => deleteReview(review.id)}>
+                                                <Delete color='error' />
+                                            </IconButton>
                                         </Box>
                                         <Box>
-                                            {[1,2,3,4,5].map((star) => (
+                                            {[1, 2, 3, 4, 5].map((star) => (
                                                 <Icon key={star}>
-                                                    <StarIcon color = {(review.rating) >= star ? 'warning' : 'disabled'} />
+                                                    <Star color={(review.rating) >= star ? 'warning' : 'disabled'} />
                                                 </Icon>
                                             ))}
                                         </Box>
