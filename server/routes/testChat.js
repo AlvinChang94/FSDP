@@ -130,12 +130,12 @@ router.post('/botmessage', validateToken, async (req, res) => {
     }
     const userSettings = await ConfigSettings.findOne({ where: { userId: req.user.id } });
     await schema.validate(req.body);
-    const now = new Date();
+    const userTimestamp = new Date();
     await TestChatMessage.create({
       sender_id,
       chat_id,
       content,
-      timestamp: now,
+      timestamp: userTimestamp,
       sender: sender
     });
 
@@ -203,15 +203,18 @@ router.post('/botmessage', validateToken, async (req, res) => {
     );
     const reply = response.data.output?.message?.content?.[0]?.text;
     const chatbot_id = 0
+    const assistantTimestamp = new Date();
+
     await TestChatMessage.create({
       sender_id: chatbot_id,
       chat_id,
       content: reply,
-      timestamp: now,
+      timestamp: assistantTimestamp,
       sender: 'assistant'
     });
+
+    await TestChat.update({ updatedAt: assistantTimestamp }, { where: { chat_id } });
     res.json({ llmReply: reply });
-    // Update chat's updatedAt
 
     await TestChat.update({ updatedAt: now }, { where: { chat_id } });
   } catch (err) {

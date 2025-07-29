@@ -40,12 +40,14 @@ const generateAlertRoutes = require('./routes/generate-alert');
 app.use('/generate-alert', generateAlertRoutes);
 const chooseReviews = require('./routes/choose-review')
 app.use('/choose-review', chooseReviews)
+const analyticsRoutes = require('./routes/analytics');
+app.use('/api', analyticsRoutes);
 
 
 const db = require('./models');
 const bcrypt = require('bcrypt');
 const router = require('./routes/tutorial');
-db.sequelize.sync({ alter: true}).then(async () => {
+db.sequelize.sync({ alter: false}).then(async () => {
     // Check if admin exists
     const admin = await db.User.findOne({ where: { email: 'joe@gmail.com' } });
     if (!admin) {

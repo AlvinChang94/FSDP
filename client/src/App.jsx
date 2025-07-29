@@ -173,13 +173,13 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/Review">
-                          <ListItemText primary="Review" sx={{ color: 'white' }} />
+                        <ListItemButton component={Link} to="/Escalations">
+                          <ListItemText primary="Escalations" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/Escalations">
-                          <ListItemText primary="Escalations" sx={{ color: 'white' }} />
+                        <ListItemButton component={Link} to="/Review">
+                          <ListItemText primary="Review" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
@@ -283,7 +283,7 @@ function App() {
                     <Route path={"/AdminDash/Satisfaction"} element={<Satisfaction />} />
                     <Route path={"/ConversationDb"} element={<ConversationDb />} />
                     <Route path="/ConversationAI" element={<ConversationAI />} />
-                    <Route path="/conv-analytics/response-time" element={<RespTime />} />
+                    
                     <Route path="/Review" element={<Review />} />
                     <Route path="/conv-analytics/escalation-no" element={<EscalationNo />} />
                     <Route path="/conv-analytics/escalation-delay" element={<EscalationDelay />} />
@@ -292,6 +292,7 @@ function App() {
                     <Route path={'/EditAnnouncement/:id'} element={<EditAnnouncement />} />
                     <Route path={'/Escalations'} element={<Escalations />} />
                     
+                    <Route path="/conv-analytics/response-time/:clientId" element={<RespTime />} />
                   </Route>
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>

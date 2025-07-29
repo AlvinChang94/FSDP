@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Button, TextField } from '@mui/material';
 import axios from 'axios';
 
+const realAverageResponseTime = localStorage.getItem('realAverageResponseTime');
 const hardcodedData = {
-  average_response_time: '20.5 seconds',
-  payment_schedule_response_time: '22.3 seconds',
+    
+  average_response_time: realAverageResponseTime ? `${realAverageResponseTime} seconds` : '20 seconds',
+  payment_schedule_response_time: '2 seconds',
   escalation_count: 30,
   escalation_delay: '10.2 seconds',
   faq: [
@@ -23,11 +25,9 @@ function ConversationAI() {
   const [question, setQuestion] = useState('');
   const [chatResponse, setChatResponse] = useState('');
   const [loadingAnswer, setLoadingAnswer] = useState(false);
-
-  // Get token from localStorage
+  const [averageResponseTime, setAverageResponseTime] = useState(null);
   const token = localStorage.getItem('accessToken');
 
-  // Auto-generate summary on mount
   useEffect(() => {
     const fetchSummary = async () => {
       setLoadingSummary(true);
