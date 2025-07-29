@@ -18,6 +18,7 @@ const AnnouncementsPanel = () => {
     const [popoverAnnouncementId, setPopoverAnnouncementId] = useState(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogAnnouncement, setDialogAnnouncement] = useState(null);
+    const [today, setToday] = useState(new Date().toLocaleString());
 
 
     useEffect(() => {
@@ -37,6 +38,7 @@ const AnnouncementsPanel = () => {
             http.get("/announcements")
                 .then((res) => setPanelAnnouncementList(res.data))
                 .catch((err) => console.error("Failed to fetch announcements", err));
+            setToday(new Date().toLocaleString());
         }
     }, [isOpen]);
 
@@ -70,7 +72,7 @@ const AnnouncementsPanel = () => {
 
     const handleDialogClose = () => {
         setDialogOpen(false);
-        setDialogAnnouncement(  );
+        setDialogAnnouncement();
     };
 
     const isPopoverOpen = Boolean(popoverAnchor);
@@ -85,8 +87,8 @@ const AnnouncementsPanel = () => {
                     <Accordion defaultExpanded disableGutters='true' square='true' sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none', borderBottom: '1px solid #333' }}>
                         <AccordionSummary sx={{
                             position: 'relative',
-                            pl: 4, // add some left padding for balance
-                            pr: 4, // add right padding to prevent overlap with icon
+                            pl: 4,
+                            pr: 4,
                             justifyContent: 'center',
                             '& .MuiAccordionSummary-content': {
                                 justifyContent: 'center',
@@ -95,10 +97,12 @@ const AnnouncementsPanel = () => {
                             <Typography>ANNOUNCEMENTS</Typography>
                         </AccordionSummary>
                         <AccordionDetails sx={{ backgroundColor: '#cdcdcd', p: 0 }}>
-                            <Box sx={{ overflowY: 'auto', maxHeight: 575, ...(user && user.role == 'user' && { maxHeight: 285 }) }}>
+                            <Box sx={{ overflowY: 'auto', height: 575, ...(user && user.role == 'user' && { height: 285 }) }}>
                                 <AccordionDetails>
                                     <Grid container spacing={2} direction='column'>
-                                        {panelAnnouncementList.map((announcement) => (
+                                        {panelAnnouncementList.filter(announcement =>
+                                            announcement.sendNow || (!announcement.sendNow && (new Date(announcement.scheduledDate).toLocaleString()) <= today)
+                                        ).map((announcement) => (
                                             <Grid item xs={12} >
                                                 <AccordionDetails sx={{ mb: 0.5 }}>
                                                     <Card sx={{ backgroundColor: '#fff', boxShadow: 'none', mb: -3.5, mt: -1, maxWidth: '100' }}>
