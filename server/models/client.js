@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Client.associate = (models) => {
         Client.hasMany(models.ClientMessage, { foreignKey: 'senderPhone', sourceKey: 'phoneNumber' });
+        Client.hasMany(models.Escalation, { foreignKey: 'clientId', sourceKey: 'id' })
     };
 
     return Client;
