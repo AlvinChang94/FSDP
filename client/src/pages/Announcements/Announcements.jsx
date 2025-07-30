@@ -50,7 +50,9 @@ function Announcements() {
                                     {/* Title & Edit Icon */}
                                     <Box sx={{ display: 'flex', mb: 1 }}>
                                         <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                                            <strong>
                                             {announcement.title}
+                                            </strong>
                                         </Typography>
                                         {user && user.role == 'admin' && (
                                             <Link to={`/EditAnnouncement/${announcement.id}`}>
@@ -93,7 +95,9 @@ function Announcements() {
                                     {/* Title & Edit Icon */}
                                     <Box sx={{ display: 'flex', mb: 1 }}>
                                         <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                                            <strong>
                                             {announcement.title}
+                                            </strong>
                                         </Typography>
                                         {user && user.role == 'admin' && (
                                             <Link to={`/EditAnnouncement/${announcement.id}`}>

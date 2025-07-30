@@ -1,114 +1,142 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box, Card, CardContent, Typography, IconButton, Menu, MenuItem, Dialog,
-    DialogTitle, DialogContent, DialogContentText, Grid
+    DialogTitle, DialogContent, DialogContentText, Grid, Button
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Tooltip } from '@mui/material';
+import http from '../http';
 
 function Escalations() {
+    const [escalations, setEscalations] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogTitle, setDialogTitle] = useState("");
     const [dialogContent, setDialogContent] = useState("");
+    const [expanded, setExpanded] = React.useState(false);
+    const [loading, setLoading] = useState(false);
+    const [selectedEscalation, setSelectedEscalation] = useState(null);
+    
 
-    const handleMenuClick = (event) => {
+    const usersMap = { //TEMPORARY. Will try to fetch the names from the Database in the final iteration.
+        1: { username: "Ahmad bin Ismail" },
+        2: { username: "Li Wei Tan" },
+        3: { username: "Siti Nurhidayah" },
+    };
+
+    useEffect(() => {
+        http.get("/escalations")
+            .then((res) => setEscalations(res.data))
+            .catch((err) => console.error("Failed to fetch escalations", err));
+    }, []);
+
+    const handleMenuClick = (event, escalation) => {
         setAnchorEl(event.currentTarget);
+        setSelectedEscalation(escalation);
     };
 
     const handleMenuClose = () => {
         setAnchorEl(null);
     };
 
-    const openDialog = (type) => {
+    const openDialog = (type, escalation) => {
         setDialogTitle(type);
-
-        if (type === "Generate Client Summary") {
-            setDialogContent(
-                `Name: Jane Doe
-Email: janedoe@example.com
-Role: Client
-Status: Active
-Escalation History: 2 past escalations
-Last Escalation: June 15, 2025`
-            );
-        } else if (type === "Generate Chat Summary") {
-            setDialogContent(
-                `Jane Doe expressed frustration over delayed responses.
-She asked about account limits and billing.
-Escalation triggered after 2 unresolved follow-ups.
-Suggested next action: assign a senior support rep.`
-            );
-        }
-
+        setSelectedEscalation(escalation);
+        setDialogContent("Generating summary...");
         setDialogOpen(true);
-        handleMenuClose();
     };
 
     const closeDialog = () => {
         setDialogOpen(false);
     };
 
-    const person = {
-        name: "Jane Doe",
-        email: "janedoe@example.com",
-        occupation: "Marketing Manager",
-        chatPreview: [
-            { sender: "Jane", message: "Hi, I've been waiting on this for 3 days..." },
-            { sender: "Support", message: "Apologies! Let me look into that for you." },
-            { sender: "Jane", message: "Please escalate this. I’ve asked twice already." },
-        ]
+    const handleToggle = () => setExpanded(!expanded);
+
+    const generateChatSummary = async (escalation) => {
+        if (!escalation) return;
+
+        setLoading(true);
+        setDialogContent("Generating summary...");
+
+        try {
+            const response = await http.post("/escalations/generate-summary", {
+                clientId: escalation.clientId,
+                chathistory: escalation.chathistory,
+            });
+
+            const summary = response.data.chatsummary || "No summary returned.";
+            setDialogContent(summary);
+
+            // Optional: update local escalation state with the summary
+            setEscalations(prev =>
+                prev.map(e =>
+                    e.clientId === escalation.clientId
+                        ? { ...e, chatsummary: summary }
+                        : e
+                )
+            );
+        } catch (err) {
+            console.error(err);
+            setDialogContent("Failed to generate summary.");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    return (
-        <Box sx={{ mt: 3 }}>
-            <Grid container spacing={2} direction="column">
-                <Grid item xs={12}>
-                    <Card sx={{ width: '100%', p: 2, boxShadow: 3 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <CardContent>
-                                <Typography variant="h6"><strong>Name:</strong> {person.name}</Typography>
-                                <Typography variant="body1"><strong>Email:</strong> {person.email}</Typography>
-                                <Typography variant="body1"><strong>Occupatuion:</strong> {person.occupation}</Typography>
-                                <Box sx={{ mt: 2 }}>
-                                    <Tooltip title={`${person.chatPreview[0]?.sender}: ${person.chatPreview[0]?.message}`}>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: "text.secondary",
-                                                opacity: 0.7,
-                                                whiteSpace: "nowrap",
-                                                overflow: "hidden",
-                                                textOverflow: "ellipsis",
-                                                maxWidth: "100%",
-                                            }}
-                                        >
-                                            💬 {person.chatPreview[0]?.sender}: {person.chatPreview[0]?.message}
-                                        </Typography>
-                                    </Tooltip>
-                                </Box>
-                            </CardContent>
 
-                            <Box sx={{ alignSelf: 'flex-start' }}>
-                                <IconButton onClick={handleMenuClick}>
-                                    <MoreVertIcon />
-                                </IconButton>
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    open={Boolean(anchorEl)}
-                                    onClose={handleMenuClose}
-                                >
-                                    <MenuItem onClick={() => openDialog("Generate Client Summary")}>
-                                        Generate Client Summary
-                                    </MenuItem>
-                                    <MenuItem onClick={() => openDialog("Generate Chat Summary")}>
-                                        Generate Chat Summary
-                                    </MenuItem>
-                                </Menu>
+    return (
+        <Box >
+            <Typography variant="h5" sx={{mb: 2}}>Escalations</Typography>
+            <Grid container spacing={2} direction="column">
+                {escalations.map((escalation) => (
+                    <Grid item xs={12}>
+                        <Card sx={{ width: '100%', p: 2, boxShadow: 3 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <CardContent>
+                                    <Typography variant="h6"><strong>Client: </strong> {usersMap[escalation.clientId]?.username || "Unknown"}</Typography>
+                                    <Typography variant="h7"><strong>Client ID: </strong> {escalation.clientId}</Typography>
+                                    <Box sx={{
+                                        mt: 2, flexGrow: 1,
+                                        overflow: expanded ? 'visible' : 'hidden',
+                                        textOverflow: expanded ? 'unset' : 'ellipsis',
+                                        width: "75%",
+                                        display: expanded ? 'block' : '-webkit-box',
+                                        WebkitBoxOrient: expanded ? 'unset' : 'vertical',
+                                        WebkitLineClamp: expanded ? 'unset' : 2,
+                                        cursor: 'pointer',
+                                        userSelect: 'none',
+                                    }}>
+                                        <Tooltip onClick={handleToggle}
+                                            sx={{
+                                            }}>
+                                            <Typography variant="h7" sx={{ whiteSpace: "pre-line" }}><strong>Chat History: </strong> {escalation.chathistory}</Typography>
+
+                                        </Tooltip>
+                                    </Box>
+                                </CardContent>
+
+                                <Box sx={{ alignSelf: 'flex-start' }}>
+                                    <IconButton onClick={(e) => handleMenuClick(e, escalation)}>
+                                        <MoreVertIcon />
+                                    </IconButton>
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        open={Boolean(anchorEl)}
+                                        onClose={handleMenuClose}
+                                    >
+                                        <MenuItem onClick={() => {
+                                            openDialog("Generate Chat Summary", selectedEscalation);
+                                            generateChatSummary(selectedEscalation);
+                                            handleMenuClose();
+                                        }}>
+                                            Generate Chat Summary
+                                        </MenuItem>
+                                    </Menu>
+                                </Box>
                             </Box>
-                        </Box>
-                    </Card>
-                </Grid>
+                        </Card>
+                    </Grid>
+                ))};
             </Grid>
 
             {/* Pop-up Dialog */}

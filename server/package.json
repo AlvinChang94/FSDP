@@ -9,7 +9,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.844.0",
     "@aws-sdk/client-lex-runtime-v2": "^3.844.0",
@@ -18,12 +17,13 @@
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
+    "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.1",
-    "mysql2": "^3.14.1",
+    "mysql2": "^3.14.3",
     "nanoid": "^3.3.11",
+    "openai": "^5.10.2",
     "sequelize": "^6.37.7",
     "socket.io": "^4.8.1",
     "sqlite3": "^5.1.7",
@@ -32,5 +32,6 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
-  }
+  },
+  "description": ""
 }
