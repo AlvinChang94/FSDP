@@ -290,6 +290,7 @@ function App() {
                     <Route path={'/EditAnnouncement/:id'} element={<EditAnnouncement />} />
                     <Route path={'/Escalations'} element={<Escalations />} />
                     <Route path="/conv-analytics/response-time/:clientId" element={<RespTime />} />
+                    <Route path="/analytics/most-common-topic" element={<ConversationDb />} />
                   </Route>
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>

@@ -1,40 +1,64 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Box, Typography, Paper, Button, TextField } from '@mui/material';
 import axios from 'axios';
-
-const realAverageResponseTime = localStorage.getItem('realAverageResponseTime');
-const hardcodedData = {
-    
-  average_response_time: realAverageResponseTime ? `${realAverageResponseTime} seconds` : '20 seconds',
-  payment_schedule_response_time: '2 seconds',
-  escalation_count: 30,
-  escalation_delay: '10.2 seconds',
-  faq: [
-    'What does my insurance policy cover?',
-    'How do I update or change my policy details?',
-    'How do I check my upcoming payment dates?',
-    'What are your working hours?',
-    'Can I defer or reschedule a payment?',
-    'How do I view my account statement?'
-  ],
-};
+import UserContext from '../../contexts/UserContext';
 
 function ConversationAI() {
+  const { user } = useContext(UserContext);
+  const userId = user?.id;
   const [summary, setSummary] = useState('');
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [question, setQuestion] = useState('');
   const [chatResponse, setChatResponse] = useState('');
   const [loadingAnswer, setLoadingAnswer] = useState(false);
-  const [averageResponseTime, setAverageResponseTime] = useState(null);
+  const [commonTopics, setCommonTopics] = useState([]);
   const token = localStorage.getItem('accessToken');
 
   useEffect(() => {
+    if (!userId) return;
+    const fetchCommonTopics = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:3001/api/analytics/common-topics/${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        setCommonTopics(res.data.topics || []);
+      } catch (err) {
+        setCommonTopics([]);
+        console.error('Failed to fetch common topics', err);
+      }
+    };
+    fetchCommonTopics();
+  }, [token, userId]);
+
+  const realAverageResponseTime = localStorage.getItem('realAverageResponseTime');
+  const faqList = commonTopics.length > 0
+    ? commonTopics.map(t => t.topic)
+    : [];
+
+  const hardcodedData = {
+    average_response_time: realAverageResponseTime ? `${realAverageResponseTime} seconds` : '20 seconds',
+    payment_schedule_response_time: '2 seconds',
+    escalation_count: 30,
+    escalation_delay: '10.2 seconds',
+    faq: faqList,
+  };
+  const faqString = faqList.join('; ');
+
+  useEffect(() => {
+    if (!userId) return;
     const fetchSummary = async () => {
       setLoadingSummary(true);
       try {
         const res = await axios.post(
           'http://localhost:3001/api/testchat/summary',
-          { data: hardcodedData },
+          {
+            data: {
+              ...hardcodedData,
+              faq: faqList, 
+            },
+          },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -43,15 +67,13 @@ function ConversationAI() {
         );
         setSummary(res.data.summary || 'No summary available.');
       } catch (err) {
-        console.error(err);
         setSummary('Failed to generate summary.');
       }
       setLoadingSummary(false);
     };
     fetchSummary();
-  }, [token]);
+  }, [token, userId, faqString]);
 
-  // Ask follow-up question
   const handleAsk = async () => {
     if (!question.trim()) return;
     setLoadingAnswer(true);
@@ -70,7 +92,6 @@ function ConversationAI() {
       );
       setChatResponse(res.data.answer || 'No answer returned.');
     } catch (err) {
-      console.error(err);
       setChatResponse('Failed to get response.');
     }
     setLoadingAnswer(false);
@@ -83,13 +104,12 @@ function ConversationAI() {
       {loadingSummary ? (
         <Typography>Loading summary...</Typography>
       ) : (
-
         <Paper
           sx={{
             p: 3,
             mb: 4,
-            backgroundColor: '#D3D3D3', // dark grey
-            color: '#000000',           // light text
+            backgroundColor: '#D3D3D3',
+            color: '#000000',
             borderRadius: 2,
             boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.5)',
           }}
@@ -121,8 +141,8 @@ function ConversationAI() {
           sx={{
             p: 3,
             mt: 3,
-            backgroundColor: '#D3D3D3', // same light grey as summary
-            color: '#000000',           // matching text color
+            backgroundColor: '#D3D3D3',
+            color: '#000000',
             borderRadius: 2,
             boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.5)',
           }}
@@ -145,5 +165,4 @@ function ConversationAI() {
     </Box>
   );
 }
-
 export default ConversationAI;

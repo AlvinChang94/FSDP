@@ -463,41 +463,38 @@ router.post("/receive", async (req, res) => {
 
 router.post('/summary', validateToken, async (req, res) => {
   try {
-    // Use data from request or fallback defaults
-    const metrics = req.body.data || {
-      average_response_time: '20.5 seconds',
-      payment_schedule_response_time: '22.3 seconds',
-      escalation_count: 30,
-      escalation_delay: '10.2 seconds',
-      faq: [
-        'How can I update my billing information?',
-        'What is the status of my recent order?',
-        'How do I reset my password?',
-        'What are your working hours?',
-        'How can I speak to a human agent?'
-      ]
-    };
+    const metrics = req.body.data || {};
+    metrics.faq = Array.isArray(metrics.faq) && metrics.faq.length > 0
+      ? metrics.faq
+      : []; 
+    const faqListHtml = metrics.faq.length
+      ? `<ul style="margin-top: 0; padding-left: 20px;">
+      ${metrics.faq.map(topic => `<li><strong>${topic}</strong></li>`).join('\n')}
+    </ul>`
+      : '<p>No FAQ topics identified.</p>';
 
-    // Build prompt for summary
-    const summaryPrompt = `Write a short, clear, and impactful summary of this data for a business report. Use percentages where helpful and highlight key numbers with emphasis:
+    const exampleStyleText = `STYLE EXAMPLE ONLY — DO NOT COPY DATA:
+The average response time across all queries was 20.5 seconds. However, queries related to 'payment schedules' showed a notably higher average of 22.3 seconds — 8.8% slower than the general response time. A total of 30 conversations were escalated to human agents. While the volume remains within normal range, the average escalation response delay increased to 10.2 seconds. This suggests a potential strain on agent availability during peak periods, possibly affecting resolution speed and customer satisfaction. The most commonly asked topics are on Billing inquiries, Password resets.`;
 
+    const faqInlineText = metrics.faq.join(', ');
+
+    const summaryPrompt = `
+Write a short, clear, and impactful summary of this data for a business report. Mirror the sentence structure and flow of the example. Use <strong> tags to highlight key numbers. Present the actual FAQ topics as a list and DO NOT repeat any sample data from the example.
+
+Metrics:
 Average Response Time: ${metrics.average_response_time}
 Payment Schedule Response Time: ${metrics.payment_schedule_response_time}
 Escalated Conversations: ${metrics.escalation_count}
 Escalation Delay: ${metrics.escalation_delay}
-Top FAQs: ${metrics.faq.join('; ')}
+Actual FAQ Topics: ${faqInlineText}
 
-
-Write a short summary with key numbers in <strong>bold</strong> using HTML tags, e.g.:
-Example style:
-"This week, the average response time across all queries was 20.5 seconds. However, queries related to 'payment schedules' showed a notably higher average of 22.3 seconds — 8.8% slower than the general response time.
-
-A total of 30 conversations were escalated to human agents. While the volume remains within normal range, the average escalation response delay increased to 10.2 seconds. This suggests a potential strain on agent availability during peak periods, possibly affecting resolution speed and customer satisfaction."
+${exampleStyleText}
 `;
 
-    const apiKey = process.env.AWS_BEARER_TOKEN_BEDROCK;
 
-    // Call Bedrock API for summary
+
+
+    const apiKey = process.env.AWS_BEARER_TOKEN_BEDROCK;
     const summaryMessages = [{ role: 'user', content: [{ text: summaryPrompt }] }];
     const summaryResponse = await axios.post(
       'https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/amazon.nova-pro-v1:0/invoke',
@@ -515,7 +512,6 @@ A total of 30 conversations were escalated to human agents. While the volume rem
 
     let answer = '';
 
-    // If a question is sent, get answer from Bedrock too
     if (req.body.question) {
       const question = req.body.question.trim();
       const askPrompt = `Based on this data: ${JSON.stringify(metrics)}, answer this question: ${question}`;
@@ -536,7 +532,6 @@ A total of 30 conversations were escalated to human agents. While the volume rem
       answer = askResponse.data.output?.message?.content?.[0]?.text?.trim() || "No answer generated.";
     }
 
-    // Return JSON response
     return res.json({ summary, answer });
 
   } catch (err) {
