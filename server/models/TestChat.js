@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     title: {
       type: DataTypes.TEXT,
-      allownull: false
+      allowNull: false
     }
   }, {
     tableName: 'test_chats',

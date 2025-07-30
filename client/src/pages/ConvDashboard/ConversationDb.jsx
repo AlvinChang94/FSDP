@@ -1,13 +1,31 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Box, Typography, Grid, Paper, Link as MuiLink } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar } from 'recharts';
 import UserContext from '../../contexts/UserContext';
 import axios from 'axios';
 
 function ConversationDb() {
     const { user } = useContext(UserContext);
     const [averageTime, setAverageTime] = useState(null);
+    const [commonTopics, setCommonTopics] = useState([]);
 
+    useEffect(() => {
+        const fetchCommonTopics = async () => {
+            if (user?.id) {
+                try {
+                    const token = localStorage.getItem('accessToken');
+                    const res = await axios.get(`http://localhost:3001/api/analytics/common-topics/${user.id}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setCommonTopics(res.data.topics || []);
+                } catch (err) {
+                    setCommonTopics([]);
+                }
+            }
+        };
+        fetchCommonTopics();
+    }, [user]);
     useEffect(() => {
         const fetchAverageTime = async () => {
             if (user?.id) {
@@ -27,7 +45,7 @@ function ConversationDb() {
     }, [user]);
 
     return (
-        <Box sx={{ position: 'fixed', minHeight: '100vh', minWidth: 'calc(100vw - 284px)', bgcolor: '#f5f6fa', top: 0, left: '220px', p: 4 }}>
+        <Box sx={{ minHeight: '100vh', overflowY: 'auto'}}>
             <Paper elevation={3} sx={{ maxWidth: 1100, mx: 'auto', p: 4, mb: 4, bgcolor: 'white' }}>
                 <Typography variant="h4" fontWeight="bold" gutterBottom>
                     Conversation Analytics Dashboard
@@ -77,9 +95,22 @@ function ConversationDb() {
                     Frequently asked questions
                 </Typography>
                 <Paper sx={{ p: 4, mb: 2 }}>
-                    <Typography variant="body1" color="text.secondary">
-                        [Chart Placeholder]
-                    </Typography>
+                    {commonTopics.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={commonTopics} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="topic" />
+                                <YAxis allowDecimals={false} />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey="count" fill="#1976d2" name="Number of Questions" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <Typography variant="body2" color="text.secondary">
+                            Loading common topics...
+                        </Typography>
+                    )}
                 </Paper>
 
                 <Box textAlign="right">

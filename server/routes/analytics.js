@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { TestChatMessage, TestChat } = require('../models');
 const { validateToken } = require('../middlewares/auth');
+const Sequelize = require('sequelize');
 
 router.get('/analytics/response-time/:clientId', validateToken, async (req, res) => {
   const { clientId } = req.params;
@@ -86,5 +87,36 @@ router.get('/analytics/message-timings/:clientId', validateToken, async (req, re
     return res.status(500).json({ error: 'Failed to fetch message timings.' });
   }
 });
+
+router.get('/analytics/common-topics/:clientId', validateToken, async (req, res) => {
+  const clientId = req.params.clientId;
+
+  try {
+    const topics = await TestChat.findAll({
+      where: { clientId },
+      attributes: [
+        'title',
+        [Sequelize.fn('COUNT', Sequelize.col('chat_id')), 'count']
+      ],
+      group: ['title'],
+      order: [[Sequelize.literal('count'), 'DESC']],
+      limit: 5,
+      raw: true
+    });
+
+    const result = topics.map(t => ({
+      topic: t.title,
+      count: parseInt(t.count, 10)
+    }));
+
+    return res.json({ topics: result });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Failed to fetch top topics' });
+  }
+});
+
+
+
 
 module.exports = router;
