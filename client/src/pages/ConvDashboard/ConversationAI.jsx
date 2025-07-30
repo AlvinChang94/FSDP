@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Box, Typography, Paper, Button, TextField } from '@mui/material';
 import axios from 'axios';
 import UserContext from '../../contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
+
 
 function ConversationAI() {
   const { user } = useContext(UserContext);
@@ -13,6 +15,12 @@ function ConversationAI() {
   const [loadingAnswer, setLoadingAnswer] = useState(false);
   const [commonTopics, setCommonTopics] = useState([]);
   const token = localStorage.getItem('accessToken');
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate('/ConversationDb');
+  };
+
 
   useEffect(() => {
     if (!userId) return;
@@ -56,7 +64,7 @@ function ConversationAI() {
           {
             data: {
               ...hardcodedData,
-              faq: faqList, 
+              faq: faqList,
             },
           },
           {
@@ -98,9 +106,11 @@ function ConversationAI() {
   };
 
   return (
+    
     <Box sx={{ p: 4, maxWidth: 900, mx: 'auto' }}>
       <Typography variant="h4" mb={3}>Conversation Analytics</Typography>
-
+      <Button variant="outlined" onClick={handleBack} sx={{ mb: 2 }}>
+        Back to Dashboard </Button>
       {loadingSummary ? (
         <Typography>Loading summary...</Typography>
       ) : (
