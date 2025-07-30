@@ -7,11 +7,22 @@ import { Edit } from '@mui/icons-material';
 function Announcements() {
     const [announcementList, setAnnouncementList] = useState([]);
     const navigate = useNavigate();
+    const [user, setUser] = useState(null);
+    const [today, setToday] = useState(new Date().toLocaleString());
+
+    useEffect(() => {
+        if (localStorage.getItem("accessToken")) {
+            http.get('/user/auth').then((res) => {
+                setUser(res.data.user);
+            });
+        }
+    }, []);
 
     useEffect(() => {
         http.get("/announcements")
             .then((res) => setAnnouncementList(res.data))
             .catch((err) => console.error("Failed to fetch announcements", err));
+        setToday(new Date().toLocaleString());
     }, []);
 
     return (
@@ -22,53 +33,104 @@ function Announcements() {
                     <Button sx={{ mr: 2 }} variant="contained" onClick={() => navigate("/")} color='inherit'>
                         Back to Home
                     </Button>
-                    <Link to='/CreateAnnouncement'>
-                        <Button color='secondary' variant='contained'>Create</Button>
-                    </Link>
+                    {user && user.role == 'admin' && (
+                        <Link to='/CreateAnnouncement'>
+                            <Button color='secondary' variant='contained'>Create</Button>
+                        </Link>
+                    )}
                 </Box>
             </Box>
 
             <Grid container spacing={2} direction='column'>
                 {announcementList.map((announcement) => (
                     <Grid item xs={12} key={announcement.id}>
-                        <Card sx={{ width: '100%', padding: '16px', backgroundColor: '#fff', boxShadow: 3, minHeight: 200 }}>
-                            <CardContent>
-                                {/* Title & Edit Icon */}
-                                <Box sx={{ display: 'flex', mb: 1 }}>
-                                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                                        {announcement.title}
-                                    </Typography>
-                                    <Link to={`/EditAnnouncement/${announcement.id}`}>
-                                        <IconButton color='success'>
-                                            <Edit />
-                                        </IconButton>
-                                    </Link>
-                                </Box>
+                        {user && user.role == 'user' && (announcement.sendNow || (!announcement.sendNow && (new Date(announcement.scheduledDate).toLocaleString()) <= today)) ? (
+                            <Card sx={{ width: '100%', padding: '16px', backgroundColor: '#fff', boxShadow: 3, minHeight: 150 }}>
+                                <CardContent>
+                                    {/* Title & Edit Icon */}
+                                    <Box sx={{ display: 'flex', mb: 1 }}>
+                                        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                                            {announcement.title}
+                                        </Typography>
+                                        {user && user.role == 'admin' && (
+                                            <Link to={`/EditAnnouncement/${announcement.id}`}>
+                                                <IconButton color='success'>
+                                                    <Edit />
+                                                </IconButton>
+                                            </Link>
+                                        )}
+                                    </Box>
 
-                                {/* Content */}
-                                <Typography sx={{ whiteSpace: 'pre-wrap', mb: 1 }}>
-                                    {announcement.content}
-                                </Typography>
+                                    {/* Content */}
+                                    <Typography sx={{ whiteSpace: 'pre-wrap', mb: 1 }}>
+                                        {announcement.content}
+                                    </Typography>
 
-                                {/* Scheduled Date */}
-                                {announcement.scheduledDate && (
-                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                        Scheduled Date: {new Date(announcement.scheduledDate).toLocaleString()}
-                                    </Typography>
-                                )}
+                                    {/* Scheduled Date */}
+                                    {user && user.role == 'admin' && announcement.scheduledDate && !announcement.sendNow && (
+                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                            Scheduled Date: {new Date(announcement.scheduledDate).toLocaleString()}
+                                        </Typography>
+                                    )}
 
-                                {/* Audience */}
-                                <Box sx={{ mt: 2 }}>
-                                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                                        Audience:
+                                    {/* Audience */}
+                                    {user && user.role == 'admin' && (
+                                        <Box sx={{ mt: 2 }}>
+                                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                                Audience:
+                                            </Typography>
+                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                {announcement.AudienceisModerator ? 'Moderator' : ''} <br></br>
+                                                {announcement.AudienceisUser ? 'User' : ''}
+                                            </Typography>
+                                        </Box>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        ) : user && user.role == 'admin' && (
+                            <Card sx={{ width: '100%', padding: '16px', backgroundColor: '#fff', boxShadow: 3, minHeight: 150 }}>
+                                <CardContent>
+                                    {/* Title & Edit Icon */}
+                                    <Box sx={{ display: 'flex', mb: 1 }}>
+                                        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                                            {announcement.title}
+                                        </Typography>
+                                        {user && user.role == 'admin' && (
+                                            <Link to={`/EditAnnouncement/${announcement.id}`}>
+                                                <IconButton color='success'>
+                                                    <Edit />
+                                                </IconButton>
+                                            </Link>
+                                        )}
+                                    </Box>
+
+                                    {/* Content */}
+                                    <Typography sx={{ whiteSpace: 'pre-wrap', mb: 1 }}>
+                                        {announcement.content}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                        {announcement.AudienceisModerator ? 'Moderator' : ''} <br></br>
-                                        {announcement.AudienceisUser ? 'User' : ''}
-                                    </Typography>
-                                </Box>
-                            </CardContent>
-                        </Card>
+
+                                    {/* Scheduled Date */}
+                                    {user && user.role == 'admin' && announcement.scheduledDate && !announcement.sendNow && (
+                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                            Scheduled Date: {new Date(announcement.scheduledDate).toLocaleString()}
+                                        </Typography>
+                                    )}
+
+                                    {/* Audience */}
+                                    {user && user.role == 'admin' && (
+                                        <Box sx={{ mt: 2 }}>
+                                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                                Audience:
+                                            </Typography>
+                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                {announcement.AudienceisModerator ? 'Moderator' : ''} <br></br>
+                                                {announcement.AudienceisUser ? 'User' : ''}
+                                            </Typography>
+                                        </Box>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )}
                     </Grid>
                 ))}
             </Grid>
