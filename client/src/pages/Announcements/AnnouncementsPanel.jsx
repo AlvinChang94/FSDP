@@ -94,10 +94,10 @@ const AnnouncementsPanel = () => {
                 <ListItemText primary='Announcements' />
             </ListItemButton>
             <Drawer anchor='right' open={isOpen} onClose={toggleDrawer(false)}>
-                <Box sx={{ width: 300, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ width: 300, height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#cdcdcd' }}>
 
                     <Accordion defaultExpanded disableGutters='true' expanded={announcementsExpanded}
-                        onChange={() => setAnnouncementsExpanded(!announcementsExpanded)} square sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none', borderBottom: '1px solid #333' }}>
+                        onChange={() => setAnnouncementsExpanded(!announcementsExpanded)} square sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none'}}>
                         <AccordionSummary sx={{
                             position: 'relative',
                             pl: 4,
@@ -190,7 +190,7 @@ const AnnouncementsPanel = () => {
                         </AccordionDetails>
                     </Accordion>
                     {user && user.role == "user" && (
-                        <Accordion defaultExpanded disableGutters='true' square='true' sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none', borderBottom: '1px solid #333', }}>
+                        <Accordion defaultExpanded disableGutters='true' square='true' sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none'}}>
                             <AccordionSummary sx={{
                                 position: 'relative',
                                 pl: 4,
