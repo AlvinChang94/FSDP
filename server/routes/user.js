@@ -5,6 +5,7 @@ const { User } = require('../models');
 const yup = require("yup");
 const { sign } = require('jsonwebtoken');
 require('dotenv').config();
+const axios = require('axios');
 const { validateToken } = require('../middlewares/auth');
 function generateLinkCode(length = 8) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no confusing chars
@@ -194,5 +195,45 @@ router.put('/profile', validateToken, async (req, res) => {
         res.status(500).json({ error: err });
     }
 });
-  
+
+router.post('/generate-overview', validateToken, async (req, res) => {
+  try {
+    const { businessName, industry, targetAudience, uniqueSellingPoint, extraNotes } = req.body;
+    const apiKey = process.env.AWS_BEARER_TOKEN_BEDROCK;
+
+    // Build the AI prompt
+    let systemPrompt = `You are an expert business copywriter. Write a concise, clear, and professional business overview (max 3 sentences) for the following business. Do not use <pre> tags.`;
+
+    let userPrompt = `
+Business Name: ${businessName}
+Industry: ${industry}
+Target Audience: ${targetAudience}
+Unique Selling Point: ${uniqueSellingPoint}
+${extraNotes ? `Extra Notes: ${extraNotes}` : ""}
+`;
+
+    const messages = [
+      { role: "user", content: [{ text: systemPrompt + "\n" + userPrompt }] }
+    ];
+
+    const response = await axios.post(
+      'https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/amazon.nova-pro-v1:0/invoke',
+      { messages },
+      {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      }
+    );
+
+    const overview = response.data.output?.message?.content?.[0]?.text?.trim() || "No overview generated.";
+    res.json({ overview });
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ error: 'Failed to generate overview.' });
+  }
+});
+
 module.exports = router;
