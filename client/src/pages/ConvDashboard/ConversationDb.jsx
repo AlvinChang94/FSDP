@@ -9,6 +9,28 @@ function ConversationDb() {
     const { user } = useContext(UserContext);
     const [averageTime, setAverageTime] = useState(null);
     const [commonTopics, setCommonTopics] = useState([]);
+    const [averageChats, setAverageChats] = useState(null);
+    const [chatbotSessions, setChatbotSessions] = useState(null);
+
+    useEffect(() => {
+        const fetchChatbotSessions = async () => {
+            if (user?.id) {
+                try {
+                    const token = localStorage.getItem('accessToken');
+                    const res = await axios.get(`http://localhost:3001/api/analytics/average-chat-groups/${user.id}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setChatbotSessions(res.data.averageGroups);
+                } catch (err) {
+                    setChatbotSessions(null);
+                }
+            }
+        };
+        fetchChatbotSessions();
+    }, []);
+
+
+
 
     useEffect(() => {
         const fetchCommonTopics = async () => {
@@ -26,6 +48,8 @@ function ConversationDb() {
         };
         fetchCommonTopics();
     }, [user]);
+
+
     useEffect(() => {
         const fetchAverageTime = async () => {
             if (user?.id) {
@@ -44,8 +68,26 @@ function ConversationDb() {
         fetchAverageTime();
     }, [user]);
 
+    useEffect(() => {
+        const fetchAverageChats = async () => {
+            if (user?.id) {
+                try {
+                    const token = localStorage.getItem('accessToken');
+                    const res = await axios.get(`http://localhost:3001/api/analytics/average-chats/${user.id}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setAverageChats(res.data.average_chats_per_day);
+                } catch (err) {
+                    setAverageChats(null);
+                }
+            }
+        };
+        fetchAverageChats();
+    },
+        [user]);
+
     return (
-        <Box sx={{ minHeight: '100vh', overflowY: 'auto'}}>
+        <Box sx={{ minHeight: '100vh', overflowY: 'auto' }}>
             <Paper elevation={3} sx={{ maxWidth: 1100, mx: 'auto', p: 4, mb: 4, bgcolor: 'white' }}>
                 <Typography variant="h4" fontWeight="bold" gutterBottom>
                     Conversation Analytics Dashboard
@@ -59,11 +101,28 @@ function ConversationDb() {
                 {[
                     {
                         title: "Average response time for each question",
-                        value: averageTime !== null ? `${averageTime.toFixed(2)} seconds` : "Loading...",
+                        value: averageTime !== null
+                            ? `${parseFloat(averageTime).toFixed(2)} seconds`
+                            : "Loading...",
+
                         to: `/conv-analytics/response-time/${user?.id}`
                     },
-                    { title: "Number of escalations", value: "30", to: "/conv-analytics/escalation-no" },
-                    { title: "Escalation response delay", value: "10.2s", to: "/conv-analytics/escalation-delay" },
+                    {
+                        title: "Average chats per day",
+                        value: averageChats !== null && !isNaN(averageChats)
+                            ? `${parseFloat(averageChats).toFixed(2)} chats`
+                            : "Loading...",
+                        to: `/conv-analytics/average-chats/${user?.id}`
+                    }
+                    ,
+                    {
+                        title: "Chatbot sessions per day",
+                        value: chatbotSessions !== null && !isNaN(chatbotSessions)
+                            ? `${parseFloat(chatbotSessions).toFixed(2)} sessions`
+                            : "Loading...",
+                        to: `/conv-analytics/average-chat-groups/${user?.id}`
+                    }
+
                 ].map((stat, index) => (
                     <Grid item xs={12} md={4} key={index}>
                         <Link to={stat.to} style={{ textDecoration: 'none' }}>

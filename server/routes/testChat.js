@@ -466,7 +466,7 @@ router.post('/summary', validateToken, async (req, res) => {
     const metrics = req.body.data || {};
     metrics.faq = Array.isArray(metrics.faq) && metrics.faq.length > 0
       ? metrics.faq
-      : []; 
+      : [];
     const faqListHtml = metrics.faq.length
       ? `<ul style="margin-top: 0; padding-left: 20px;">
       ${metrics.faq.map(topic => `<li><strong>${topic}</strong></li>`).join('\n')}
@@ -474,7 +474,13 @@ router.post('/summary', validateToken, async (req, res) => {
       : '<p>No FAQ topics identified.</p>';
 
     const exampleStyleText = `STYLE EXAMPLE ONLY — DO NOT COPY DATA:
-The average response time across all queries was 20.5 seconds. However, queries related to 'payment schedules' showed a notably higher average of 22.3 seconds — 8.8% slower than the general response time. A total of 30 conversations were escalated to human agents. While the volume remains within normal range, the average escalation response delay increased to 10.2 seconds. This suggests a potential strain on agent availability during peak periods, possibly affecting resolution speed and customer satisfaction. The most commonly asked topics are on Billing inquiries, Password resets.`;
+The average response time across all queries was <strong>20.5 seconds</strong>. Queries related to <strong>'payment schedules'</strong> showed a higher average of <strong>22.3 seconds</strong>, about <strong>8.8%</strong> slower than the general baseline. On average, <strong>25 chats</strong> were initiated daily across all users, with <strong>10 unique chat groups</strong> actively used during that time. This reflects strong platform engagement and healthy group-level traction. The most commonly asked topics include:
+<ul style="margin-top: 0; padding-left: 20px;">
+  <li><strong>Billing inquiries</strong></li>
+  <li><strong>Password resets</strong></li>
+  <li><strong>Subscription cancellations</strong></li>
+</ul>`;
+
 
     const faqInlineText = metrics.faq.join(', ');
 
@@ -484,14 +490,12 @@ Write a short, clear, and impactful summary of this data for a business report. 
 Metrics:
 Average Response Time: ${metrics.average_response_time}
 Payment Schedule Response Time: ${metrics.payment_schedule_response_time}
-Escalated Conversations: ${metrics.escalation_count}
-Escalation Delay: ${metrics.escalation_delay}
+Average Chats Per Day: ${metrics.average_chats_per_day}
+Average Chat Groups Per Day: ${metrics.average_group_count}
 Actual FAQ Topics: ${faqInlineText}
 
 ${exampleStyleText}
 `;
-
-
 
 
     const apiKey = process.env.AWS_BEARER_TOKEN_BEDROCK;

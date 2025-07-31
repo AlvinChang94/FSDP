@@ -32,8 +32,6 @@ import ConversationDb from './pages/ConvDashboard/ConversationDb.jsx';
 import ConversationAI from './pages/ConvDashboard/ConversationAI.jsx';
 import RespTime from './pages/ConvDashboard/ConvAnalytics/RespTime';
 import Review from './pages/Review.jsx';
-import EscalationNo from './pages/ConvDashboard/ConvAnalytics/EscalationNo.jsx';
-import EscalationDelay from './pages/ConvDashboard/ConvAnalytics/EscalationDelay.jsx';
 import CreateAnnouncement from './pages/Announcements/CreateAnnouncement.jsx';
 import Announcements from './pages/Announcements/Announcements.jsx';
 import EditAnnouncement from './pages/Announcements/EditAnnouncement.jsx';
@@ -41,6 +39,9 @@ import Escalations from './pages/Escalations.jsx';
 import GlobalBanner from './components/GlobalBanner.jsx';
 import UserSettings from './pages/user_settings.jsx';
 import AnnouncementsPanel from './pages/Announcements/AnnouncementsPanel.jsx';
+import AverageChats from './pages/ConvDashboard/ConvAnalytics/AverageChats.jsx';
+import AverageChatGroups from './pages/ConvDashboard/ConvAnalytics/AverageChatGroups.jsx';
+
 
 const logout = () => {
   localStorage.clear();
@@ -137,7 +138,7 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <AnnouncementsPanel/>
+                        <AnnouncementsPanel />
                       </ListItem>
                     </>
                   ) : user ? (
@@ -183,7 +184,7 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <AnnouncementsPanel/>
+                        <AnnouncementsPanel />
                       </ListItem>
                     </>
                   ) : null}
@@ -283,17 +284,17 @@ function App() {
                     <Route path={"/AdminDash/Satisfaction"} element={<Satisfaction />} />
                     <Route path={"/ConversationDb"} element={<ConversationDb />} />
                     <Route path="/ConversationAI" element={<ConversationAI />} />
-                    
                     <Route path="/Review" element={<Review />} />
-                    <Route path="/conv-analytics/escalation-no" element={<EscalationNo />} />
-                    <Route path="/conv-analytics/escalation-delay" element={<EscalationDelay />} />
                     <Route path={'/CreateAnnouncement'} element={<CreateAnnouncement />} />
                     <Route path={'/Announcements'} element={<Announcements />} />
                     <Route path={'/EditAnnouncement/:id'} element={<EditAnnouncement />} />
                     <Route path={'/Escalations'} element={<Escalations />} />
-                    
                     <Route path="/conv-analytics/response-time/:clientId" element={<RespTime />} />
                     <Route path="/analytics/most-common-topic" element={<ConversationDb />} />
+                    <Route path="/conv-analytics/average-chats/:id" element={<AverageChats />} />
+                    <Route path="/conv-analytics/average-chat-groups/:id" element={<AverageChatGroups />} />
+
+
                   </Route>
                   {/* The element={} represents the name of the file in the 'pages' folder */}
                 </Routes>
