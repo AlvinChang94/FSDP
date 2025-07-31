@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
-  Box, Typography, Paper, TextField, Button, Avatar, Divider
+  Box, Typography, Paper, TextField, Button, Avatar, Divider, Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
 import http from "../http";
 
@@ -49,6 +49,57 @@ function UserSettings() {
       setSaveStatus("Failed to save settings.");
       setTimeout(() => setSaveStatus(""), 2000);
     }
+  };
+  useEffect(() => {
+    http.get("/user/me")
+      .then(res => {
+        setProfile({
+          name: res.data.name || "",
+          email: res.data.email || "",
+          phone: res.data.phone_num || "",
+          businessName: res.data.business_name || "",
+          businessDesc: res.data.business_overview || "",
+          profilePic: "", // leave empty unless you manage profilePic separately
+        });
+      })
+      .catch(err => {
+        console.error("Failed to fetch user profile:", err);
+      });
+  }, []);
+
+
+
+
+  const [openAIOverview, setOpenAIOverview] = useState(false);
+  const [aiForm, setAIForm] = useState({
+    businessName: profile.businessName,
+    industry: "",
+    targetAudience: "",
+    uniqueSellingPoint: "",
+    extraNotes: ""
+  });
+  const [aiOverview, setAIOverview] = useState("");
+  const [aiLoading, setAILoading] = useState(false);
+
+  const handleAIFormChange = (e) => {
+    setAIForm({ ...aiForm, [e.target.name]: e.target.value });
+  };
+
+  const handleAIGenerate = async () => {
+    setAILoading(true);
+    try {
+      const res = await http.post('/user/generate-overview', aiForm);
+      setAIOverview(res.data.overview);
+    } catch {
+      setAIOverview("Failed to generate overview.");
+    }
+    setAILoading(false);
+  };
+
+  const handleAIAccept = () => {
+    setProfile({ ...profile, businessDesc: aiOverview });
+    setOpenAIOverview(false);
+    setAIOverview("");
   };
 
   return (
@@ -126,8 +177,80 @@ function UserSettings() {
           sx={{ mb: 2 }}
         />
         <Button
+      variant="outlined"
+      sx={{ mb: 2, ml: 35.36 }}
+      onClick={() => setOpenAIOverview(true)}
+    >
+      Generate Overview with AI
+    </Button>
+
+    <Dialog open={openAIOverview} onClose={() => setOpenAIOverview(false)} maxWidth="sm" fullWidth>
+      <DialogTitle>Generate Business Overview with AI</DialogTitle>
+      <DialogContent>
+        <TextField
+          label="Business Name"
+          name="businessName"
+          value={aiForm.businessName}
+          onChange={handleAIFormChange}
+          fullWidth sx={{ mb: 2, mt: 1 }}
+        />
+        <TextField
+          label="Industry"
+          name="industry"
+          value={aiForm.industry}
+          onChange={handleAIFormChange}
+          fullWidth sx={{ mb: 2 }}
+        />
+        <TextField
+          label="Target Audience"
+          name="targetAudience"
+          value={aiForm.targetAudience}
+          onChange={handleAIFormChange}
+          fullWidth sx={{ mb: 2 }}
+        />
+        <TextField
+          label="Unique Selling Point"
+          name="uniqueSellingPoint"
+          value={aiForm.uniqueSellingPoint}
+          onChange={handleAIFormChange}
+          fullWidth sx={{ mb: 2 }}
+        />
+        <TextField
+          label="Extra Notes (optional)"
+          name="extraNotes"
+          value={aiForm.extraNotes}
+          onChange={handleAIFormChange}
+          fullWidth sx={{ mb: 2 }}
+        />
+        <Button
           variant="contained"
-          sx={{ mt: 2, px: 4, py: 1.5, fontWeight: 600, fontSize: 18, borderRadius: 3 }}
+          onClick={handleAIGenerate}
+          disabled={aiLoading}
+          sx={{ mt: 1 }}
+        >
+          {aiLoading ? "Generating..." : "Generate"}
+        </Button>
+        {aiOverview && (
+          <Paper sx={{ mt: 3, p: 2, bgcolor: "#f5f5f5" }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>AI-Generated Overview:</Typography>
+            <Typography>{aiOverview}</Typography>
+            <Button
+              variant="contained"
+              sx={{ mt: 2 }}
+              onClick={handleAIAccept}
+            >
+              Use this Overview
+            </Button>
+          </Paper>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setOpenAIOverview(false)}>Close</Button>
+      </DialogActions>
+    </Dialog> <br/>
+        <Button
+          variant="contained"
+          sx={{px: 4, py: 1.5, fontWeight: 600, fontSize: 18, borderRadius: 3 }}
           onClick={handleSave}
         >
           Save Changes

@@ -183,6 +183,7 @@ router.post('/botmessage', validateToken, async (req, res) => {
     The user will now be speaking: `
 
     let messages;
+    const now = new Date();
     messages = req.body.messages.map((msg, idx, arr) => {
       // If this is the last message in the array (latest message)
       if (idx === arr.length - 1 && msg.role === "user") {
