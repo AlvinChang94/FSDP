@@ -94,7 +94,7 @@ const AnnouncementsPanel = () => {
                 <ListItemText primary='Announcements' />
             </ListItemButton>
             <Drawer anchor='right' open={isOpen} onClose={toggleDrawer(false)}>
-                <Box sx={{ width: 300, height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#cdcdcd' }}>
+                <Box sx={{ width: 300, height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#1e212e' }}>
 
                     <Accordion defaultExpanded disableGutters='true' expanded={announcementsExpanded}
                         onChange={() => setAnnouncementsExpanded(!announcementsExpanded)} square sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none'}}>
@@ -110,7 +110,7 @@ const AnnouncementsPanel = () => {
                             <Typography>ANNOUNCEMENTS</Typography>
                         </AccordionSummary>
                         <AccordionDetails sx={{ backgroundColor: '#cdcdcd', p: 0 }}>
-                            <Box sx={{ overflowY: 'auto', height: 575, ...(user && user.role == 'user' && { height: 285 }) }}>
+                            <Box sx={{ overflowY: 'auto', height: 575, ...(user && user.role == 'user' && { height: 263 }) }}>
                                 <AccordionDetails>
                                     <Grid container spacing={2} direction='column'>
                                         {panelAnnouncementList.filter(announcement =>
@@ -118,7 +118,7 @@ const AnnouncementsPanel = () => {
                                             .map((announcement) => (
                                             <Grid item xs={12} >
                                                 <AccordionDetails sx={{ mb: 0.5 }}>
-                                                    <Card sx={{ backgroundColor: '#fff', boxShadow: 'none', mb: -3.5, mt: -1, maxWidth: '100' }}>
+                                                    <Card sx={{ backgroundColor: '#fff', boxShadow: 'none', mb: -3.5, mt: -1, width: 235 }}>
                                                         <CardContent>
                                                             {/* Title & Edit Icon */}
                                                             <Box>
@@ -148,7 +148,7 @@ const AnnouncementsPanel = () => {
                                                             type="button"
                                                             aria-describedby={popoverAnnouncementId === announcement.id ? 'simple-popover' : undefined}
                                                             onClick={(e) => handlePopoverOpen(e, announcement.id)}
-                                                            sx={{ mt: -3, ml: 24 }}
+                                                            sx={{ml: 22 }}
                                                         >
                                                             <MoreVertIcon />
                                                         </IconButton>
@@ -203,27 +203,27 @@ const AnnouncementsPanel = () => {
                                 <Typography>ESCALATIONS</Typography>
                             </AccordionSummary>
                             <AccordionDetails sx={{ backgroundColor: '#cdcdcd', p: 0 }}>
-                                <Box sx={{ overflowY: 'auto', height: announcementsExpanded ? 241 : 526}}>
+                                <Box sx={{ overflowY: 'auto', height: announcementsExpanded ? 263 : 526}}>
                                     <AccordionDetails>
                                         <Grid container spacing={2} direction='column'>
                                             {escalationsList.map((escalation) => (
                                                 <Grid item xs={12} >
                                                     <AccordionDetails sx={{ mb: 0.5 }}>
-                                                        <Card sx={{ backgroundColor: '#fff', boxShadow: 'none', mb: -3.5, mt: -1, maxWidth: '100' }}>
+                                                        <Card sx={{ backgroundColor: '#fff', boxShadow: 'none', mb: -3.5, mt: -1, width: 235 }}>
                                                             <CardContent>
                                                                 {/* Title & Edit Icon */}
                                                                 <Box>
-                                                                    <Typography variant="h7" ><strong>Client: </strong> {usersMap[escalation.clientId]?.username || "Unknown"}</Typography>
+                                                                    <Typography variant="h7" sx={{p: '4px'}} ><strong>Client: </strong> {usersMap[escalation.clientId]?.username || "Unknown"}</Typography>
                                                                     <br />
-                                                                    <Typography variant="h7"><strong>Client ID: </strong> {escalation.clientId}</Typography>
+                                                                    <Typography variant="h7" sx={{p: '4px', fontSize: '12px'}}><strong>Client ID: </strong> {escalation.clientId}</Typography>
                                                                 </Box>
                                                                 <Box sx={{
-                                                                    flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis',
+                                                                    flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis', pl: '4px',
                                                                     display: '-webkit-box',
                                                                     WebkitBoxOrient: 'vertical',
-                                                                    WebkitLineClamp: 2
+                                                                    WebkitLineClamp: 2,
                                                                 }}>
-                                                                    <Typography variant="h7" sx={{ whiteSpace: "pre-line" }}><strong>Chat History: </strong> {escalation.chathistory}</Typography>
+                                                                    <Typography variant="h7" sx={{ whiteSpace: "pre-line", fontSize: '12px' }}><strong>Chat History: </strong> {escalation.chathistory}</Typography>
                                                                 </Box>
                                                             </CardContent>
                                                         </Card>
