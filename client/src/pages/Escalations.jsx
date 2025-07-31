@@ -136,7 +136,7 @@ function Escalations() {
                             </Box>
                         </Card>
                     </Grid>
-                ))};
+                ))}
             </Grid>
 
             {/* Pop-up Dialog */}

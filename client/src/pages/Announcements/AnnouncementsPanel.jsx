@@ -203,7 +203,7 @@ const AnnouncementsPanel = () => {
                                 <Typography>ESCALATIONS</Typography>
                             </AccordionSummary>
                             <AccordionDetails sx={{ backgroundColor: '#cdcdcd', p: 0 }}>
-                                <Box sx={{ overflowY: 'auto', height: announcementsExpanded ? 240 : 525}}>
+                                <Box sx={{ overflowY: 'auto', height: announcementsExpanded ? 241 : 526}}>
                                     <AccordionDetails>
                                         <Grid container spacing={2} direction='column'>
                                             {escalationsList.map((escalation) => (
