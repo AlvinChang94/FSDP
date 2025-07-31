@@ -64,7 +64,7 @@ function App() {
 
   useEffect(() => {
     if (localStorage.getItem("accessToken")) {
-      http.get('/user/auth').then((res) => {
+      http.get('/user/auth1').then((res) => {
         setUser(res.data.user);
       });
     }
