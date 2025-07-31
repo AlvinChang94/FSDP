@@ -44,7 +44,7 @@ function Announcements() {
             <Grid container spacing={2} direction='column'>
                 {announcementList.map((announcement) => (
                     <Grid item xs={12} key={announcement.id}>
-                        {user && user.role == 'user' && (announcement.sendNow || (!announcement.sendNow && (new Date(announcement.scheduledDate).toLocaleString()) <= today)) ? (
+                        {user && user.role == 'user' && ((announcement.sendNow || (!announcement.sendNow && (new Date(announcement.scheduledDate).toLocaleString()) <= today)) && ((user.role == 'admin' && announcement.AudienceisModerator) || (user.role == 'user' && announcement.AudienceisUser)) ) ? (
                             <Card sx={{ width: '100%', padding: '16px', backgroundColor: '#fff', boxShadow: 3, minHeight: 150 }}>
                                 <CardContent>
                                     {/* Title & Edit Icon */}

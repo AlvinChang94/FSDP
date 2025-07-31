@@ -114,8 +114,8 @@ const AnnouncementsPanel = () => {
                                 <AccordionDetails>
                                     <Grid container spacing={2} direction='column'>
                                         {panelAnnouncementList.filter(announcement =>
-                                            announcement.sendNow || (!announcement.sendNow && (new Date(announcement.scheduledDate).toLocaleString()) <= today)
-                                        ).map((announcement) => (
+                                            (announcement.sendNow || (!announcement.sendNow && (new Date(announcement.scheduledDate).toLocaleString()) <= today)) && ((user.role == 'admin' && announcement.AudienceisModerator) || (user.role == 'user' && announcement.AudienceisUser)))
+                                            .map((announcement) => (
                                             <Grid item xs={12} >
                                                 <AccordionDetails sx={{ mb: 0.5 }}>
                                                     <Card sx={{ backgroundColor: '#fff', boxShadow: 'none', mb: -3.5, mt: -1, maxWidth: '100' }}>
@@ -248,19 +248,23 @@ const AnnouncementsPanel = () => {
                         {user && user.role == 'admin' ? (
                             <Link to='/CreateAnnouncement'>
                                 <Button variant="contained" fullWidth>
-                                    Create Announcement
+                                    <Typography>Create Announcement</Typography>
                                 </Button>
                             </Link>
                         ) : (
                             <Link to='/Escalations'>
                                 <Button variant="contained" fullWidth>
-                                    View Escalations
+                                    <Typography>View Escalations</Typography>
                                 </Button>
                             </Link>
                         )}
                         <Link to='/Announcements'>
                             <Button variant="contained" fullWidth>
-                                View Announcements
+                                { user && user.role == 'admin' ? (
+                                    <Typography>View All Announcements</Typography>
+                                ) : (
+                                    <Typography>View Announcements</Typography>
+                                )}
                             </Button>
                         </Link>
                     </Box>
