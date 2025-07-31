@@ -474,7 +474,8 @@ router.post('/summary', validateToken, async (req, res) => {
       : '<p>No FAQ topics identified.</p>';
 
     const exampleStyleText = `STYLE EXAMPLE ONLY — DO NOT COPY DATA:
-The average response time across all queries was <strong>20.5 seconds</strong>. Queries related to <strong>'payment schedules'</strong> showed a higher average of <strong>22.3 seconds</strong>, about <strong>8.8%</strong> slower than the general baseline. On average, <strong>25 chats</strong> were initiated daily across all users, with <strong>10 unique chat groups</strong> actively used during that time. This reflects strong platform engagement and healthy group-level traction. The most commonly asked topics include:
+The average response time across all queries was <strong>20.5 seconds</strong> .Some queries showed elevated response times, suggesting these may involve more nuanced issues or require deeper contextual processing by the chatbot.
+ On average, <strong>25 chats</strong> were initiated daily across all users, with <strong>10 unique chat groups</strong> actively used during that time. This reflects strong platform engagement and healthy group-level traction. The most commonly asked topics include:
 <ul style="margin-top: 0; padding-left: 20px;">
   <li><strong>Billing inquiries</strong></li>
   <li><strong>Password resets</strong></li>
@@ -489,7 +490,6 @@ Write a short, clear, and impactful summary of this data for a business report. 
 
 Metrics:
 Average Response Time: ${metrics.average_response_time}
-Payment Schedule Response Time: ${metrics.payment_schedule_response_time}
 Average Chats Per Day: ${metrics.average_chats_per_day}
 Average Chat Groups Per Day: ${metrics.average_group_count}
 Actual FAQ Topics: ${faqInlineText}
