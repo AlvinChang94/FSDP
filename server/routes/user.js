@@ -108,6 +108,10 @@ router.get("/auth", validateToken, (req, res) => {
     user: userInfo
   });
 });
+router.get('/auth1', validateToken, async (req, res) => {
+  const user = await User.findByPk(req.user.id); // Always fetch fresh from DB
+  res.json({ user });
+});
 
 router.get('/all', validateToken, async (req, res) => {
   if (!req.user || req.user.role !== 'admin') {

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Box, Typography, Paper, TextField, Button, Avatar, Divider, Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
 import http from "../http";
+import UserContext from "../contexts/UserContext";
 
 function UserSettings() {
   // Example state (replace with real user data/fetch logic)
@@ -17,6 +18,7 @@ function UserSettings() {
   const [password, setPassword] = useState("");
   const [profilePicFile, setProfilePicFile] = useState(null);
   const [saveStatus, setSaveStatus] = useState("");
+  const { setUser } = useContext(UserContext);
 
   // Fetch user data on mount (pseudo code)
   useEffect(() => {
@@ -43,7 +45,10 @@ function UserSettings() {
         profilePic: profile.profilePic,
         password: password || undefined // Only send if changed
       });
+      const res = await http.get('/user/auth1');
       setSaveStatus("Settings saved!");
+      setUser(res.data.user);
+      console.log(res.data.user.name)
       setTimeout(() => setSaveStatus(""), 2000);
     } catch (err) {
       setSaveStatus("Failed to save settings.");
