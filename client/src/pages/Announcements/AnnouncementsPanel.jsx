@@ -1,7 +1,7 @@
 import React, { useState, useEffect, handleClick } from 'react';
 import {
     Drawer, Button, Box, IconButton, Typography, Accordion, AccordionSummary, AccordionDetails,
-    List, ListItemButton, ListItemText, ListItem, Grid, Card, CardContent, Dialog, DialogTitle, DialogContent
+    List, ListItemButton, ListItemText, Tooltip, Grid, Card, CardContent, Dialog, DialogTitle, DialogContent
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import http from '../../http.js';
@@ -12,6 +12,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 const AnnouncementsPanel = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [panelAnnouncementList, setPanelAnnouncementList] = useState([]);
+    const [escalationsList, setEscalationsList] = useState([]);
     const [user, setUser] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [popoverAnchor, setPopoverAnchor] = useState(null);
@@ -19,6 +20,7 @@ const AnnouncementsPanel = () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogAnnouncement, setDialogAnnouncement] = useState(null);
     const [today, setToday] = useState(new Date().toLocaleString());
+    const [announcementsExpanded, setAnnouncementsExpanded] = useState(true);
 
 
     useEffect(() => {
@@ -33,12 +35,22 @@ const AnnouncementsPanel = () => {
         setIsOpen(open);
     };
 
+    const usersMap = {  //TEMPORARY. Will try to fetch the names from the Database in the final iteration.
+        1: { username: "Ahmad bin Ismail" },
+        2: { username: "Li Wei Tan" },
+        3: { username: "Siti Nurhidayah" },
+    };
+
     useEffect(() => {
         if (isOpen) {
             http.get("/announcements")
                 .then((res) => setPanelAnnouncementList(res.data))
                 .catch((err) => console.error("Failed to fetch announcements", err));
             setToday(new Date().toLocaleString());
+            http.get("/escalations")
+                .then((res) => setEscalationsList(res.data))
+                .catch((err) => console.error("Failed to fetch escalations", err))
+
         }
     }, [isOpen]);
 
@@ -84,7 +96,8 @@ const AnnouncementsPanel = () => {
             <Drawer anchor='right' open={isOpen} onClose={toggleDrawer(false)}>
                 <Box sx={{ width: 300, height: '100%', display: 'flex', flexDirection: 'column' }}>
 
-                    <Accordion defaultExpanded disableGutters='true' square='true' sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none', borderBottom: '1px solid #333' }}>
+                    <Accordion defaultExpanded disableGutters='true' expanded={announcementsExpanded}
+                        onChange={() => setAnnouncementsExpanded(!announcementsExpanded)} square sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none', borderBottom: '1px solid #333' }}>
                         <AccordionSummary sx={{
                             position: 'relative',
                             pl: 4,
@@ -115,7 +128,9 @@ const AnnouncementsPanel = () => {
                                                                     WebkitBoxOrient: 'vertical',
                                                                     WebkitLineClamp: 1
                                                                 }}>
-                                                                    {announcement.title}
+                                                                    <strong>
+                                                                        {announcement.title}
+                                                                    </strong>
                                                                 </Typography>
                                                             </Box>
 
@@ -178,8 +193,8 @@ const AnnouncementsPanel = () => {
                         <Accordion defaultExpanded disableGutters='true' square='true' sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none', borderBottom: '1px solid #333', }}>
                             <AccordionSummary sx={{
                                 position: 'relative',
-                                pl: 4, // add some left padding for balance
-                                pr: 4, // add right padding to prevent overlap with icon
+                                pl: 4,
+                                pr: 4,
                                 justifyContent: 'center',
                                 '& .MuiAccordionSummary-content': {
                                     justifyContent: 'center',
@@ -187,6 +202,38 @@ const AnnouncementsPanel = () => {
                             }} expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}>
                                 <Typography>ESCALATIONS</Typography>
                             </AccordionSummary>
+                            <AccordionDetails sx={{ backgroundColor: '#cdcdcd', p: 0 }}>
+                                <Box sx={{ overflowY: 'auto', height: announcementsExpanded ? 240 : 525}}>
+                                    <AccordionDetails>
+                                        <Grid container spacing={2} direction='column'>
+                                            {escalationsList.map((escalation) => (
+                                                <Grid item xs={12} >
+                                                    <AccordionDetails sx={{ mb: 0.5 }}>
+                                                        <Card sx={{ backgroundColor: '#fff', boxShadow: 'none', mb: -3.5, mt: -1, maxWidth: '100' }}>
+                                                            <CardContent>
+                                                                {/* Title & Edit Icon */}
+                                                                <Box>
+                                                                    <Typography variant="h7" ><strong>Client: </strong> {usersMap[escalation.clientId]?.username || "Unknown"}</Typography>
+                                                                    <br />
+                                                                    <Typography variant="h7"><strong>Client ID: </strong> {escalation.clientId}</Typography>
+                                                                </Box>
+                                                                <Box sx={{
+                                                                    flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis',
+                                                                    display: '-webkit-box',
+                                                                    WebkitBoxOrient: 'vertical',
+                                                                    WebkitLineClamp: 2
+                                                                }}>
+                                                                    <Typography variant="h7" sx={{ whiteSpace: "pre-line" }}><strong>Chat History: </strong> {escalation.chathistory}</Typography>
+                                                                </Box>
+                                                            </CardContent>
+                                                        </Card>
+                                                    </AccordionDetails>
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                    </AccordionDetails>
+                                </Box>
+                            </AccordionDetails>
                         </Accordion>
                     )}
                     <Box
@@ -198,10 +245,16 @@ const AnnouncementsPanel = () => {
                             width: '100%'
                         }}
                     >
-                        {user && user.role == 'admin' && (
+                        {user && user.role == 'admin' ? (
                             <Link to='/CreateAnnouncement'>
                                 <Button variant="contained" fullWidth>
                                     Create Announcement
+                                </Button>
+                            </Link>
+                        ) : (
+                            <Link to='/Escalations'>
+                                <Button variant="contained" fullWidth>
+                                    View Escalations
                                 </Button>
                             </Link>
                         )}

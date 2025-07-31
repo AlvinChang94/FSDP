@@ -1,99 +1,162 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Button, TextField } from '@mui/material';
+import React, { useState, useEffect, useContext } from 'react';
+import {
+  Box, Typography, Paper, Button, TextField
+} from '@mui/material';
 import axios from 'axios';
-
-const realAverageResponseTime = localStorage.getItem('realAverageResponseTime');
-const hardcodedData = {
-    
-  average_response_time: realAverageResponseTime ? `${realAverageResponseTime} seconds` : '20 seconds',
-  payment_schedule_response_time: '2 seconds',
-  escalation_count: 30,
-  escalation_delay: '10.2 seconds',
-  faq: [
-    'What does my insurance policy cover?',
-    'How do I update or change my policy details?',
-    'How do I check my upcoming payment dates?',
-    'What are your working hours?',
-    'Can I defer or reschedule a payment?',
-    'How do I view my account statement?'
-  ],
-};
+import UserContext from '../../contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 function ConversationAI() {
+  const { user } = useContext(UserContext);
+  const userId = user?.id;
+  const navigate = useNavigate();
+  const token = localStorage.getItem('accessToken');
+
   const [summary, setSummary] = useState('');
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [question, setQuestion] = useState('');
   const [chatResponse, setChatResponse] = useState('');
   const [loadingAnswer, setLoadingAnswer] = useState(false);
-  const [averageResponseTime, setAverageResponseTime] = useState(null);
-  const token = localStorage.getItem('accessToken');
+  const [commonTopics, setCommonTopics] = useState([]);
+  const [chatAvg, setChatAvg] = useState(null);
+  const realAverageResponseTime = localStorage.getItem('realAverageResponseTime');
+  const [groupAvg, setGroupAvg] = useState(null);
+
+  const handleBack = () => {
+    navigate('/ConversationDb');
+  };
 
   useEffect(() => {
+    if (!userId) return;
+
+    const fetchCommonTopics = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:3001/api/analytics/common-topics/${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setCommonTopics(res.data.topics || []);
+      } catch (err) {
+        console.error('Failed to fetch common topics', err);
+        setCommonTopics([]);
+      }
+    };
+
+    const fetchChatAverage = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:3001/api/analytics/average-chats/${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setChatAvg(res.data.average_chats_per_day);
+      } catch (err) {
+        console.error('Failed to fetch average chats', err);
+        setChatAvg(null);
+      }
+    };
+
+    const fetchGroupAverage = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:3001/api/analytics/average-chat-groups/${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setGroupAvg(res.data.averageGroups);
+      } catch (err) {
+        console.error('Failed to fetch average chat groups', err);
+        setGroupAvg(null);
+      }
+    };
+
+
+    fetchCommonTopics();
+    fetchChatAverage();
+    fetchGroupAverage();
+  }, [token, userId]);
+
+  const faqList = commonTopics.length > 0
+    ? commonTopics.map(t => t.topic)
+    : [];
+
+  const faqString = faqList.join('; ');
+
+  useEffect(() => {
+    if (!userId || chatAvg === null) return;
+
     const fetchSummary = async () => {
       setLoadingSummary(true);
+
+      const payload = {
+        average_response_time: realAverageResponseTime || '20 seconds',
+        payment_schedule_response_time: '2 seconds',
+        average_group_count: groupAvg,
+        average_chats_per_day: chatAvg,
+        faq: faqList
+      };
+
       try {
         const res = await axios.post(
           'http://localhost:3001/api/testchat/summary',
-          { data: hardcodedData },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { data: payload },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         setSummary(res.data.summary || 'No summary available.');
       } catch (err) {
-        console.error(err);
+        console.error('Summary error:', err);
         setSummary('Failed to generate summary.');
       }
+
       setLoadingSummary(false);
     };
-    fetchSummary();
-  }, [token]);
 
-  // Ask follow-up question
+    fetchSummary();
+  }, [token, userId, chatAvg, faqString]);
+
   const handleAsk = async () => {
     if (!question.trim()) return;
     setLoadingAnswer(true);
+
+    const payload = {
+      average_response_time: realAverageResponseTime || '20 seconds',
+      payment_schedule_response_time: '2 seconds',
+      escalation_delay: '10.2 seconds',
+      average_chats_per_day: chatAvg,
+      faq: faqList
+    };
+
     try {
       const res = await axios.post(
         'http://localhost:3001/api/testchat/summary',
-        {
-          question,
-          data: hardcodedData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { question, data: payload },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setChatResponse(res.data.answer || 'No answer returned.');
     } catch (err) {
-      console.error(err);
+      console.error('Answer error:', err);
       setChatResponse('Failed to get response.');
     }
+
     setLoadingAnswer(false);
   };
 
   return (
     <Box sx={{ p: 4, maxWidth: 900, mx: 'auto' }}>
       <Typography variant="h4" mb={3}>Conversation Analytics</Typography>
+      <Button variant="outlined" onClick={handleBack} sx={{ mb: 2 }}>
+        Back to Dashboard
+      </Button>
 
       {loadingSummary ? (
         <Typography>Loading summary...</Typography>
       ) : (
-
-        <Paper
-          sx={{
-            p: 3,
-            mb: 4,
-            backgroundColor: '#D3D3D3', // dark grey
-            color: '#000000',           // light text
-            borderRadius: 2,
-            boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.5)',
-          }}
-        >
+        <Paper sx={{
+          p: 3,
+          mb: 4,
+          backgroundColor: '#D3D3D3',
+          color: '#000000',
+          borderRadius: 2,
+          boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.5)',
+        }}>
           <Typography
             sx={{ whiteSpace: 'pre-wrap' }}
             dangerouslySetInnerHTML={{ __html: summary }}
@@ -117,16 +180,14 @@ function ConversationAI() {
       </Button>
 
       {chatResponse && (
-        <Paper
-          sx={{
-            p: 3,
-            mt: 3,
-            backgroundColor: '#D3D3D3', // same light grey as summary
-            color: '#000000',           // matching text color
-            borderRadius: 2,
-            boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.5)',
-          }}
-        >
+        <Paper sx={{
+          p: 3,
+          mt: 3,
+          backgroundColor: '#D3D3D3',
+          color: '#000000',
+          borderRadius: 2,
+          boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.5)',
+        }}>
           <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
             Your question:
           </Typography>
