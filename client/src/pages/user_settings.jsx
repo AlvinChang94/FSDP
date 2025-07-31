@@ -50,6 +50,26 @@ function UserSettings() {
       setTimeout(() => setSaveStatus(""), 2000);
     }
   };
+  useEffect(() => {
+    http.get("/user/me")
+      .then(res => {
+        setProfile({
+          name: res.data.name || "",
+          email: res.data.email || "",
+          phone: res.data.phone_num || "",
+          businessName: res.data.business_name || "",
+          businessDesc: res.data.business_overview || "",
+          profilePic: "", // leave empty unless you manage profilePic separately
+        });
+      })
+      .catch(err => {
+        console.error("Failed to fetch user profile:", err);
+      });
+  }, []);
+
+
+
+
   const [openAIOverview, setOpenAIOverview] = useState(false);
   const [aiForm, setAIForm] = useState({
     businessName: profile.businessName,

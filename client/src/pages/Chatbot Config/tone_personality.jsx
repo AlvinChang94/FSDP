@@ -83,7 +83,7 @@ function TonePersonality() {
 }, [userId]);
 
   return (
-    <Box sx={{ml: -6, mt: -9, mb: -30}}>
+    <Box sx={{ml: -10, mt: -9, mb: -30}}>
     <Box sx={{ display: "flex", bgcolor: "#181617"}}>
       {/* Secondary Nav Bar */}
       <Box sx={{
