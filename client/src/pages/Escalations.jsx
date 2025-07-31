@@ -125,7 +125,7 @@ function Escalations() {
                                         onClose={handleMenuClose}
                                     >
                                         <MenuItem onClick={() => {
-                                            openDialog("Generate Chat Summary", selectedEscalation);
+                                            openDialog("Chat Summary", selectedEscalation);
                                             generateChatSummary(selectedEscalation);
                                             handleMenuClose();
                                         }}>
