@@ -174,5 +174,25 @@ router.get('/me', validateToken, async (req, res) => {
   }
 });
 
+router.put('/profile', validateToken, async (req, res) => {
+    try {
+        const { name, email, phone, businessName, businessDesc, profilePic, password } = req.body;
+        const user = await User.findByPk(req.user.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        user.name = name;
+        user.email = email;
+        user.phone_num = phone;
+        user.business_name = businessName;
+        user.business_overview = businessDesc;
+        if (profilePic) user.profile_picture = profilePic;
+        if (password) user.password = await bcrypt.hash(password, 10);
+        await user.save();
+        res.json({ success: true });
+    } catch (err) {
+      console.log(err)
+        res.status(500).json({ error: err });
+    }
+});
   
 module.exports = router;

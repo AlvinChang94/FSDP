@@ -24,6 +24,22 @@ module.exports = (sequelize, DataTypes) => {
         link_code: {
             type: DataTypes.TEXT,
             allowNull: true
+        },
+        business_name:{
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        business_overview:{
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        phone_num:{
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        profile_picture:{
+            type: DataTypes.TEXT,
+            allowNull: true
         }
     }, {
         tableName: 'users'

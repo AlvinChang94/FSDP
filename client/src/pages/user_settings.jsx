@@ -33,9 +33,22 @@ function UserSettings() {
   };
 
   const handleSave = async () => {
-    // Save logic here (send profile and password to backend)
-    setSaveStatus("Settings saved!");
-    setTimeout(() => setSaveStatus(""), 2000);
+    try {
+      await http.put('/user/profile', {
+        name: profile.name,
+        email: profile.email,
+        phone: profile.phone,
+        businessName: profile.businessName,
+        businessDesc: profile.businessDesc,
+        profilePic: profile.profilePic,
+        password: password || undefined // Only send if changed
+      });
+      setSaveStatus("Settings saved!");
+      setTimeout(() => setSaveStatus(""), 2000);
+    } catch (err) {
+      setSaveStatus("Failed to save settings.");
+      setTimeout(() => setSaveStatus(""), 2000);
+    }
   };
 
   return (
