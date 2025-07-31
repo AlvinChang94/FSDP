@@ -180,11 +180,11 @@ router.put('/profile', validateToken, async (req, res) => {
         const user = await User.findByPk(req.user.id);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        user.name = name;
-        user.email = email;
-        user.phone_num = phone;
-        user.business_name = businessName;
-        user.business_overview = businessDesc;
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (phone) user.phone_num = phone;
+        if (businessName) user.business_name = businessName;
+        if (businessDesc) user.business_overview = businessDesc;
         if (profilePic) user.profile_picture = profilePic;
         if (password) user.password = await bcrypt.hash(password, 10);
         await user.save();
