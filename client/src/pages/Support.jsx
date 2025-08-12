@@ -9,9 +9,9 @@ import UserContext from '../contexts/UserContext';
 
 function Support() {
     return (
-        <Box sx={{position: 'fixed', minHeight: '100vh', minWidth: 'calc(100vw - 284px)', bgcolor: '#f5f6fa', top: 0, left: '220px', p: 4}}>
+        <Box sx={{position: 'fixed', minHeight: '100vh', minWidth: 'calc(100vw - 284px)', bgcolor: '#f5f6fa', top: 0, left: '15vw', p: 4}}>
             {/* Top white rectangle */}
-            <Paper elevation={3} sx={{ maxWidth: 1100, mx: 'auto', p: 4, mb: 4, bgcolor: 'white' }}>
+            <Paper elevation={3} sx={{ maxWidth: 1015, p: 4, mb: 4, bgcolor: 'white',  }}>
                 <Typography variant="h4" fontWeight="bold" gutterBottom>
                     Support Centre for QueryEase
                 </Typography>

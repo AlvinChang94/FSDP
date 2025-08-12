@@ -115,7 +115,7 @@ function Intervention_threshold() {
     };
 
     return (
-        <Box sx={{ ml: -10, mt: -9, mb: -30 }}>
+        <Box sx={{ position: 'absolute', right: '20.41vw', top: '0vh'  }}>
             <Box sx={{ display: "flex", bgcolor: "#181617" }}>
                 {/* Secondary Nav Bar */}
                 <Box sx={{
