@@ -15,6 +15,10 @@ const twilio = require("twilio");
 const { Op } = require('sequelize');
 const cooldownMap = new Map();
 const { ConfigSettings } = require('../models');
+const waRouter = require('./waRouter');
+router.use('/wa', waRouter);
+
+
 const lexClient = new LexRuntimeV2Client({
   region: process.env.AWS_REGION,
   credentials: {

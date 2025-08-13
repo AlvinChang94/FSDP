@@ -104,7 +104,7 @@ function Faq_Management() {
         setDeleteIndex(null);
     };
     return (
-        <Box sx={{position: 'absolute', right: '36.33vw', top: '0vh' }}>
+        <Box sx={{position: 'absolute', left: 220, top: 0, width:'80vw'}}>
             <Box sx={{ display: "flex", bgcolor: "#181617" }}>
                 {/* Secondary Nav Bar */}
                 <Box sx={{
