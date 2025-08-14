@@ -101,6 +101,28 @@ function Alert() {
         }
     };
 
+    const checkTodayAlerts = () => {
+        const startOfDay = dayjs().startOf('day').format('YYYY-MM-DDTHH:mm');
+        const endOfDay = dayjs().endOf('day').format('YYYY-MM-DDTHH:mm');
+
+        formik.setFieldValue('startDate', startOfDay);
+        formik.setFieldValue('endDate', endOfDay);
+
+        const activeAlerts = alertList.filter(alert => {
+            const alertStart = dayjs(alert.sendDate);
+            const alertEnd = dayjs(alert.endDate);
+            return alertEnd.isAfter(startOfDay) && alertStart.isBefore(endOfDay);
+        });
+
+        setFilteredAlerts(activeAlerts.map(a => a.id));
+
+        if (activeAlerts.length === 0) {
+            toast.info('No active alerts today');
+        } else {
+            toast.success(`${activeAlerts.length} alert(s) active today`);
+        }
+    };
+
     const formik = useFormik({
         initialValues: {
             startDate: '',
@@ -160,7 +182,7 @@ function Alert() {
                     onClick={onClickSearch}>
                     <Search />
                 </IconButton>
-                <IconButton color="primary"
+                <IconButton color="error"
                     onClick={onClickClear}>
                     <Clear />
                 </IconButton>
@@ -197,8 +219,11 @@ function Alert() {
                     disabled={!formik.values.startDate}
                     inputProps={{ min: formik.values.startDate || undefined }}
                 />
-                <Button type="submit" variant="contained" color="primary">
+                <Button type="submit" variant="outlined" color="primary">
                     Check Alerts
+                </Button>
+                <Button variant="outlined" color="info" onClick={checkTodayAlerts}>
+                    Check Today's Alerts
                 </Button>
             </Box>
 
