@@ -44,7 +44,7 @@ function Login() {
                     localStorage.setItem("accessToken", res.data.accessToken);
                     localStorage.setItem("userId", user.id);
                     setUser(user);
-                    navigate("/user-dashboard");
+                    navigate("/");
                     window.location.reload();
                 })
                 .catch(function (err) {

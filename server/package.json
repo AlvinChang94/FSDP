@@ -16,6 +16,7 @@
     "@whiskeysockets/baileys": "^6.7.18",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.10.0",
+    "baileys": "github:WhiskeySockets/Baileys",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
@@ -27,10 +28,13 @@
     "openai": "^5.10.2",
     "pino": "^9.9.0",
     "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "qrcode.react": "^4.2.0",
     "sequelize": "^6.37.7",
     "socket.io": "^4.8.1",
     "sqlite3": "^5.1.7",
     "twilio": "^5.7.3",
+    "whatsapp-web.js": "^1.32.0",
     "yup": "^1.6.1"
   },
   "devDependencies": {

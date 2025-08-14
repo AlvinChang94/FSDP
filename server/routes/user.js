@@ -167,7 +167,7 @@ router.delete('/:id', validateToken, async (req, res) => {
 router.get('/me', validateToken, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'name', 'email', 'link_code', "phone_num", "business_name", "business_overview"]
+      attributes: ['id', 'name', 'email', 'link_code', "phone_num", "business_name", "business_overview",]
     });
 
     if (!user) return res.status(404).json({ error: "User not found" });

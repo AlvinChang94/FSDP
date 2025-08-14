@@ -1,3 +1,4 @@
 node_modules/
 server/.env
-server/auth
+server/.wwebjs_cache
+server/wa-auth
