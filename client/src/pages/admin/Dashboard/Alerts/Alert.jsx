@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Box, Typography, Grid, Card, CardContent, IconButton, Button, Input } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, IconButton, Button, Input, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import http from '../../../../http';
 import dayjs from 'dayjs';
@@ -7,6 +7,8 @@ import { AccessTime, Edit, Delete, Refresh, Clear, Search } from '@mui/icons-mat
 import isSameOrAfter from 'dayjs/plugin/isSameOrBefore';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
 
 function Alert() {
     const [alertList, setAlertList] = useState([]);
@@ -40,6 +42,8 @@ function Alert() {
     };
     const onClickClear = () => {
         setSearch('');
+        setFilteredAlerts([]);
+        formik.resetForm();
         getAlerts();
     };
     const onClickSearch = () => {
@@ -89,6 +93,41 @@ function Alert() {
         }
     };
 
+    const formik = useFormik({
+        initialValues: {
+            startDate: '',
+            endDate: '',
+        },
+        validationSchema: yup.object({
+            startDate: yup
+                .date()
+                .required('Start Date is required'),
+            endDate: yup
+                .date()
+                .min(yup.ref('startDate'), 'End Date must be after Start Date')
+                .required('End Date is required'),
+        }),
+        onSubmit: (values) => {
+            const rangeStart = dayjs(values.startDate);
+            const rangeEnd = dayjs(values.endDate);
+
+            const activeAlerts = alertList.filter(alert => {
+                const alertStart = dayjs(alert.sendDate);
+                const alertEnd = dayjs(alert.endDate);
+                return alertEnd.isAfter(rangeStart) && alertStart.isBefore(rangeEnd);
+            });
+
+            const activeIds = activeAlerts.map(a => a.id);
+            setFilteredAlerts(activeIds);
+
+            if (activeAlerts.length === 0) {
+                toast.info('No active alerts in the selected period');
+            } else {
+                toast.success(`${activeAlerts.length} alert(s) active in the selected period`);
+            }
+        }
+    });
+
     return (
         <Box>
             <ToastContainer />
@@ -105,7 +144,7 @@ function Alert() {
                     </Link>
                 </Box>
             </Box>
-            <Box display='flex' alignItems='center'>
+            <Box display='flex' alignItems='center' sx={{ mb: 2 }}>
                 <Input value={search} placeholder="Search"
                     onChange={onSearchChange}
                     onKeyDown={onSearchKeyDown} />
@@ -125,22 +164,32 @@ function Alert() {
                 </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
-                <Input
+            <Box component="form" onSubmit={formik.handleSubmit} sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
+                <TextField
                     type="datetime-local"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    label="Start Date"
+                    name="startDate"
+                    InputLabelProps={{ shrink: true }}
+                    value={formik.values.startDate}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.startDate && Boolean(formik.errors.startDate)}
+                    helperText={formik.touched.startDate && formik.errors.startDate}
                 />
-                <Input
+                <TextField
                     type="datetime-local"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
+                    label="End Date"
+                    name="endDate"
+                    InputLabelProps={{ shrink: true }}
+                    value={formik.values.endDate}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+                    helperText={formik.touched.endDate && formik.errors.endDate}
+                    disabled={!formik.values.startDate}
+                    inputProps={{ min: formik.values.startDate || undefined }}
                 />
-                <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={filterByDateRange}
-                >
+                <Button type="submit" variant="contained" color="secondary">
                     Check Alerts
                 </Button>
             </Box>
@@ -150,7 +199,7 @@ function Alert() {
                     const isActive = filteredAlerts.includes(alert.id);
                     return (
                         <Grid item xs={12} md={6} lg={4} key={alert.id}>
-                            <Card sx={{ border: isActive ? '2px solid #4caf50' : 'none'}}>
+                            <Card sx={{ border: isActive ? '2px solid #4caf50' : 'none' }}>
                                 <CardContent>
                                     <Box sx={{ display: 'flex', mb: 1 }}>
                                         <Typography variant="h6" sx={{ flexGrow: 1 }}>
