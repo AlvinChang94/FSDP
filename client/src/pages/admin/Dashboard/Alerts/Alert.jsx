@@ -21,6 +21,15 @@ function Alert() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
+    const getAlerts = () => {
+        http.get("/alert")
+            .then((res) => {
+                setAlertList(sortAlerts(res.data));
+                setFilteredAlerts([]);
+            })
+            .catch((err) => console.error("Failed to fetch alert", err));
+    };
+
     const onSearchChange = (e) => {
         setSearch(e.target.value);
     };
@@ -42,7 +51,6 @@ function Alert() {
     };
     const onClickClear = () => {
         setSearch('');
-        setFilteredAlerts([]);
         formik.resetForm();
         getAlerts();
     };
@@ -189,7 +197,7 @@ function Alert() {
                     disabled={!formik.values.startDate}
                     inputProps={{ min: formik.values.startDate || undefined }}
                 />
-                <Button type="submit" variant="contained" color="secondary">
+                <Button type="submit" variant="contained" color="primary">
                     Check Alerts
                 </Button>
             </Box>
