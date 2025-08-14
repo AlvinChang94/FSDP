@@ -15,6 +15,11 @@ module.exports = (sequelize, DataTypes) => {
         len: [3, 500],
       },
     },
+    
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    }
   });
 
   return Review;

@@ -2,16 +2,33 @@ const express = require('express');
 const router = express.Router();
 const { Review } = require('../models');
 const yup = require('yup');
+const { validateToken } = require('../middlewares/auth');
 
 const validationSchema = yup.object({
   rating: yup.number().min(1).max(5).required(),
   comment: yup.string().trim().min(3).max(500).required(),
 });
 
-router.post('/', async (req, res) => {
+router.get('/mine', validateToken, async (req, res) => {
+  try {
+    const myReviews = await Review.findAll({
+      where: { userId: req.user.id },
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json(myReviews);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch your reviews' });
+  }
+});
+
+router.post('/', validateToken, async (req, res) => {
   try {
     const data = await validationSchema.validate(req.body, { abortEarly: false });
-    const review = await Review.create(data);
+    const review = await Review.create({
+      ...data,
+      userId: req.user.id
+    });
     res.status(201).json(review);
   } catch (err) {
     res.status(400).json({ errors: err.errors || err.message });
@@ -31,7 +48,6 @@ router.get('/', async (req, res) => {
 
 router.get('/summary', async (req, res) => {
   try {
-    const { Review } = require('../models');
     const reviews = await Review.findAll();
 
     const summary = [1, 2, 3, 4, 5].map(rating => ({
