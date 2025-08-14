@@ -13,19 +13,14 @@ function Escalations() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogTitle, setDialogTitle] = useState("");
     const [dialogContent, setDialogContent] = useState("");
-    const [expanded, setExpanded] = React.useState(false);
+    const [historyExpanded, setHistoryExpanded] = React.useState(false);
+    const [summaryExpanded, setSummaryExpanded] = React.useState(false);
     const [loading, setLoading] = useState(false);
     const [selectedEscalation, setSelectedEscalation] = useState(null);
     
 
-    const usersMap = { //TEMPORARY. Will try to fetch the names from the Database in the final iteration.
-        1: { username: "Ahmad bin Ismail" },
-        2: { username: "Li Wei Tan" },
-        3: { username: "Siti Nurhidayah" },
-    };
-
     useEffect(() => {
-        http.get("/escalations")
+        http.get("/escalations/clients_full_data")
             .then((res) => setEscalations(res.data))
             .catch((err) => console.error("Failed to fetch escalations", err));
     }, []);
@@ -50,7 +45,8 @@ function Escalations() {
         setDialogOpen(false);
     };
 
-    const handleToggle = () => setExpanded(!expanded);
+    const handleHistoryToggle = () => setHistoryExpanded(!historyExpanded);
+    const handleSummaryToggle = () => setSummaryExpanded(!summaryExpanded);
 
     const generateChatSummary = async (escalation) => {
         if (!escalation) return;
@@ -60,8 +56,8 @@ function Escalations() {
 
         try {
             const response = await http.post("/escalations/generate-summary", {
-                clientId: escalation.clientId,
-                chathistory: escalation.chathistory,
+                clientId: escalation.escalation.clientId,
+                chathistory: escalation.escalation.chathistory,
             });
 
             const summary = response.data.chatsummary || "No summary returned.";
@@ -70,7 +66,7 @@ function Escalations() {
             // Optional: update local escalation state with the summary
             setEscalations(prev =>
                 prev.map(e =>
-                    e.clientId === escalation.clientId
+                    e.escalation.clientId === escalation.escalation.clientId
                         ? { ...e, chatsummary: summary }
                         : e
                 )
@@ -89,30 +85,51 @@ function Escalations() {
             <Typography variant="h5" sx={{mb: 2}}>Escalations</Typography>
             <Grid container spacing={2} direction="column">
                 {escalations.map((escalation) => (
-                    <Grid item xs={12}>
+                    <Grid item xs={12} key={escalation.id}>
                         <Card sx={{ width: '100%', p: 2, boxShadow: 3 }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <CardContent>
-                                    <Typography variant="h6"><strong>Client: </strong> {usersMap[escalation.clientId]?.username || "Unknown"}</Typography>
-                                    <Typography variant="h7"><strong>Client ID: </strong> {escalation.clientId}</Typography>
+                                    <Typography variant="h6"><strong>Client: </strong> {escalation.name}</Typography>
+                                    <Typography variant="h7"><strong>Client ID: </strong> {escalation.escalation.clientId}</Typography>
                                     <Box sx={{
                                         mt: 2, flexGrow: 1,
-                                        overflow: expanded ? 'visible' : 'hidden',
-                                        textOverflow: expanded ? 'unset' : 'ellipsis',
+                                        overflow: historyExpanded ? 'visible' : 'hidden',
+                                        textOverflow: historyExpanded ? 'unset' : 'ellipsis',
                                         width: "75%",
-                                        display: expanded ? 'block' : '-webkit-box',
-                                        WebkitBoxOrient: expanded ? 'unset' : 'vertical',
-                                        WebkitLineClamp: expanded ? 'unset' : 2,
+                                        display: historyExpanded ? 'block' : '-webkit-box',
+                                        WebkitBoxOrient: historyExpanded ? 'unset' : 'vertical',
+                                        WebkitLineClamp: historyExpanded ? 'unset' : 2,
                                         cursor: 'pointer',
                                         userSelect: 'none',
                                     }}>
-                                        <Tooltip onClick={handleToggle}
+                                        <Tooltip onClick={handleHistoryToggle}
                                             sx={{
                                             }}>
-                                            <Typography variant="h7" sx={{ whiteSpace: "pre-line" }}><strong>Chat History: </strong> {escalation.chathistory}</Typography>
+                                            <Typography variant="h7" sx={{ whiteSpace: "pre-line" }}><strong>Chat History: </strong> {escalation.escalation.chathistory}</Typography>
 
                                         </Tooltip>
                                     </Box>
+
+                                    {escalation.chatsummary && (
+                                    <Box sx={{
+                                        mt: 2, flexGrow: 1,
+                                        overflow: summaryExpanded ? 'visible' : 'hidden',
+                                        textOverflow: summaryExpanded ? 'unset' : 'ellipsis',
+                                        width: "75%",
+                                        display: summaryExpanded ? 'block' : '-webkit-box',
+                                        WebkitBoxOrient: summaryExpanded ? 'unset' : 'vertical',
+                                        WebkitLineClamp: summaryExpanded ? 'unset' : 2,
+                                        cursor: 'pointer',
+                                        userSelect: 'none',
+                                    }}>
+                                        <Tooltip onClick={handleSummaryToggle}
+                                            sx={{
+                                            }}>
+                                            <Typography variant="h7" sx={{ whiteSpace: "pre-line" }}><strong>Chat Summary: </strong> <br/>{escalation.escalation.chatsummary}</Typography>
+
+                                        </Tooltip>
+                                    </Box>
+                                    )}
                                 </CardContent>
 
                                 <Box sx={{ alignSelf: 'flex-start' }}>
