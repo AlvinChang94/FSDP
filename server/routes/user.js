@@ -157,9 +157,10 @@ router.delete('/:id', validateToken, async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     await user.destroy();
-    mutedUsers.delete(String(user.id)); // Clean up in-memory muted status
+  
     res.json({ message: 'User deleted' });
   } catch (err) {
+    console.error('Delete error:', err.stack);
     res.status(500).json({ message: 'Failed to delete user' });
   }
 });
@@ -172,7 +173,7 @@ router.get('/me', validateToken, async (req, res) => {
 
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    res.json(user); // send user data to frontend
+    res.json(user); 
   } catch (err) {
     console.error("Error in /user/me:", err);
     res.status(500).json({ error: "Server error" });

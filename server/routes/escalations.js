@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Escalation } = require('../models');
+const { Escalation, ClientMessage, Client } = require('../models');
 const { Op } = require("sequelize");
 const yup = require("yup");
 const axios = require('axios');
@@ -96,6 +96,31 @@ router.get("/", async (req, res) => {
     res.json(list);
 });
 
+router.get("/clients_full_data", async (req, res) => {
+    try {
+    const clients = await Client.findAll({
+      include: [
+        { model: Escalation },
+        { model: ClientMessage }
+      ]
+    });
+
+    // Transform the nested arrays into single objects
+    const formattedData = clients.map(client => ({
+      id: client.id,
+      name: client.name,
+      phoneNumber: client.phoneNumber,
+      escalation: client.Escalations.length > 0 ? client.Escalations[0] : null,
+      message: client.ClientMessages.length > 0 ? client.ClientMessages[0] : null
+    }));
+
+    res.json(formattedData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
 router.get("/:id", async (req, res) => {
     const id = req.params.id;
     const escalation = await Escalation.findByPk(id)
@@ -106,6 +131,7 @@ router.get("/:id", async (req, res) => {
     }
     res.json(escalation);
 });
+
 
 router.put("/:id", async (req, res) => {
     let id = req.params.id;

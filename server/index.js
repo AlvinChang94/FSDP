@@ -77,9 +77,10 @@ const analyticsRoutes = require('./routes/analytics');
 app.use('/api', analyticsRoutes);
 const escalationRoutes = require('./routes/escalations')
 app.use('/escalations', escalationRoutes)
+const clientmsgRoutes = require('./routes/client_messages_routes');
+app.use('/client_messages', clientmsgRoutes);
 const chatbotRoutes = require('./routes/chatbot')
 app.use('/sendchatbot', chatbotRoutes)
-
 
 
 const db = require('./models');
