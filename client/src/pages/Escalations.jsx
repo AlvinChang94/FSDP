@@ -110,7 +110,7 @@ function Escalations() {
                                         </Tooltip>
                                     </Box>
 
-                                    {escalation.chatsummary && (
+                                    {escalation.escalation.chatsummary && (
                                     <Box sx={{
                                         mt: 2, flexGrow: 1,
                                         overflow: summaryExpanded ? 'visible' : 'hidden',
