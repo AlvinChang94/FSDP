@@ -48,17 +48,22 @@ function GlobalBanner() {
 
     return (
         <Box
-          sx={{
-            backgroundColor: 'rgba(255, 236, 179, 0.8)',
-            backdropFilter: 'blur(5px)',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 1300,
-            padding: 2,
-          }}
+            sx={{
+                backgroundColor: 'rgba(255, 236, 179, 0.8)',
+                backdropFilter: 'blur(5px)',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 1300,
+                padding: 2,
+                maxHeight: '6em',
+                overflowY: 'auto', 
+                scrollbarWidth: 'thin', 
+                '&::-webkit-scrollbar': { width: '6px' },
+                '&::-webkit-scrollbar-thumb': { backgroundColor: '#ccc', borderRadius: '3px' }
+            }}
         >
             {visibleAlerts.map((alert) => (
                 <Box
