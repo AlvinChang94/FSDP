@@ -94,7 +94,7 @@ function startSession(rawUserId) {
     try {
       const contact = await msg.getContact();
       console.log(`[${userId}] 💬 Message from ${msg.from}, ${contact.pushname || contact.name || "Unknown"}: ${msg.body}`);
-      const { data } = await axios.post('http://localhost:3001/api/testchat/receive', {
+      const { data } = await axios.post('http://localhost:3001/sendchatbot/receive', {
         userId: rawUserId,      // pass the userId that owns this WA session
         From1: msg.from,         // the WhatsApp sender
         Body: msg.body,        // message text

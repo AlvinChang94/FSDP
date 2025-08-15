@@ -49,7 +49,7 @@ function TonePersonality() {
   };
   const handleSave = async () => {
     try {
-      await http.post('/api/config/save', {
+      await http.post('/api/config/tonesettingssave', {
         userId,
         tone: Object.keys(tones).filter(t => tones[t]).join(', '),
         emojiUsage,
@@ -64,7 +64,7 @@ function TonePersonality() {
   };
   useEffect(() => {
   const fetchSettings = async () => {
-    const res = await http.get(`/api/config/${userId}`);
+    const res = await http.get(`/api/config/tonesettings/${userId}`);
     if (res.data) {
       // Example: setTones, setEmojiUsage, setSignature
       if (res.data.tone) {
