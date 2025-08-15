@@ -1,3 +1,5 @@
+const { Hooks } = require("sequelize/lib/hooks");
+
 module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define("User", {
         name: {
@@ -47,17 +49,26 @@ module.exports = (sequelize, DataTypes) => {
     User.associate = (models) => {
         User.hasMany(models.Tutorial, {
             foreignKey: "userId",
-            onDelete: "cascade"
+            onDelete: "cascade",
+            hooks: true
         });
-        User.hasMany(models.Message, { as: 'sentMessages', foreignKey: 'senderId' });
+        User.hasMany(models.Message, {
+            as: 'sentMessages', foreignKey: 'senderId', onDelete: "cascade",
+            hooks: true
+        });
         User.belongsToMany(models.Client, {
             through: models.ClientUser,
-            foreignKey: 'userId',      // column in ClientUser referring to User
-            otherKey: 'clientId'       // column in ClientUser referring to Client
+            foreignKey: 'userId',      
+            otherKey: 'clientId',
+            onDelete: "cascade",
+            hooks: true
         });
 
-        // Optional: also allow accessing the join table records directly
-        User.hasMany(models.ClientUser, { foreignKey: 'userId' });
+      
+        User.hasMany(models.ClientUser, {
+            foreignKey: 'userId', onDelete: "cascade",
+            hooks: true
+        });
     };
     return User;
 }

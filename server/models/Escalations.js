@@ -11,11 +11,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         chathistory: {
             type: DataTypes.STRING(2000),
-            allowNull: false
+            allowNull: true
         },
         chatsummary: {
             type: DataTypes.STRING(2000),
-            allownull: false
+            allownull: true
         },
     }, {
         tableName: 'escalations'
