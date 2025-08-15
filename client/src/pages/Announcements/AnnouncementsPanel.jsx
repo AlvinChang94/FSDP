@@ -35,19 +35,13 @@ const AnnouncementsPanel = () => {
         setIsOpen(open);
     };
 
-    const usersMap = {  //TEMPORARY. Will try to fetch the names from the Database in the final iteration.
-        1: { username: "Ahmad bin Ismail" },
-        2: { username: "Li Wei Tan" },
-        3: { username: "Siti Nurhidayah" },
-    };
-
     useEffect(() => {
         if (isOpen) {
             http.get("/announcements")
                 .then((res) => setPanelAnnouncementList(res.data))
                 .catch((err) => console.error("Failed to fetch announcements", err));
             setToday(new Date().toLocaleString());
-            http.get("/escalations")
+            http.get("/escalations/clients_full_data")
                 .then((res) => setEscalationsList(res.data))
                 .catch((err) => console.error("Failed to fetch escalations", err))
 
@@ -213,9 +207,9 @@ const AnnouncementsPanel = () => {
                                                             <CardContent>
                                                                 {/* Title & Edit Icon */}
                                                                 <Box>
-                                                                    <Typography variant="h7" sx={{p: '4px'}} ><strong>Client: </strong> {usersMap[escalation.clientId]?.username || "Unknown"}</Typography>
+                                                                    <Typography variant="h7" sx={{p: '4px'}} ><strong>Client: </strong> {escalation.name}</Typography>
                                                                     <br />
-                                                                    <Typography variant="h7" sx={{p: '4px', fontSize: '12px'}}><strong>Client ID: </strong> {escalation.clientId}</Typography>
+                                                                    <Typography variant="h7" sx={{p: '4px', fontSize: '12px'}}><strong>Client ID: </strong> {escalation.escalation.clientId}</Typography>
                                                                 </Box>
                                                                 <Box sx={{
                                                                     flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis', pl: '4px',
@@ -223,7 +217,7 @@ const AnnouncementsPanel = () => {
                                                                     WebkitBoxOrient: 'vertical',
                                                                     WebkitLineClamp: 2,
                                                                 }}>
-                                                                    <Typography variant="h7" sx={{ whiteSpace: "pre-line", fontSize: '12px' }}><strong>Chat History: </strong> {escalation.chathistory}</Typography>
+                                                                    <Typography variant="h7" sx={{ whiteSpace: "pre-line", fontSize: '12px' }}><strong>Chat History: </strong> {escalation.escalation.chathistory}</Typography>
                                                                 </Box>
                                                             </CardContent>
                                                         </Card>
