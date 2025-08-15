@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-function AdminActions() { 
+function AdminActions() {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -48,15 +48,21 @@ function AdminActions() {
   };
   const handleDelete = async () => {
     try {
+      
+      setUsers(prev => prev.filter(u => u.id !== selectedUser.id));
+
       await http.delete(`/user/${selectedUser.id}`);
       toast.success("User deleted successfully");
-      fetchUsers();
+
+      await fetchUsers(); 
     } catch (err) {
+      console.error("Delete error:", err);
       toast.error("Failed to delete user.");
     } finally {
       setOpenDeleteDialog(false);
     }
   };
+
 
   const confirmDelete = (user) => {
     setSelectedUser(user);
