@@ -2,49 +2,26 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import http from '../http';
-import dayjs from 'dayjs';
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
-import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-
-dayjs.extend(isSameOrAfter);
-dayjs.extend(isSameOrBefore);
-
-const DISMISSED_ALERTS_KEY = 'dismissedAlerts';
 
 function GlobalBanner() {
     const [activeAlerts, setActiveAlerts] = useState([]);
-    const [dismissedIds, setDismissedIds] = useState(() => {
-        const saved = localStorage.getItem(DISMISSED_ALERTS_KEY);
-        return saved ? JSON.parse(saved) : [];
-    });
 
     useEffect(() => {
-        http.get("/alert")
-            .then((res) => {
-                const now = dayjs();
-                const active = res.data.filter(alert => {
-                    const send = dayjs(alert.sendDate);
-                    const end = dayjs(alert.endDate);
-                    if (!send.isValid()) return false;
-                    if (!end.isValid()) return now.isSameOrAfter(send);
-                    return now.isSameOrAfter(send) && now.isSameOrBefore(end);
-                });
-                setActiveAlerts(active);
-            })
-            .catch(err => console.error("Failed to fetch alert", err));
+        http.get("/alert/active")
+            .then(res => setActiveAlerts(res.data))
+            .catch(err => console.error("Failed to fetch alerts", err));
     }, []);
 
-    const handleDismiss = (id) => {
-        setDismissedIds(prev => {
-            const updated = [...prev, id];
-            localStorage.setItem(DISMISSED_ALERTS_KEY, JSON.stringify(updated));
-            return updated;
-        });
+    const handleDismiss = async (id) => {
+        try {
+            await http.post(`/alert/${id}/dismiss`);
+            setActiveAlerts(prev => prev.filter(alert => alert.id !== id));
+        } catch (err) {
+            console.error('Failed to dismiss alert', err);
+        }
     };
 
-    const visibleAlerts = activeAlerts.filter(alert => !dismissedIds.includes(alert.id));
-
-    if (visibleAlerts.length === 0) return null;
+    if (activeAlerts.length === 0) return null;
 
     return (
         <Box
@@ -65,7 +42,7 @@ function GlobalBanner() {
                 '&::-webkit-scrollbar-thumb': { backgroundColor: '#ccc', borderRadius: '3px' }
             }}
         >
-            {visibleAlerts.map((alert) => (
+            {activeAlerts.map((alert) => (
                 <Box
                     key={alert.id}
                     sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}

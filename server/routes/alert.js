@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { Alert } = require('../models');
+const { Alert, UserAlertDismiss } = require('../models');
 const { Op } = require('sequelize');
 const yup = require('yup');
+const { validateToken } = require('../middlewares/auth')
 
 const validationSchema = yup.object({
   title: yup.string().trim().min(3).max(100).required(),
@@ -12,6 +13,51 @@ const validationSchema = yup.object({
     .date()
     .min(yup.ref('sendDate'), 'End Date must be after Send Date')
     .required('End Date is required'),
+});
+
+router.get("/active", validateToken, async (req, res) => {
+    try {
+        const now = new Date();
+
+        const dismissed = await UserAlertDismiss.findAll({
+            where: { userId: req.user.id },
+            attributes: ['alertId']
+        });
+        const dismissedIds = dismissed.map(d => d.alertId);
+
+        const activeAlerts = await Alert.findAll({
+            where: {
+                id: { [Op.notIn]: dismissedIds },
+                sendDate: { [Op.lte]: now },
+                [Op.or]: [
+                    { endDate: { [Op.gte]: now } },
+                    { endDate: null } 
+                ]
+            },
+            order: [['createdAt', 'DESC']]
+        });
+
+        res.json(activeAlerts);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Failed to fetch active alerts' });
+    }
+});
+
+router.post('/:id/dismiss', validateToken, async (req, res) => {
+    const alertId = req.params.id;
+    const userId = req.user.id;
+
+    try {
+        const exists = await UserAlertDismiss.findOne({ where: { userId, alertId } });
+        if (exists) return res.status(200).json({ message: 'Already dismissed' });
+
+        const dismissed = await UserAlertDismiss.create({ userId, alertId });
+        res.json(dismissed);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Failed to dismiss alert' });
+    }
 });
 
 router.post("/", async (req, res) => {
