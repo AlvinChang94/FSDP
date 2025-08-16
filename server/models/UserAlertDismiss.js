@@ -8,7 +8,8 @@ module.exports = (sequelize, DataTypes) => {
     alertId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: { model: 'Alerts', key: 'id' }
+      references: { model: 'Alerts', key: 'id' },
+      onDelete: 'CASCADE'
     },
     dismissedAt: {
       type: DataTypes.DATE,
