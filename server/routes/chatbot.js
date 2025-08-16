@@ -39,7 +39,7 @@ function formatBoldForWhatsApp(text) {
 }
 
 async function keyword_match_check(keywords, confidence, message, businessOwner, businessName, profileName, chatHistory) {
-    const recentHistory = chatHistory.slice(-4);
+    const recentHistory = chatHistory.slice(-2);
 
     let systemPrompt = `You are a classification engine.  
 
@@ -63,57 +63,38 @@ Output rules:
 
 `
     const requestBody = {
-        system: [
-            { text: systemPrompt }
-        ],
+        system: systemPrompt,
         messages: [
             ...recentHistory.map(m => ({
-                role: 'user',
-                content: [{ text: m.content }]
+                role: "user",
+                content: [
+                    { type: "text", text: m.content }
+                ]
             })),
-            { role: 'user', content: [{ text: message }] }
-        ]
+            {
+                role: "user",
+                content: [
+                    { type: "text", text: message }
+                ]
+            }
+        ],
+        anthropic_version: "bedrock-2023-05-31",
+        max_tokens: 1
+
     };
-    console.log(requestBody)
-    // Call your model
-    const apiKey = process.env.AWS_BEARER_TOKEN_BEDROCK;
-    const aiResponse = await axios.post(
-        'https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/amazon.nova-pro-v1:0/invoke',
-        requestBody,
-        {
-            headers: {
-                Authorization: `Bearer ${apiKey}`, // If calling Bedrock directly, switch to SigV4 instead.
-                'Content-Type': 'application/json',
-                Accept: 'application/json'
-            },
-            validateStatus: () => true // Let us decide how to handle non-2xx
-        }
-    );
-
-    if (aiResponse.status < 200 || aiResponse.status >= 300) {
-        // Log provider error, don’t hide it behind a generic 500
-        console.error('Model error:', aiResponse.status, aiResponse.data);
-        return res.status(502).json({ error: 'Model request failed', status: aiResponse.status, data: aiResponse.data });
-    }
-
-    const reply1 = aiResponse.data.output?.message?.content?.[0]?.text?.trim()
-        || "🤖 Sorry, I didn't quite catch that.";
-
-    let reply = formatBoldForWhatsApp(reply1);
-    if (reply.includes(systemPrompt)) reply = reply.replace(systemPrompt, '');
-    console.log(reply)
+    reply = await send_chatbot(requestBody, systemPrompt)
+    console.log(`${reply}`)
 }
 async function retries_exceeded_check(no_of_retries, confidence, message, chatHistory) {
     let systemPrompt = `You are a classification engine.
 
 You receive:
-- The last ${no_of_retries + 5} messages, alternating between client and chatbot
+- The last ${no_of_retries + 5} messages from the client
 - A maximum retry count: ${no_of_retries}
 - A confidence threshold (0–1): ${confidence}
 
 Definitions:
-- Misunderstanding: any chatbot reply with confidence < ${confidence}
-- Re-articulation: a client message that repeats or clarifies their original question after a misunderstanding
+- Re-articulation: a client message that repeats or clarifies their original question, expressing brief frustration
 
 Task:
 1. Scan the message sequence for misunderstandings followed by client re-articulations.
@@ -163,10 +144,41 @@ async function human_intervention(clientId, userId) {
     })
 }
 
+async function send_chatbot(requestBody, systemPrompt) {
+    const apiKey = process.env.AWS_BEARER_TOKEN_BEDROCK;
+    const aiResponse = await axios.post(
+        `https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/${encodeURIComponent('arn:aws:bedrock:ap-southeast-2:175261507723:inference-profile/apac.anthropic.claude-sonnet-4-20250514-v1:0')}/invoke`,
+        requestBody,
+        {
+            headers: {
+                Authorization: `Bearer ${apiKey}`, // If calling Bedrock directly, switch to SigV4 instead.
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            validateStatus: () => true // Let us decide how to handle non-2xx
+        }
+    );
+
+    if (aiResponse.status < 200 || aiResponse.status >= 300) {
+        // Log provider error, don’t hide it behind a generic 500
+        console.error('Model error:', aiResponse.status, aiResponse.data);
+        return console.log({ error: 'Model request failed', status: aiResponse.status, data: aiResponse.data });
+    }
+
+    const body = aiResponse.data
+    let answer;
+    const blocks = body.content.flat();
+    answer = blocks.map(b => b.text || "").join("").trim();
+
+    let reply = formatBoldForWhatsApp(answer);
+    if (reply.includes(systemPrompt)) reply = reply.replace(systemPrompt, '');
+    return reply
+}
+
 router.post('/receive', async (req, res) => {
     try {
         // Body + input normalization
-        const { userId, ProfileName, Body } = req.body || {};
+        const { userId, ProfileName, Body, To1 } = req.body || {};
         const rules = await ThresholdRule.findAll({ where: { userId: userId } });
         const hasKeywordMatch = rules.some(r => r.triggerType === 'keyword_match');
         const hasRetriesExceeded = rules.some(r => r.triggerType === 'retries_exceeded')
@@ -174,9 +186,10 @@ router.post('/receive', async (req, res) => {
 
         const fromRaw = req.body?.From1 ?? req.body?.From ?? '';
         if (!userId || !Body || !fromRaw) {
-            return res.status(400).json({ error: 'userId, Body, and From/From1 are required' });
+            return console.log({ error: 'userId, Body, and From/From1 are required' });
         }
         const From = `+${String(fromRaw).replace(/@.*$/, '').replace(/^\+?/, '')}`;
+        const To = `+${String(To1).replace(/@.*$/, '').replace(/^\+?/, '')}`;
         const now = new Date();
         await ensureClientExists({ userId, phoneNumber: From, name: ProfileName });
         // Owner + settings
@@ -184,7 +197,6 @@ router.post('/receive', async (req, res) => {
             ConfigSettings.findOne({ where: { userId } }),
             User.findByPk(userId)
         ]);
-
 
         const ownerName = businessOwner?.name || '';
         const businessName = businessOwner?.business_name || '';
@@ -221,14 +233,11 @@ router.post('/receive', async (req, res) => {
       Primary job: respond clearly and efficiently in a personal way, always within 1000 characters.
 
       `;
-
         // Fetch history
         const chatHistory = await ClientMessage.findAll({
             where: { senderPhone: From, userId },
             order: [['timestamp', 'ASC']]
         });
-
-        // Persist inbound message first (catch schema issues early)
         await ClientMessage.create({
             senderPhone: From,
             senderName: ProfileName ?? null,
@@ -300,7 +309,7 @@ router.post('/receive', async (req, res) => {
         if (aiResponse.status < 200 || aiResponse.status >= 300) {
             // Log provider error, don’t hide it behind a generic 500
             console.error('Model error:', aiResponse.status, aiResponse.data);
-            return res.status(502).json({ error: 'Model request failed', status: aiResponse.status, data: aiResponse.data });
+            return console.log({ error: 'Model request failed', status: aiResponse.status, data: aiResponse.data });
         }
 
         const reply1 = aiResponse.data.output?.message?.content?.[0]?.text?.trim()
@@ -310,7 +319,7 @@ router.post('/receive', async (req, res) => {
         if (reply.includes(systemPrompt)) reply = reply.replace(systemPrompt, '');
 
         await ClientMessage.create({
-            senderPhone: From,
+            senderPhone: To,
             senderName: 'QueryBot',
             content: reply,
             timestamp: new Date(),
@@ -321,8 +330,7 @@ router.post('/receive', async (req, res) => {
         // Success response
         return res.status(200).json({ reply });
     } catch (err) {
-        console.error('Receive error:', err);
-        return res.status(500).json({ error: err.message, stack: err.stack });
+        return console.error('Receive error:', err);;
     }
 });
 

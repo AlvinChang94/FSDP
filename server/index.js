@@ -40,9 +40,6 @@ app.post('/api/wa/:userId/logout', async (req, res) => {
 
 });
 
-
-const PORT = process.env.APP_PORT;
-app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
 //request and response, respond a "Welcome" message
 app.get("/", (req, res) => {
     res.send("Welcome");

@@ -2,6 +2,9 @@ const { verify } = require('jsonwebtoken');
 require('dotenv').config();
 const validateToken = (req, res, next) => {
     try {
+        if (!req.header("Authorization")){
+            return
+        }
         const accessToken = req.header("Authorization").split(" ")[1];
         if (!accessToken) {
             return res.sendStatus(401);

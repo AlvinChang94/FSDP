@@ -42,9 +42,5 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false
     });
 
-    ClientMessage.associate = (models) => {
-        ClientMessage.belongsTo(models.Client, { foreignKey: 'senderPhone', targetKey: 'phoneNumber' });
-    };
-
     return ClientMessage;
 }

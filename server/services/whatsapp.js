@@ -88,7 +88,7 @@ function startSession(rawUserId) {
     }
   });
 
-  // --- Your bot logic here ---
+
   client.on('message', async (msg) => {
     if (msg.fromMe || msg.isStatus) return;
     try {
@@ -99,6 +99,7 @@ function startSession(rawUserId) {
         From1: msg.from,         // the WhatsApp sender
         Body: msg.body,        // message text
         ProfileName: contact.name || contact.pushname || "Unknown",
+        To1: client.info.wid._serialized
         // add more fields if your API expects them
       });
       const replyText =
