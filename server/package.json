@@ -26,6 +26,7 @@
     "mysql2": "^3.14.3",
     "nanoid": "^3.3.11",
     "openai": "^5.10.2",
+    "p-limit": "^7.0.0",
     "pino": "^9.9.0",
     "qrcode": "^1.5.4",
     "qrcode-terminal": "^0.12.0",

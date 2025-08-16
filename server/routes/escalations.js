@@ -101,7 +101,7 @@ router.get("/clients_full_data", async (req, res) => {
     const clients = await Client.findAll({
       include: [
         { model: Escalation },
-        { model: ClientMessage }
+        { model: ClientMessage, as: 'messages' }
       ]
     });
 
@@ -111,7 +111,7 @@ router.get("/clients_full_data", async (req, res) => {
       name: client.name,
       phoneNumber: client.phoneNumber,
       escalation: client.Escalations.length > 0 ? client.Escalations[0] : null,
-      message: client.ClientMessages.length > 0 ? client.ClientMessages[0] : null
+      message: client.messages.length > 0 ? client.messages[0] : null
     }));
 
     res.json(formattedData);
