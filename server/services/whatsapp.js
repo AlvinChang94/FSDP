@@ -105,6 +105,7 @@ function startSession(rawUserId) {
       const replyText =
         typeof data === 'string' ? data :
           data?.reply || "🤖 Sorry, I didn't quite catch that.";
+      console.log(replyText)
 
       //await msg.reply(String(replyText));
 

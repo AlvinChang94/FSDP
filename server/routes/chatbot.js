@@ -102,9 +102,11 @@ You are given the following base information:
 ${systemPromptParts.join("\n\n")}
 
 Final Rule:
+The latest message has the most priority; If the message history contradicts the latest message, the latest message retains the most truth.
 If ANY of the provided tasks pass their criteria, output exactly one token: True
 Otherwise, output exactly one token: False
-No quotes, punctuation, extra text, or newlines.`;
+No quotes, punctuation, extra text, or newlines.
+`;
 
     const requestBody = {
         system: combinedSystemPrompt,
@@ -129,16 +131,8 @@ No quotes, punctuation, extra text, or newlines.`;
     const url = `https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/${encodeURIComponent('arn:aws:bedrock:ap-southeast-2:175261507723:inference-profile/apac.anthropic.claude-sonnet-4-20250514-v1:0')}/invoke`
     reply = await send_chatbot(requestBody, url)
     console.log(`${reply}`)
+    return reply
 }
-async function human_intervention(clientId, userId) {
-    Escalation.create({
-        clientId: clientId,
-        userId: userId,
-        chathistory: "tbd",
-        chatsummary: "tbd",
-    })
-}
-
 
 async function send_chatbot(requestBody, url) {
     const apiKey = process.env.AWS_BEARER_TOKEN_BEDROCK;
@@ -178,7 +172,6 @@ router.post('/receive', async (req, res) => {
         const hasKeywordMatch = rules.some(r => r.triggerType === 'keyword_match');
         const hasRetriesExceeded = rules.some(r => r.triggerType === 'retries_exceeded')
         const hasEmotionDetected = rules.some(r => r.triggerType === 'emotion_detected')
-
         const fromRaw = req.body?.From1 ?? req.body?.From ?? '';
         if (!userId || !Body || !fromRaw) {
             return console.log({ error: 'userId, Body, and From/From1 are required' });
@@ -200,6 +193,12 @@ router.post('/receive', async (req, res) => {
         const ownerName = businessOwner?.name || '';
         const businessName = businessOwner?.business_name || '';
         const businessOverview = businessOwner?.business_overview || '';
+        const clientRecord = await Client.findOne({
+            where: { phoneNumber: From }
+        });
+        const existingEscalation = await Escalation.findOne({
+            where: { clientId: clientRecord.id, userId }
+        });
 
         // Build system prompt (guarded)
         let systemPrompt =
@@ -236,32 +235,95 @@ router.post('/receive', async (req, res) => {
             order: [['timestamp', 'ASC']]
         });
 
+        if (existingEscalation) {
+            if (existingEscalation.status !== 'pending') {
+                const affirmationPrompt = `
+You are a yes/no classifier.
+Determine if the user's message explicitly confirms they want human assistance.
+Only output "True" or "False".
+Message: "${Body}"
+    `;
 
-        const collect = (type) => {
-            const matched = rules.filter(r => r.triggerType === type);
-            return {
-                values: matched.map(r => r.keyword),
-                confs: matched.map(r => r.confidenceThreshold),
+                const affirmationRequest = {
+                    system: affirmationPrompt,
+                    messages: [
+                        {
+                            role: "user",
+                            content: [
+                                { type: "text", text: Body }
+                            ]
+                        }
+                    ],
+                    anthropic_version: "bedrock-2023-05-31",
+                    max_tokens: 1
+
+                };
+                const urlAffirm = `https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/${encodeURIComponent('arn:aws:bedrock:ap-southeast-2:175261507723:inference-profile/apac.anthropic.claude-sonnet-4-20250514-v1:0')}/invoke`;
+                const affirmation = await send_chatbot(affirmationRequest, urlAffirm);
+
+                if (affirmation === 'True') {
+                    // user confirmed escalation
+                    await existingEscalation.update({ status: 'pending' });
+
+                    // 🔧 Place your additional code here
+                    // (e.g. notify human operator, send webhook, log activity)
+                    console.log(`Escalation ${existingEscalation.escalationId} set to pending`);
+
+                    return res.status(200).json({ reply: "No problem! I'll contact my representatives to provide some assistance" });
+                }
+                else {
+                    // user didn't confirm — delete escalation and continue normally
+                    await existingEscalation.destroy();
+                    console.log(`Escalation ${existingEscalation.escalationId} removed due to no affirmation`);
+                    // Now fall through into normal bot response logic
+                }
+
+            }
+        }
+
+
+        if (!existingEscalation) {
+            const collect = (type) => {
+                const matched = rules.filter(r => r.triggerType === type);
+                return {
+                    values: matched.map(r => r.keyword),
+                    confs: matched.map(r => r.confidenceThreshold),
+                };
             };
-        };
 
-        const kw = collect('keyword_match');
-        const rt = collect('retries_exceeded');
-        const em = collect('emotion_detected');
+            const kw = collect('keyword_match');
+            const rt = collect('retries_exceeded');
+            const em = collect('emotion_detected');
+            const boo = await check(
+                kw.values,            // keywords
+                kw.confs,             // confidence_keywords
+                rt.values,            // no_of_retries (list of trigger values for retries)
+                rt.confs,             // confidence_tries
+                em.values,            // emotions
+                em.confs,             // confidence_emotions
+                Body,                 // message
+                ownerName,            // businessOwner
+                businessName,         // businessName
+                ProfileName,          // profileName
+                chatHistory           // chatHistory
+            );
+            if (boo == "True") {
+                systemPrompt += `Human intervention is currently needed. You will now request the user if they wish to speak to a human representative of the business`
+                Escalation.create({
+                    clientId: clientRecord.id,
+                    userId: userId,
+                    chathistory: "tbd",
+                    chatsummary: "tbd",
+                    status: 'tbc',
+                })
+            }
 
-        await check(
-            kw.values,            // keywords
-            kw.confs,             // confidence_keywords
-            rt.values,            // no_of_retries (list of trigger values for retries)
-            rt.confs,             // confidence_tries
-            em.values,            // emotions
-            em.confs,             // confidence_emotions
-            Body,                 // message
-            ownerName,            // businessOwner
-            businessName,         // businessName
-            ProfileName,          // profileName
-            chatHistory           // chatHistory
-        );
+        } else {
+            systemPrompt += `For additional context, the client currently already has a pending human intervention request. They cannot make another request for human intervention
+            You need not request if they wish further assistance. The only way to remove the request is for the business owner to clear it.
+            You may touch up with the client OCCASIONALLY, NOT REPETITEVELY to checkup on whether they are getting the help they need`
+        }
+
         // Build messages (system once, then history, then latest)
         const requestBody = {
             system: [
@@ -275,6 +337,7 @@ router.post('/receive', async (req, res) => {
                 { role: 'user', content: [{ text: Body }] }
             ]
         };
+
         await ClientMessage.create({
             senderPhone: From,
             senderName: ProfileName ?? null,
@@ -285,7 +348,6 @@ router.post('/receive', async (req, res) => {
         // Call your model
         const url = 'https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/amazon.nova-pro-v1:0/invoke';
         const reply = await send_chatbot(requestBody, url);
-        console.log(reply)
 
         await ClientMessage.create({
             senderPhone: To,
