@@ -27,6 +27,19 @@ module.exports = (sequelize, DataTypes) => {
             as: 'messages',
             constraints: false           // don’t enforce strict DB FK
         });
+        Client.hasMany(models.ClientUser, {
+            foreignKey: 'clientId',
+            onDelete: 'CASCADE'
+        });
+        Client.belongsToMany(models.User, {
+            through: models.ClientUser,
+            foreignKey: 'clientId',
+            otherKey: 'userId',
+            onDelete: 'CASCADE'
+        });
+
+
+
 
     };
 

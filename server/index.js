@@ -78,6 +78,8 @@ const clientmsgRoutes = require('./routes/client_messages_routes');
 app.use('/client_messages', clientmsgRoutes);
 const chatbotRoutes = require('./routes/chatbot')
 app.use('/sendchatbot', chatbotRoutes)
+const myclients = require('./routes/clients')
+app.use('/api/clients', myclients)
 
 
 const db = require('./models');
@@ -105,3 +107,6 @@ db.sequelize.sync({ alter: false }).then(async () => {
 }).catch((err) => {
     console.log(err);
 });
+
+
+

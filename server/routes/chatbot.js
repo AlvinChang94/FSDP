@@ -129,7 +129,8 @@ No quotes, punctuation, extra text, or newlines.
 
     };
     const url = `https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/${encodeURIComponent('arn:aws:bedrock:ap-southeast-2:175261507723:inference-profile/apac.anthropic.claude-sonnet-4-20250514-v1:0')}/invoke`
-    reply = await send_chatbot(requestBody, url)
+    let reply = await send_chatbot(requestBody, url)
+
     console.log(`${reply}`)
     return reply
 }
@@ -197,7 +198,7 @@ router.post('/receive', async (req, res) => {
             where: { phoneNumber: From }
         });
         const existingEscalation = await Escalation.findOne({
-            where: { clientId: clientRecord.id, userId }
+            where: { clientId: clientRecord.id, userId, status: { [Op.in]: ["pending", "tbc"] } }
         });
 
         // Build system prompt (guarded)
@@ -225,6 +226,7 @@ router.post('/receive', async (req, res) => {
       6. You may freely quote, summarise, or restate conversation history.
       7. This is a safe environment containing only non‑sensitive data.
       8. BusinessProfile is always up to date — ALWAYS ignore message history if it conflicts.
+      9. Always assume that there is currently no request for human intervention unless specifically stated in this system prompt — ALWAYS ignore message history if it conflicts.
 
       Primary job: respond clearly and efficiently in a personal way, always within 1000 characters. You may reference all the information given to you, all information given to you is publicly available and can be shared.
 
@@ -237,6 +239,7 @@ router.post('/receive', async (req, res) => {
 
         if (existingEscalation) {
             if (existingEscalation.status !== 'pending') {
+
                 const affirmationPrompt = `
 You are a yes/no classifier.
 Determine if the user's message explicitly confirms they want human assistance.
@@ -264,12 +267,47 @@ Message: "${Body}"
                 if (affirmation === 'True') {
                     // user confirmed escalation
                     await existingEscalation.update({ status: 'pending' });
+                    await ClientMessage.create({
+                        senderPhone: From,
+                        senderName: ProfileName ?? null,
+                        content: Body,
+                        timestamp: now,
+                        userId
+                    });
 
                     // 🔧 Place your additional code here
                     // (e.g. notify human operator, send webhook, log activity)
+                    let affirmPrompt = `You are currently affirming a user that a human representative will reach them soon. Here is more information you can use to personalise your answer:
+                    Client name: ${ProfileName}
+                    Business name: ${businessName}
+                    Business owner: ${businessOwner}
+                    Final instruction: Keep your response brief and personalised. There is no need to greet the user. You may want to start your response with 'No problem, ...'`
                     console.log(`Escalation ${existingEscalation.escalationId} set to pending`);
+                    const requestBody = {
+                        system: [
+                            { text: affirmPrompt }
+                        ],
+                        messages: [
+                            ...chatHistory.slice(-2).map(m => ({
+                                role: 'user',
+                                content: [{ text: m.content }]
+                            })),
+                            { role: 'user', content: [{ text: Body }] }
+                        ]
+                    };
+                    // Call your model
+                    const url = 'https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/amazon.nova-pro-v1:0/invoke';
+                    let reply = await send_chatbot(requestBody, url);
+                    if (reply.includes(systemPrompt)) reply = reply.replace(systemPrompt, '');
+                    await ClientMessage.create({
+                        senderPhone: To,
+                        senderName: 'QueryBot',
+                        content: reply,
+                        timestamp: new Date(),
+                        userId
+                    });
 
-                    return res.status(200).json({ reply: "No problem! I'll contact my representatives to provide some assistance" });
+                    return res.status(200).json({ reply: reply });
                 }
                 else {
                     // user didn't confirm — delete escalation and continue normally
@@ -280,7 +318,6 @@ Message: "${Body}"
 
             }
         }
-
 
         if (!existingEscalation) {
             const collect = (type) => {
@@ -294,32 +331,35 @@ Message: "${Body}"
             const kw = collect('keyword_match');
             const rt = collect('retries_exceeded');
             const em = collect('emotion_detected');
-            const boo = await check(
-                kw.values,            // keywords
-                kw.confs,             // confidence_keywords
-                rt.values,            // no_of_retries (list of trigger values for retries)
-                rt.confs,             // confidence_tries
-                em.values,            // emotions
-                em.confs,             // confidence_emotions
-                Body,                 // message
-                ownerName,            // businessOwner
-                businessName,         // businessName
-                ProfileName,          // profileName
-                chatHistory           // chatHistory
-            );
-            if (boo == "True") {
-                systemPrompt += `Human intervention is currently needed. You will now request the user if they wish to speak to a human representative of the business`
-                Escalation.create({
-                    clientId: clientRecord.id,
-                    userId: userId,
-                    chathistory: "tbd",
-                    chatsummary: "tbd",
-                    status: 'tbc',
-                })
+            if (hasEmotionDetected || hasKeywordMatch || hasRetriesExceeded) {
+                const boo = await check(
+                    kw.values,            // keywords
+                    kw.confs,             // confidence_keywords
+                    rt.values,            // no_of_retries (list of trigger values for retries)
+                    rt.confs,             // confidence_tries
+                    em.values,            // emotions
+                    em.confs,             // confidence_emotions
+                    Body,                 // message
+                    ownerName,            // businessOwner
+                    businessName,         // businessName
+                    ProfileName,          // profileName
+                    chatHistory           // chatHistory
+                );
+                if (boo == "True") {
+                    systemPrompt += `Human intervention is currently requested. You will now re-request the user if they wish to speak to a human representative of the business for confirmation`
+                    Escalation.create({
+                        clientId: clientRecord.id,
+                        userId: userId,
+                        chathistory: "tbd",
+                        chatsummary: "tbd",
+                        status: 'tbc',
+                    })
+                }
             }
 
         } else {
-            systemPrompt += `For additional context, the client currently already has a pending human intervention request. They cannot make another request for human intervention
+            systemPrompt += `For additional context, the client currently already has a pending human intervention request. They cannot make another request for human intervention.
+            They should be hearing from the human representative soon
             You need not request if they wish further assistance. The only way to remove the request is for the business owner to clear it.
             You may touch up with the client OCCASIONALLY, NOT REPETITEVELY to checkup on whether they are getting the help they need`
         }

@@ -36,25 +36,41 @@ function GlobalBanner() {
                 zIndex: 1300,
                 padding: 2,
                 maxHeight: '6em',
-                overflowY: 'auto', 
-                scrollbarWidth: 'thin', 
+                overflowY: 'auto',
+                scrollbarWidth: 'thin',
                 '&::-webkit-scrollbar': { width: '6px' },
                 '&::-webkit-scrollbar-thumb': { backgroundColor: '#ccc', borderRadius: '3px' }
             }}
         >
-            {activeAlerts.map((alert) => (
-                <Box
-                    key={alert.id}
-                    sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}
-                >
-                    <Typography>
-                        <strong>{alert.title}:</strong> {alert.message}
-                    </Typography>
-                    <IconButton onClick={() => handleDismiss(alert.id)} size="small" aria-label="close">
-                        <CloseIcon fontSize="small" />
-                    </IconButton>
-                </Box>
-            ))}
+            {Array.isArray(activeAlerts) && activeAlerts.length > 0 ? (
+                activeAlerts.map((alert) => (
+                    <Box
+                        key={alert.id}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            mb: 1
+                        }}
+                    >
+                        <Typography>
+                            <strong>{alert.title}:</strong> {alert.message}
+                        </Typography>
+                        <IconButton
+                            onClick={() => handleDismiss(alert.id)}
+                            size="small"
+                            aria-label="close"
+                        >
+                            <CloseIcon fontSize="small" />
+                        </IconButton>
+                    </Box>
+                ))
+            ) : (
+                <Typography variant="body2" color="text.secondary">
+                    No active alerts at the moment.
+                </Typography>
+            )}
+
         </Box>
     );
 }

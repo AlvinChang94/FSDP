@@ -41,6 +41,7 @@ import UserSettings from './pages/user_settings.jsx';
 import AnnouncementsPanel from './pages/Announcements/AnnouncementsPanel.jsx';
 import AverageChats from './pages/ConvDashboard/ConvAnalytics/AverageChats.jsx';
 import AverageChatGroups from './pages/ConvDashboard/ConvAnalytics/AverageChatGroups.jsx';
+import MyClients from './pages/MyClients.jsx';
 
 
 const logout = () => {
@@ -269,7 +270,7 @@ function App() {
                     <Route path={"/login"} element={<Login />} />
                     <Route path={"/preview"} element={<ChatbotPreview />} />
                     <Route path={"/useranalytics"} element={<Login />} />
-                    <Route path={"/myclients"} element={<Login />} />
+                    <Route path={"/myclients"} element={<MyClients />} />
                     <Route path={"/supportcentre"} element={<Support />} />
                     <Route path={"/settings"} element={<UserSettings />} />
                     <Route path={"/contact"} element={<Contactstaff />} />
