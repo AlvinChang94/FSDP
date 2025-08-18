@@ -7,6 +7,7 @@ const {
     startSession,
     getLastUpdate,
     logoutSession,
+    markDelinked
 } = require('./services/whatsapp');
 const { User } = require('./models');
 
@@ -39,6 +40,17 @@ app.post('/api/wa/:userId/logout', async (req, res) => {
   res.json({ status: ok ? 'delinked' : 'not_found' });
 
 });
+
+app.post('/api/wa/:userId/delink', async (req, res) => {
+  try {
+    markDelinked(req.params.userId, 'manual');
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 
 //request and response, respond a "Welcome" message
 app.get("/", (req, res) => {

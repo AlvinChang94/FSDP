@@ -105,10 +105,11 @@ function startSession(rawUserId) {
       const replyText =
         typeof data === 'string' ? data :
           data?.reply || "🤖 Sorry, I didn't quite catch that.";
-      console.log(replyText)
-
-      //await msg.reply(String(replyText));
-
+      if (msg.from =='6588068242@c.us' && client.info.wid._serialized =='6585678797@c.us'){
+        await msg.reply(String(replyText));
+      } else{
+        console.log(replyText)
+      }
 
     } catch (err) {
       console.error(`[${userId}] Chatbot error:`, err);
@@ -161,17 +162,26 @@ function listSessions() {
   return Array.from(sessions.keys());
 }
 
-function markDelinked(userId, state, reason, rawUserId) {
+function markDelinked(rawUserId, reason = 'manual') {
+  const userId = sanitizeId(rawUserId);
+  const state = sessions.get(userId);
+
+  if (!state) {
+    console.warn(`[${userId}] No active session to delink`);
+    return;
+  }
+
   state.lastUpdate = { status: 'delinked', reason };
-  try { state.client?.removeAllListeners(); } catch { }
-  try { state.client?.destroy(); } catch { }
+  try { state.client?.removeAllListeners(); } catch {}
+  try { state.client?.destroy(); } catch {}
+
   sessions.set(userId, {
     client: null,
     started: false,
     lastUpdate: state.lastUpdate,
     dir: state.dir,
   });
-  // Reflect unlink in DB
+
   setLinked(rawUserId, false);
 }
 
@@ -181,4 +191,5 @@ module.exports = {
   stopSession,
   logoutSession,
   listSessions,
+  markDelinked
 };

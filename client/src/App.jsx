@@ -44,8 +44,7 @@ import AverageChatGroups from './pages/ConvDashboard/ConvAnalytics/AverageChatGr
 import MyClients from './pages/MyClients.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-
+import placeholderPfp from './assets/placeholderpfp.png';
 
 const logout = () => {
   localStorage.clear();
@@ -81,6 +80,7 @@ function App() {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
+
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
@@ -221,12 +221,20 @@ function App() {
                   }}
                   onClick={handleUserBarClick}
                 >
+
+
                   <Avatar
                     alt="Profile Picture"
-                    src="/placeholderpfp.png"
+                    src={`http://localhost:3001/user/profilepic/${localStorage.getItem('userId')}?t=${Date.now()}`}
                     sx={{ width: 40, height: 40, mr: 2, border: '2px solid black' }}
+                  > <img
+    src={placeholderPfp}
+    alt="Placeholder"
+    style={{ width: '100%', height: '100%' }}
+  />
+</Avatar>
 
-                  />
+
                   <Typography variant="body1" sx={{ flexGrow: 1, fontSize: '1.4rem', mt: -2.2, fontWeight: 'bold' }}>
                     {user ? user.name : ""}
                     <span style={{ display: 'block', fontSize: '0.8em', marginBottom: -20, marginTop: -4, fontWeight: '600', color: user && user.role === 'admin' ? 'red' : '#494db3' }}>{user ? user.role == 'admin' ? "Admin" : "User" : ""}</span>

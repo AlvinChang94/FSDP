@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import http from '../http';
 import { toast } from 'react-toastify';
 
@@ -70,6 +70,7 @@ export default function MyClients() {
     const [viewing, setViewing] = useState(false);
     const [aiPreview, setAiPreview] = useState('');
     const [aiLoading, setAiLoading] = useState(false);
+    const toastCooldownRef = useRef(0);
 
 
     useEffect(() => {
@@ -124,11 +125,7 @@ export default function MyClients() {
                 (Array.isArray(data) && data.length === 0) ||
                 (typeof data === 'object' && Object.keys(data).length === 0)
             ) {
-                toast.warn('No client messages to retrieve');
-                console.log("err")
-            }
-            else {
-                console.log("no err")
+                showToastWithCooldown('No client messages to retrieve');
             }
 
 
@@ -154,12 +151,18 @@ export default function MyClients() {
             .replace(/\n/g, '<br>'); // convert line breaks
     }
 
-
+    const showToastWithCooldown = (msg) => {
+        const now = Date.now();
+        if (now - toastCooldownRef.current > 5000) { // 5 seconds
+            toast.error(msg);
+            toastCooldownRef.current = now;
+        }
+    };
 
     return (
         <Box sx={{ ml: -25 }}>
             <Typography variant="h4" gutterBottom>
-                My clients
+                <b>My clients</b>
             </Typography>
 
             {loading && <Typography>Loading clients...</Typography>}
@@ -276,9 +279,26 @@ export default function MyClients() {
                 <Box
                     sx={modalStyle}
                     component="form"
-                    onSubmit={e => {
+                    onSubmit={async e => {
                         e.preventDefault();
-                        saveEdit();
+                        try {
+                            // abortEarly: false ensures we collect *all* validation errors
+                            await editClientSchema.validate(editing, { abortEarly: false });
+
+                            // If valid, proceed
+                            saveEdit();
+
+                        } catch (err) {
+                            if (err.name === 'ValidationError') {
+                                // Show every message as a toast
+                                err.inner.forEach(error => {
+                                    toast.error(error.message);
+                                });
+                            } else {
+                                toast.error('Something went wrong while validating.');
+                            }
+                        }
+
                     }}
                 >
                     {editing && (
@@ -289,9 +309,16 @@ export default function MyClients() {
                                     <TextField
                                         label="Contact Name"
                                         value={editing.contactName || editing.name || ''}
-                                        onChange={e => setEditing(prev => ({ ...prev, contactName: e.target.value }))}
+                                        onChange={e => {
+                                            const val = e.target.value;
+                                            if (val.length === 100) {
+                                                showToastWithCooldown('Maximum 100 characters reached');
+                                            }
+                                            setEditing(prev => ({ ...prev, contactName: e.target.value }))
+                                        }}
                                         fullWidth
                                         margin="normal"
+                                        inputProps={{ maxLength: 100 }}
                                     />
 
                                 );
@@ -304,12 +331,17 @@ export default function MyClients() {
                                     label={field.title || 'Untitled Field'}
                                     value={field.value}
                                     onChange={e => {
+                                        const val = e.target.value;
+                                        if (val.length === 100) {
+                                            showToastWithCooldown('Maximum 100 characters reached');
+                                        }
                                         const newFields = [...(editing.customFields || [])];
                                         newFields[idx].value = e.target.value;
                                         setEditing({ ...editing, customFields: newFields });
                                     }}
                                     fullWidth
                                     margin="normal"
+                                    inputProps={{ maxLength: 100 }}
                                 />
                             ))}
 
@@ -318,11 +350,20 @@ export default function MyClients() {
                             <TextField
                                 label="Client Summary"
                                 value={editing.clientsummary || ''}
-                                onChange={e => setEditing(prev => ({ ...prev, clientsummary: e.target.value }))}
+                                onChange={e => {
+                                    const val = e.target.value;
+
+                                    // If you want to warn at exactly 2000 chars:
+                                    if (val.length === 2000) {
+                                        showToastWithCooldown('Maximum 2000 characters reached');
+                                    }
+                                    setEditing(prev => ({ ...prev, clientsummary: e.target.value }))
+                                }}
                                 fullWidth
                                 margin="normal"
                                 multiline
                                 minRows={6}
+                                inputProps={{ maxLength: 2000 }}
                             />
 
 
@@ -404,21 +445,36 @@ export default function MyClients() {
                                             label="Field Title"
                                             value={field.title}
                                             onChange={e => {
+                                                const val = e.target.value;
+
+                                                // Show warning exactly at 100 chars
+                                                if (val.length === 20) {
+                                                    showToastWithCooldown('Maximum 20 characters reached');
+                                                }
                                                 const newFields = [...(editing.customFields || [])];
                                                 newFields[idx].title = e.target.value;
                                                 setEditing({ ...editing, customFields: newFields });
                                             }}
                                             fullWidth
+                                            inputProps={{ maxLength: 20 }}
                                         />
                                         <TextField
                                             label="Field Entry"
                                             value={field.value}
                                             onChange={e => {
+                                                const val = e.target.value;
+
+                                                // Show warning exactly at 100 chars
+                                                if (val.length === 100) {
+                                                    showToastWithCooldown('Maximum 100 characters reached');
+                                                }
+
                                                 const newFields = [...(editing.customFields || [])];
                                                 newFields[idx].value = e.target.value;
                                                 setEditing({ ...editing, customFields: newFields });
                                             }}
                                             fullWidth
+                                            inputProps={{ maxLength: 100 }}
                                         />
                                         <IconButton
                                             color="error"

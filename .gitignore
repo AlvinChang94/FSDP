@@ -2,3 +2,4 @@ node_modules/
 server/.env
 server/.wwebjs_cache
 server/wa-auth
+server/uploaded

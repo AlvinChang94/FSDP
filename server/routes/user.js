@@ -7,6 +7,11 @@ const { sign } = require('jsonwebtoken');
 require('dotenv').config();
 const axios = require('axios');
 const { validateToken } = require('../middlewares/auth');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+
 function generateLinkCode(length = 8) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no confusing chars
   let code = '';
@@ -24,6 +29,38 @@ async function generateUniqueLinkCode() {
   }
   return code;
 }
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const userFolder = path.join(__dirname, '../uploaded', String(req.user.id));
+    if (!fs.existsSync(userFolder)) {
+      fs.mkdirSync(userFolder, { recursive: true });
+    }
+    cb(null, userFolder);
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+const upload = multer({ storage });
+
+// Storage config: save file as "<userid>.<ext>"
+const storage1 = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const profilePicDir = path.join(__dirname, '../profilepic');
+    // Create folder if it doesn't exist
+    if (!fs.existsSync(profilePicDir)) {
+      fs.mkdirSync(profilePicDir, { recursive: true });
+    }
+
+    cb(null, profilePicDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname); // .jpg, .png
+    cb(null, `${req.user.id}${ext.toLowerCase()}`);
+  }
+});
+const upload1 = multer({ storage: storage1 });
 
 router.post("/register", async (req, res) => {
   let data = req.body;
@@ -56,6 +93,10 @@ router.post("/register", async (req, res) => {
   }
 
 });
+
+
+
+
 router.post("/login", async (req, res) => {
   let data = req.body;
   let validationSchema = yup.object({
@@ -157,7 +198,7 @@ router.delete('/:id', validateToken, async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     await user.destroy();
-  
+
     res.json({ message: 'User deleted' });
   } catch (err) {
     console.error('Delete error:', err.stack);
@@ -173,32 +214,32 @@ router.get('/me', validateToken, async (req, res) => {
 
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    res.json(user); 
+    res.json(user);
   } catch (err) {
     console.error("Error in /user/me:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-router.put('/profile', validateToken, async (req, res) => {
-    try {
-        const { name, email, phone, businessName, businessDesc, profilePic, password } = req.body;
-        const user = await User.findByPk(req.user.id);
-        if (!user) return res.status(404).json({ error: 'User not found' });
+router.put('/profile', validateToken, upload1.single('profilePic'), async (req, res) => {
+  try {
+    const { name, email, phone, businessName, businessDesc, profilePic, newPassword } = req.body;
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-        if (name) user.name = name;
-        if (email) user.email = email;
-        if (phone) user.phone_num = phone;
-        if (businessName) user.business_name = businessName;
-        if (businessDesc) user.business_overview = businessDesc;
-        if (profilePic) user.profile_picture = profilePic;
-        if (password) user.password = await bcrypt.hash(password, 10);
-        await user.save();
-        res.json({ success: true });
-    } catch (err) {
-      console.log(err)
-        res.status(500).json({ error: err });
-    }
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (phone) user.phone_num = phone;
+    if (businessName) user.business_name = businessName;
+    if (businessDesc) user.business_overview = businessDesc;
+    if (profilePic) user.profile_picture = profilePic;
+    if (newPassword) user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+    res.json({ success: true });
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ error: err });
+  }
 });
 
 router.post('/generate-overview', validateToken, async (req, res) => {
@@ -240,5 +281,80 @@ ${extraNotes ? `Extra Notes: ${extraNotes}` : ""}
     res.status(500).json({ error: 'Failed to generate overview.' });
   }
 });
+
+router.post("/verify-password", validateToken, async (req, res) => {
+  const { currentPassword } = req.body;
+  try {
+    const user = await User.findByPk(req.user.id); // ✅ correct spelling
+
+    if (!user) {
+      return res.status(404).json({ valid: false, message: "User not found" });
+    }
+
+    const isValid = await bcrypt.compare(currentPassword, user.password);
+    res.json({ valid: isValid });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ valid: false, message: "Server error" });
+  }
+});
+
+router.post('/upload-policy', validateToken, upload.array('files'), async (req, res) => {
+  const userFolder = path.join(__dirname, '../uploaded', String(req.user.id));
+
+  // Check total folder size
+  const files = fs.readdirSync(userFolder);
+  const totalSize = files.reduce((acc, file) => {
+    const stats = fs.statSync(path.join(userFolder, file));
+    return acc + stats.size;
+  }, 0);
+
+  if (totalSize > 100 * 1024 * 1024) {
+    return res.status(400).json({ message: 'Storage limit exceeded (100MB)' });
+  }
+
+  res.json({ message: 'Files uploaded successfully' });
+});
+
+router.get('/policy-files', validateToken, (req, res) => {
+  const userFolder = path.join(__dirname, '../uploaded', String(req.user.id));
+  if (!fs.existsSync(userFolder)) {
+    return res.json([]); // no files yet
+  }
+  const files = fs.readdirSync(userFolder);
+  res.json(files); // just filenames for now
+});
+
+router.delete('/policy-files/:filename', validateToken, (req, res) => {
+  const userFolder = path.join(__dirname, '../uploaded', String(req.user.id));
+  const filePath = path.join(userFolder, req.params.filename);
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+    return res.json({ message: 'File deleted' });
+  }
+  res.status(404).json({ message: 'File not found' });
+});
+
+router.get('/profilepic/:id', (req, res) => {
+  const { id } = req.params;
+  const baseDir = path.join(__dirname, '../profilepic');
+
+  const jpgPath = path.join(baseDir, `${id}.jpg`);
+  const pngPath = path.join(baseDir, `${id}.png`);
+
+  if (fs.existsSync(jpgPath)) {
+    return res.sendFile(jpgPath);
+  }
+  if (fs.existsSync(pngPath)) {
+    return res.sendFile(pngPath);
+  }
+  return res.status(404).send('No image found');
+
+
+});
+
+
+
 
 module.exports = router;
