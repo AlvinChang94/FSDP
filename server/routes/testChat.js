@@ -10,6 +10,8 @@ const yup = require("yup");
 const { LexRuntimeV2Client, RecognizeTextCommand } = require('@aws-sdk/client-lex-runtime-v2');
 const bodyParser = require("body-parser");
 const twilio = require("twilio");
+const { Op } = require('sequelize');
+
 
 //const waRouter = require('./waRouter');
 //router.use('/wa', waRouter);
