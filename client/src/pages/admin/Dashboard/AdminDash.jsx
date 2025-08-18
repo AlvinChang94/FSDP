@@ -16,6 +16,7 @@ dayjs.extend(timezone);
 
 function AdminDash() {
     const [allReviews, setAllReviews] = React.useState([]);
+    const [readReviewIds, setReadReviewIds] = React.useState([]);
     const [chosenReview, setChosenReview] = React.useState(null);
     const [isChoosingReview, setIsChoosingReview] = React.useState(false);
 
@@ -28,6 +29,14 @@ function AdminDash() {
                 console.error("Failed to fetch reviews", err);
             }
         }
+        async function fetchReadReviewIds() {
+            try {
+                const res = await http.get("/read-reviews");
+                setReadReviewIds(res.data);
+            } catch (err) {
+                console.error("Failed to fetch read reviews", err);
+            }
+        }
 
         const savedReview = localStorage.getItem("chosenReview");
         if (savedReview) {
@@ -35,15 +44,17 @@ function AdminDash() {
         }
 
         fetchReviews();
+        fetchReadReviewIds();
     }, []);
 
     const handleChooseReview = async () => {
-        if (allReviews.length === 0) return;
+        const unreadReviews = allReviews.filter(r => !readReviewIds.includes(r.id));
+        if (unreadReviews.length === 0) return;
 
         setIsChoosingReview(true);
         try {
             const response = await http.post("/choose-review", {
-                reviews: allReviews,
+                reviews: unreadReviews,
                 instruction: "Find the most important or critical review and return it."
             });
 
@@ -131,7 +142,7 @@ function AdminDash() {
                         <Button
                             variant="contained"
                             onClick={handleChooseReview}
-                            disabled={isChoosingReview || allReviews.length === 0}
+                            disabled={isChoosingReview || allReviews.filter(r => !readReviewIds.includes(r.id)).length === 0}
                         >
                             Select Most Important Review
                         </Button>
@@ -142,7 +153,7 @@ function AdminDash() {
                     <Button
                         variant="contained"
                         onClick={handleChooseReview}
-                        disabled={isChoosingReview || allReviews.length === 0}
+                        disabled={isChoosingReview || allReviews.filter(r => !readReviewIds.includes(r.id)).length === 0}
                     >
                         No review selected yet <br />
                         (Select Most Important Review)
