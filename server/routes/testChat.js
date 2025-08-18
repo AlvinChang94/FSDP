@@ -494,4 +494,96 @@ ${exampleStyleText}
   }
 });
 
+router.post('/analytics/summarise-topic', validateToken, async (req, res) => {
+  try {
+    const messages = await ClientMessage.findAll({
+      where: {
+        user_id: req.user.id,
+        senderName: { [Op.ne]: 'QueryBot' }
+      },
+      attributes: ['content'],
+      limit: 1000
+    });
+
+    if (!messages.length) {
+      return res.status(404).json({ error: 'No user messages found.' });
+    }
+
+    const combinedText = messages.map(m => m.content).join('\n');
+
+    const systemPrompt = `
+You are a data analyst. Analyze the following user-generated messages and identify the most common topics or themes.
+
+Return your answer as a JSON array of objects, each with:
+- "topic": a short, specific label (max 5 words)
+- "count": an integer representing how often this topic appears
+
+Example:
+[
+  { "topic": "Token validation", "count": 1 },
+  { "topic": "Schema design", "count": 1 },
+  { "topic": "Error handling", "count": 1 }
+]
+
+Avoid generic terms like "chat" or "question". Include all identifiable topics, even if they appear only once.
+
+Messages:
+${combinedText}
+`;
+
+    const payload = {
+      messages: [
+        {
+          role: "user",
+          content: [{ text: systemPrompt }]
+        }
+      ]
+    };
+
+    const apiKey = process.env.AWS_BEARER_TOKEN_BEDROCK;
+    const response = await axios.post(
+      'https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/amazon.nova-pro-v1:0/invoke',
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        validateStatus: () => true
+      }
+    );
+
+    if (response.status < 200 || response.status >= 300) {
+      console.error('Model error:', response.status, response.data);
+      return res.status(502).json({ error: 'Model request failed', status: response.status });
+    }
+
+    const rawText = (
+      response.data.output?.message?.content?.[0]?.text ||
+      response.data.output?.message?.content?.text ||
+      response.data.output?.message?.content
+    )?.trim();
+
+    if (!rawText) {
+      return res.status(500).json({ error: 'Failed to generate topic summary.' });
+    }
+    const cleanedText = rawText.replace(/```json|```/g, '').trim();
+
+    let parsedTopics;
+    try {
+      parsedTopics = JSON.parse(cleanedText);
+    } catch (e) {
+      console.error("❌ Failed to parse model output:", rawText);
+      return res.status(500).json({ error: 'Model returned invalid topic format.' });
+    }
+
+    res.json({ success: true, topics: parsedTopics });
+
+  } catch (err) {
+    console.error('❌ Error in summarise-topic route:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
 module.exports = router;

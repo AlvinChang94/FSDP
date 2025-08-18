@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Box, Typography, Grid, Paper, Link as MuiLink } from '@mui/material';
+import { Box, Typography, Grid, Paper, Button, Link as MuiLink } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar } from 'recharts';
 import UserContext from '../../contexts/UserContext';
@@ -7,10 +7,39 @@ import axios from 'axios';
 
 function ConversationDb() {
     const { user } = useContext(UserContext);
+    const [showTopics, setShowTopics] = useState(false);
     const [averageTime, setAverageTime] = useState(null);
     const [commonTopics, setCommonTopics] = useState([]);
+    const [loadingTopics, setLoadingTopics] = useState(false);
     const [averageChats, setAverageChats] = useState(null);
     const [chatbotSessions, setChatbotSessions] = useState(null);
+
+
+    const handleGenerateTopics = async () => {
+        if (!user?.id) return;
+
+        setLoadingTopics(true);
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await axios.post(
+                'http://localhost:3001/api/analytics/summarise-topic',
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (res.data?.success && Array.isArray(res.data.topics)) {
+                setCommonTopics(res.data.topics);
+            } else {
+                console.warn("Unexpected topic format:", res.data);
+                setCommonTopics([]);
+            }
+        } catch (err) {
+            console.error("Failed to fetch topics:", err);
+            setCommonTopics([]);
+        } finally {
+            setLoadingTopics(false);
+        }
+    };
 
     useEffect(() => {
         const fetchChatbotSessions = async () => {
@@ -33,22 +62,28 @@ function ConversationDb() {
 
 
     useEffect(() => {
-        const fetchCommonTopics = async () => {
+        const fetchSummarisedTopics = async () => {
             if (user?.id) {
                 try {
                     const token = localStorage.getItem('accessToken');
-                    const res = await axios.get(`http://localhost:3001/api/analytics/common-topics/${user.id}`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
+                    const res = await axios.post(
+                        'http://localhost:3001/api/testchat/analytics/summarise-topic',
+                        {},
+                        {
+                            headers: { Authorization: `Bearer ${token}` }
+                        }
+                    );
+
                     setCommonTopics(res.data.topics || []);
                 } catch (err) {
+                    console.error('Failed to fetch summarised topics:', err);
                     setCommonTopics([]);
                 }
             }
         };
-        fetchCommonTopics();
-    }, [user]);
 
+        fetchSummarisedTopics();
+    }, [user]);
 
     useEffect(() => {
         const fetchAverageTime = async () => {
@@ -110,7 +145,7 @@ function ConversationDb() {
                     {
                         title: "Average chats per day",
                         value: averageChats !== null && !isNaN(averageChats)
-                            ? `${parseFloat(averageChats).toFixed(2)} chats`
+                            ? `${Math.round(averageChats)} chats`
                             : "Loading...",
                         to: `/conv-analytics/average-chats/${user?.id}`
                     }
@@ -153,31 +188,58 @@ function ConversationDb() {
                 <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
                     Frequently asked questions
                 </Typography>
-                <Paper sx={{ p: 4, mb: 2 }}>
-                    {commonTopics.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={commonTopics} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="topic" />
-                                <YAxis allowDecimals={false} />
-                                <Tooltip />
-                                <Legend />
-                                <Bar dataKey="count" fill="#1976d2" name="Number of Questions" />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    ) : (
-                        <Typography variant="body2" color="text.secondary">
-                            Loading common topics...
-                        </Typography>
-                    )}
-                </Paper>
 
-                <Box textAlign="right">
-                    <MuiLink component={Link} to="/ConversationAI" underline="hover" sx={{ color: '#1a73e8', fontWeight: 'bold' }}>
-                        View AI Analytics Summary
-                    </MuiLink>
-                </Box>
+                {!showTopics ? (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                            setShowTopics(true);
+                            handleGenerateTopics();
+                        }}
+                        sx={{ mb: 2 }}
+                    >
+                        Generate Frequently Asked Topics
+                    </Button>
+                ) : (
+                    <Paper sx={{ p: 4, mb: 2 }}>
+                        {loadingTopics ? (
+                            <Typography variant="body2" color="text.secondary">
+                                Generating topics...
+                            </Typography>
+                        ) : commonTopics.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={commonTopics} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="topic" />
+                                    <YAxis allowDecimals={false} />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Bar dataKey="count" fill="#1976d2" name="Number of Questions" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <Typography variant="body2" color="text.secondary">
+                                No topics found.
+                            </Typography>
+                        )}
+                    </Paper>
+                )}
+
+                {showTopics && (
+                    <Box textAlign="right">
+                        <MuiLink
+                            component={Link}
+                            to="/ConversationAI"
+                            underline="hover"
+                            sx={{ color: '#1a73e8', fontWeight: 'bold' }}
+                        >
+                            View AI Analytics Summary
+                        </MuiLink>
+                    </Box>
+                )}
             </Box>
+
         </Box>
     );
 }
