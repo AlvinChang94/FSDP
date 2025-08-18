@@ -1,49 +1,59 @@
 const express = require('express');
 const router = express.Router();
 const { TestChatMessage, TestChat } = require('../models');
+const { ClientMessage } = require('../models');
 const { validateToken } = require('../middlewares/auth');
 const Sequelize = require('sequelize');
+const { Op } = require('sequelize');
+
 
 router.get('/analytics/response-time/:clientId', validateToken, async (req, res) => {
   const { clientId } = req.params;
+
   if (parseInt(clientId) !== req.user.id) {
     return res.status(403).json({ error: 'Forbidden: does not match authenticated user.' });
   }
 
   try {
-    const messages = await TestChatMessage.findAll({
-      include: {
-        model: TestChat,
-        where: { clientId: req.user.id }
+    const messages = await ClientMessage.findAll({
+      where: {
+        userId: req.user.id,
+        timestamp: { [Sequelize.Op.ne]: null },
       },
       order: [['timestamp', 'ASC']]
     });
 
-    const filteredMessages = messages.filter(m => m.sender === 'user' || m.sender === 'assistant');
-
     let totalTime = 0;
     let count = 0;
 
-    for (let i = 0; i < filteredMessages.length - 1; i++) {
-      const current = filteredMessages[i];
-      const next = filteredMessages[i + 1];
+    for (let i = 0; i < messages.length - 1; i++) {
+      const current = messages[i];
+      const next = messages[i + 1];
 
-      if (current.sender === 'user' && next.sender === 'assistant') {
-        const diffSeconds = (new Date(next.timestamp) - new Date(current.timestamp)) / 1000;
-        if (diffSeconds >= 0) {
+      if (current.senderName !== 'QueryBot' && next.senderName === 'QueryBot') {
+        const receivedTime = new Date(current.timestamp);
+        const responseTime = new Date(next.timestamp);
+        const diffSeconds = (responseTime - receivedTime) / 1000;
+
+        if (diffSeconds >= 0 && diffSeconds < 3600) {
           totalTime += diffSeconds;
           count++;
         }
       }
     }
 
+
+
     const averageResponseTime = count > 0 ? parseFloat((totalTime / count).toFixed(2)) : null;
-    return res.json({ averageResponseTime });
+    return res.json({ averageResponseTime, messagePairs: count });
+
   } catch (err) {
-    console.error(err);
+    console.error('Error calculating WhatsApp response time:', err);
     return res.status(500).json({ error: 'Failed to calculate average response time.' });
   }
 });
+
+
 
 router.get('/analytics/message-timings/:clientId', validateToken, async (req, res) => {
   const { clientId } = req.params;
@@ -52,26 +62,27 @@ router.get('/analytics/message-timings/:clientId', validateToken, async (req, re
   }
 
   try {
-    const messages = await TestChatMessage.findAll({
-      include: {
-        model: TestChat,
-        where: { clientId: req.user.id }
+    const messages = await ClientMessage.findAll({
+      where: {
+        userId: req.user.id,
+        timestamp: { [Sequelize.Op.ne]: null }
       },
       order: [['timestamp', 'ASC']]
     });
 
-    const filteredMessages = messages.filter(m => m.sender === 'user' || m.sender === 'assistant');
-
     const timings = [];
     let questionCounter = 1;
 
-    for (let i = 0; i < filteredMessages.length - 1; i++) {
-      const current = filteredMessages[i];
-      const next = filteredMessages[i + 1];
+    for (let i = 0; i < messages.length - 1; i++) {
+      const current = messages[i];
+      const next = messages[i + 1];
 
-      if (current.sender === 'user' && next.sender === 'assistant') {
-        const diffSeconds = (new Date(next.timestamp) - new Date(current.timestamp)) / 1000;
-        if (diffSeconds >= 0) {
+      if (current.senderName !== 'QueryBot' && next.senderName === 'QueryBot') {
+        const receivedTime = new Date(current.timestamp);
+        const responseTime = new Date(next.timestamp);
+        const diffSeconds = (responseTime - receivedTime) / 1000;
+
+        if (diffSeconds >= 0 && diffSeconds < 3600) {
           timings.push({
             question: `Q${questionCounter}`,
             time: parseFloat(diffSeconds.toFixed(2))
@@ -83,38 +94,11 @@ router.get('/analytics/message-timings/:clientId', validateToken, async (req, re
 
     return res.json({ timings });
   } catch (err) {
-    console.error(err);
+    console.error('Error fetching WhatsApp message timings:', err);
     return res.status(500).json({ error: 'Failed to fetch message timings.' });
   }
 });
 
-router.get('/analytics/common-topics/:clientId', validateToken, async (req, res) => {
-  const clientId = req.params.clientId;
-
-  try {
-    const topics = await TestChat.findAll({
-      where: { clientId },
-      attributes: [
-        'title',
-        [Sequelize.fn('COUNT', Sequelize.col('chat_id')), 'count']
-      ],
-      group: ['title'],
-      order: [[Sequelize.literal('count'), 'DESC']],
-      limit: 5,
-      raw: true
-    });
-
-    const result = topics.map(t => ({
-      topic: t.title,
-      count: parseInt(t.count, 10)
-    }));
-
-    return res.json({ topics: result });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Failed to fetch top topics' });
-  }
-});
 
 router.get('/analytics/average-chats/:clientId', validateToken, async (req, res) => {
   const { clientId } = req.params;
@@ -124,31 +108,29 @@ router.get('/analytics/average-chats/:clientId', validateToken, async (req, res)
   }
 
   try {
-    const chats = await TestChatMessage.findAll({
-      include: [{
-        model: TestChat,
-        where: { clientId: req.user.id },
-        attributes: []
-      }],
-      where: { sender: 'user' },
-      attributes: ['chat_id', 'timestamp'],
+    const messages = await ClientMessage.findAll({
+      where: {
+        user_id: clientId,
+        senderName: { [Op.ne]: 'QueryBot' }
+      },
+      attributes: ['timestamp'],
       raw: true
     });
 
-    if (chats.length === 0) {
+    if (!messages.length) {
       return res.json({ average_chats_per_day: 0, chatCountsByDay: {} });
     }
 
-    // Group by date
     const chatCountsByDay = {};
-    chats.forEach(chat => {
-      const date = new Date(chat.timestamp).toISOString().slice(0, 10); // YYYY-MM-DD
+    messages.forEach(msg => {
+      if (!msg.timestamp) return;
+      const date = new Date(msg.timestamp).toISOString().slice(0, 10);
       chatCountsByDay[date] = (chatCountsByDay[date] || 0) + 1;
     });
 
     const dailyCounts = Object.values(chatCountsByDay);
     const totalChats = dailyCounts.reduce((sum, count) => sum + count, 0);
-    const average = parseFloat((totalChats / dailyCounts.length).toFixed(2));
+    const average = Math.round(totalChats / dailyCounts.length);
 
     return res.json({
       average_chats_per_day: average,
@@ -162,9 +144,12 @@ router.get('/analytics/average-chats/:clientId', validateToken, async (req, res)
 });
 
 
+
+
+
 router.get('/analytics/average-chat-groups/:clientId', validateToken, async (req, res) => {
   const { clientId } = req.params;
-  
+
   if (parseInt(clientId) !== req.user.id) {
     return res.status(403).json({ error: 'Forbidden: does not match authenticated user.' });
   }

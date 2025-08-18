@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
+const Sequelize = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
     const ClientMessage = sequelize.define("ClientMessage", {
@@ -22,7 +23,8 @@ module.exports = (sequelize, DataTypes) => {
         },
         userId: {
             type: DataTypes.INTEGER,
-            allowNull: true, // it will be null before user is linked
+            allowNull: true, // 
+            field: 'user_id',
             references: {
                 model: 'users',
                 key: 'id'
@@ -33,10 +35,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         timestamp: {
-            type: DataTypes.DATE,
+            type: DataTypes.DATE(3),
             allowNull: false,
-            defaultValue: DataTypes.NOW
-        }
+            defaultValue: Sequelize.literal('CURRENT_TIMESTAMP(3)')
+        },
+
     }, {
         tableName: 'client_messages',
         timestamps: false
@@ -52,4 +55,4 @@ module.exports = (sequelize, DataTypes) => {
 
 
     return ClientMessage;
-}
+};

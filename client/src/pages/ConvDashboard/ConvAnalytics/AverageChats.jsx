@@ -14,8 +14,10 @@ function AnalyticsDetail({ title }) {
   const navigate = useNavigate();
   const { id } = useParams();
   const [chatData, setChatData] = useState([]);
+  const [averageChats, setAverageChats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [chartType, setChartType] = useState('bar');
+
 
   useEffect(() => {
     const fetchChatData = async () => {
@@ -36,7 +38,10 @@ function AnalyticsDetail({ title }) {
         });
 
         const rawData = res.data.chatCountsByDay || {};
+        const average = res.data.average_chats_per_day;
+        setAverageChats(typeof average === 'number' ? average : null);
 
+        // Aggregate by weekday
         const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         const weekMap = Object.fromEntries(weekdays.map(day => [day, 0]));
 
@@ -126,9 +131,14 @@ function AnalyticsDetail({ title }) {
         <Typography variant="h6" gutterBottom>
           Insights
         </Typography>
-        <Typography variant="body1" color="text.secondary">
-         This metric represents the total number of chats initiated by all users within a single day. It reflects the overall volume of conversations handled by the platform and serves as a key indicator of system-wide engagement. A consistently high average suggests strong user reliance on chat-based support or interaction, while fluctuations may signal seasonal trends, campaign effectiveness, or shifts in user behavior
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+          This metric represents the total number of chats initiated by all users within a single day. It reflects the overall volume of conversations handled by the platform and serves as a key indicator of system-wide engagement.
         </Typography>
+        {averageChats !== null && (
+          <Typography variant="body1" fontWeight="bold">
+            Average chats per day: {parseFloat(averageChats).toFixed(2)}
+          </Typography>
+        )}
       </Paper>
     </Box>
   );
