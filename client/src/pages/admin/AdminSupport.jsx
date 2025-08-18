@@ -157,8 +157,8 @@ function AdminSupport() {
         const interval = setInterval(() => {
             try {
                 http.get(`/api/ticket/adminget`).then(res => {
-                        setTickets(res.data);
-                    });
+                    setTickets(res.data);
+                });
                 if (!selectedTicket) return;
                 http.get(`/api/messages/admin/conversation/${selectedTicket.ticketId}`).then(res => {
                     if (messagesRef.current.length == res.data.length) setShouldAutoScroll(false);
@@ -214,7 +214,7 @@ function AdminSupport() {
                     </List>
                 </Paper>
                 {/* Right side: Conversation */}
-                <Box sx={{ flex: 1, p: 3, display: 'flex', flexDirection: 'column', bgcolor: 'white', width: '62vw' }}>
+                <Box sx={{ flex: 1, p: 3, display: 'flex', flexDirection: 'column', bgcolor: 'white', width: '71vw' }}>
                     <Typography variant="h6">
                         {selectedTicket ? `Conversation for ticket ${selectedTicket.ticketId}` : 'Select a ticket'}
                     </Typography>
@@ -269,7 +269,7 @@ function AdminSupport() {
                         </Box>
                     </Modal>
                     <Divider sx={{ mb: 1 }} />
-                    <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                    <Box sx={{ flex: 1, overflowY: 'auto', mb: 10 }}>
                         {selectedTicket ? (
                             messages.map((msg, idx, arr) => {
                                 const isAdmin = msg.senderRole === 'admin';
@@ -325,7 +325,9 @@ function AdminSupport() {
                                                 ? <span style={{ fontStyle: 'italic', color: '#888' }}>This message has been deleted</span>
                                                 : (
                                                     <>
-                                                        {msg.content}
+                                                        <Typography sx={{ whiteSpace: 'pre-line' }}>
+                                                            {msg.content}
+                                                        </Typography>
                                                         {msg.isEdited && (
                                                             <span
                                                                 style={{
@@ -514,9 +516,10 @@ function AdminSupport() {
 
                     <Box
                         sx={{
-                            mb: -5,
-                            mt: 3,
-                            ml: 53,
+                            position: 'fixed',
+                            left: 1200,
+                            right: 0,
+                            bottom: 0,
                             transform: 'translate(-50%, -50%)',
                             width: '100%',
                             maxWidth: '58vw',
@@ -535,46 +538,57 @@ function AdminSupport() {
                             >
                                 This case has been marked as complete. You cannot edit it anymore.
                             </Typography>
-                        ) : selectedTicket ? (<TextField
-                            fullWidth
-                            variant="outlined"
-                            value={newMessage}
-                            onChange={e => {
-                                if (e.target.value.length > 2000) {
-                                    return;
-                                }
-                                setNewMessage(e.target.value);
+                        ) : selectedTicket ? (<Box
+                            sx={{
+                                position: 'fixed',
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                bgcolor: '#fff',
+                                p: 2,
+                                zIndex: 10,
                             }}
-                            onFocus={() => setInputFocused(true)}
-                            onBlur={() => setInputFocused(false)}
-                            onKeyDown={e => {
-                                if (e.key === 'Enter') {
-                                    handleSend()
-                                }
-                            }}
-                            placeholder={inputFocused || newMessage ? '' : "Provide a response..."}
-                            InputProps={{
-                                maxLength: 2000,
-                                sx: {
-                                    bgcolor: '#CFCFCF',
-                                    borderRadius: 2,
-                                    '& input::placeholder': { color: "#888888", opacity: 1 }
-                                },
-
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton onClick={() => {
-                                            handleSend();
-                                        }}
-                                            edge="end"
-                                            sx={{ color: '#222' }}>
-                                            <SendIcon />
-                                        </IconButton>
-                                    </InputAdornment>
-                                )
-                            }}
-                            autoComplete="off"
-                        />
+                        >
+                            <TextField
+                                fullWidth
+                                variant="outlined"
+                                value={newMessage}
+                                onChange={e => {
+                                    if (e.target.value.length <= 2000) setNewMessage(e.target.value);
+                                }}
+                                multiline
+                                minRows={1}
+                                maxRows={3}
+                                onFocus={() => setInputFocused(true)}
+                                onBlur={() => setInputFocused(false)}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSend();
+                                    }
+                                }}
+                                placeholder={inputFocused || newMessage ? '' : 'Provide a response...'}
+                                InputProps={{
+                                    sx: {
+                                        bgcolor: '#CFCFCF',
+                                        borderRadius: 2,
+                                        '& input::placeholder': { color: '#888888', opacity: 1 },
+                                    },
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                onClick={handleSend}
+                                                edge="end"
+                                                sx={{ color: '#222' }}
+                                            >
+                                                <SendIcon />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                                autoComplete="off"
+                            />
+                        </Box>
                         ) : null}
                     </Box>
                 </Box>

@@ -42,6 +42,9 @@ import AnnouncementsPanel from './pages/Announcements/AnnouncementsPanel.jsx';
 import AverageChats from './pages/ConvDashboard/ConvAnalytics/AverageChats.jsx';
 import AverageChatGroups from './pages/ConvDashboard/ConvAnalytics/AverageChatGroups.jsx';
 import MyClients from './pages/MyClients.jsx';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 
 const logout = () => {
@@ -84,6 +87,16 @@ function App() {
       <Router>
         <ThemeProvider theme={MyTheme}>
           <Box sx={{ display: 'flex' }}>
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              pauseOnHover
+              draggable
+            />
+
             {/* Sidebar Drawer */}
             <Drawer
               variant="permanent"

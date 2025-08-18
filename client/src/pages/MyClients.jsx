@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import http from '../http';
+import { toast } from 'react-toastify';
+
 import {
     Card,
     CardContent,
@@ -11,11 +13,11 @@ import {
     TextField,
     Button,
     Stack,
-    Divider,
-    Tooltip
+    Tooltip,
+    Paper
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-
+import AddIcon from '@mui/icons-material/Add';
 const modalStyle = {
     position: 'absolute',
     top: '50%',
@@ -26,16 +28,49 @@ const modalStyle = {
     boxShadow: 24,
     p: 4,
     minWidth: 600,
+    maxWidth: 600,
     maxHeight: '60vh',
     overflowY: 'auto'
 };
+import * as Yup from 'yup';
+import DOMPurify from 'dompurify';
+import { Formik, Form, FieldArray, ErrorMessage } from 'formik';
+
+
+
 
 export default function MyClients() {
+    const editClientSchema = Yup.object().shape({
+        contactName: Yup.string()
+            .max(100, 'Contact name must be at most 100 characters')
+            .required('Contact name is required'),
+
+        // Array of custom fields
+        customFields: Yup.array().of(
+            Yup.object().shape({
+                title: Yup.string()
+                    .max(20, 'Custom title must be at most 20 characters')
+                    .nullable(), // allow empty if optional
+                value: Yup.string()
+                    .max(100, 'Custom entry must be at most 100 characters')
+                    .nullable()
+            })
+        ),
+
+        clientsummary: Yup.string()
+            .max(2000, 'Client summary must be at most 2000 characters')
+            .nullable()
+
+    });
+
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(null);
     const [saving, setSaving] = useState(false);
     const [viewing, setViewing] = useState(false);
+    const [aiPreview, setAiPreview] = useState('');
+    const [aiLoading, setAiLoading] = useState(false);
+
 
     useEffect(() => {
         let mounted = true;
@@ -73,6 +108,53 @@ export default function MyClients() {
             setSaving(false);
         }
     };
+    const handleGenerateSummary = async () => {
+        try {
+            setAiLoading(true);
+
+            const res = await http.post(
+                '/api/clients/generate-summary',
+                { clientId: editing.id, userId: localStorage.getItem('userId') },
+                { headers: { 'Content-Type': 'application/json' } }
+            );
+
+            const data = res.data;
+            console.log(data)
+            if (!data ||
+                (Array.isArray(data) && data.length === 0) ||
+                (typeof data === 'object' && Object.keys(data).length === 0)
+            ) {
+                toast.warn('No client messages to retrieve');
+                console.log("err")
+            }
+            else {
+                console.log("no err")
+            }
+
+
+            // Update summary field directly
+            // Store in aiOverview for Dialog preview
+            setAiPreview(data.summary);
+
+        } catch (err) {
+            console.error('Error generating summary:', err);
+        } finally {
+            setAiLoading(false);
+        }
+    };
+
+    const acceptAIPreview = () => {
+        setEditing(prev => ({ ...prev, clientsummary: aiPreview }));
+        setAiPreview('');
+    };
+
+    function markersToHtml(text) {
+        return text
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // bold between **
+            .replace(/\n/g, '<br>'); // convert line breaks
+    }
+
+
 
     return (
         <Box sx={{ ml: -25 }}>
@@ -120,29 +202,41 @@ export default function MyClients() {
                     {viewing && (
                         <Stack spacing={2}>
                             {/* Normal primitive fields only (skip id + any object/array) */}
-                             {viewing?.ClientUsers?.[0]?.contactName && (
+                            {(viewing?.ClientUsers?.[0]?.contactName || viewing?.name) && (
                                 <Box>
                                     <Typography variant="subtitle2">Contact Name</Typography>
-                                    <Typography variant="body1">
-                                        {viewing.ClientUsers[0].contactName}
+                                    <Typography variant="body1" sx={{
+                                        whiteSpace: 'pre-line',
+                                        wordBreak: 'break-word',
+                                        overflowWrap: 'break-word',
+                                    }}>
+                                        {viewing.ClientUsers[0].contactName || viewing?.name}
                                     </Typography>
                                 </Box>
                             )}
                             {viewing?.phoneNumber && (
                                 <Box>
                                     <Typography variant="subtitle2">Phone Number</Typography>
-                                    <Typography variant="body1">
+                                    <Typography variant="body1" sx={{
+                                        whiteSpace: 'pre-line',
+                                        wordBreak: 'break-word',
+                                        overflowWrap: 'break-word',
+                                    }}>
                                         {viewing.phoneNumber}
                                     </Typography>
                                 </Box>
                             )}
-                            
+
 
                             {/* Custom fields from ClientUsers */}
                             {(viewing?.ClientUsers?.[0]?.customFields || []).map((field, idx) => (
                                 <Box key={idx}>
                                     <Typography variant="subtitle2">{field.title || 'Untitled Field'}</Typography>
-                                    <Typography variant="body1">{field.value}</Typography>
+                                    <Typography variant="body1" sx={{
+                                        whiteSpace: 'pre-line',
+                                        wordBreak: 'break-word',
+                                        overflowWrap: 'break-word',
+                                    }}>{field.value}</Typography>
                                 </Box>
                             ))}
 
@@ -152,9 +246,17 @@ export default function MyClients() {
                                     <Typography variant="subtitle2">Client Summary</Typography>
                                     <Typography
                                         variant="body1"
-                                        sx={{ whiteSpace: 'pre-line' }}
+                                        sx={{
+                                            whiteSpace: 'pre-line', // preserves line breaks
+                                            wordBreak: 'break-word',
+                                            overflowWrap: 'break-word',
+                                            minHeight: '9rem',      // ~6 lines
+                                        }}
+                                        dangerouslySetInnerHTML={{
+                                            __html: DOMPurify.sanitize(markersToHtml(viewing.ClientUsers[0].clientSummary || ""))
+                                        }}
+
                                     >
-                                        {viewing.ClientUsers[0].clientSummary}
                                     </Typography>
                                 </Box>
                             )}
@@ -182,11 +284,11 @@ export default function MyClients() {
                     {editing && (
                         <Stack spacing={2}>
                             {Object.entries(editing).map(([key, value]) => {
-                                if (key === 'id' || key === 'clientsummary' || key === 'customFields' || key === 'phoneNumber' || typeof value === 'object') return null;
+                                if (key === 'id' || key === 'clientsummary' || key === 'customFields' || key === 'phoneNumber' || typeof value === 'object' || key === 'name') return null;
                                 return (
                                     <TextField
                                         label="Contact Name"
-                                        value={editing.contactName || ''}
+                                        value={editing.contactName || editing.name || ''}
                                         onChange={e => setEditing(prev => ({ ...prev, contactName: e.target.value }))}
                                         fullWidth
                                         margin="normal"
@@ -223,6 +325,7 @@ export default function MyClients() {
                                 minRows={6}
                             />
 
+
                             {/* Bottom actions */}
                             <Box display="flex" flexDirection="column" gap={2} mt={2}>
 
@@ -230,9 +333,11 @@ export default function MyClients() {
                                 <Stack direction="row" spacing={1} alignItems="center">
                                     <Button
                                         variant="outlined"
-                                        onClick={() => console.log("Generate summary clicked for:", editing.id)}
+                                        onClick={handleGenerateSummary}
+                                        disabled={aiLoading}
                                     >
-                                        Generate summary with overview
+
+                                        {aiLoading ? 'Generating...' : 'Generate summary with overview'}
                                     </Button>
                                     <Tooltip title="This analyses the client's messages and auto-generates a summary.">
                                         <IconButton size="small">
@@ -240,25 +345,57 @@ export default function MyClients() {
                                         </IconButton>
                                     </Tooltip>
                                 </Stack>
+                                {aiPreview && (
+                                    <Paper sx={{ p: 2, mt: 2, bgcolor: '#f5f5f5' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1 }}>AI-Generated Summary:</Typography>
+                                        <Typography dangerouslySetInnerHTML={{
+                                            __html: DOMPurify.sanitize(markersToHtml(aiPreview))
+                                        }}
+                                        ></Typography>
+                                        <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                                            <Button variant="contained" onClick={acceptAIPreview}>
+                                                Accept
+                                            </Button>
+                                            <Button variant="outlined" color="secondary" onClick={() => setAiPreview('')}>
+                                                Discard
+                                            </Button>
+                                        </Stack>
+                                    </Paper>
+                                )}
+
 
                                 {/* Add custom field */}
-                                <Tooltip title="Add custom fields with a title and entry">
-                                    <IconButton
-                                        color="primary"
-                                        size="small"
-                                        onClick={() =>
-                                            setEditing(prev => ({
-                                                ...prev,
-                                                customFields: [
-                                                    ...(prev?.customFields || []),
-                                                    { title: '', value: '' }
-                                                ]
-                                            }))
-                                        }
-                                    >
-                                        <Typography variant="h5">+</Typography>
-                                    </IconButton>
-                                </Tooltip>
+                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                                    <Tooltip title="Add custom fields with a title and entry">
+                                        <IconButton
+                                            color="primary"
+                                            size="small"
+                                            sx={{
+                                                mt: -1,
+                                                width: 36,
+                                                height: 36,
+                                                borderRadius: '50%',
+                                                p: 0,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                overflow: 'hidden'
+                                            }}
+                                            TouchRippleProps={{ center: true }}
+                                            onClick={() =>
+                                                setEditing(prev => ({
+                                                    ...prev,
+                                                    customFields: [
+                                                        ...(prev?.customFields || []),
+                                                        { title: '', value: '' }
+                                                    ]
+                                                }))
+                                            }
+                                        >
+                                            <AddIcon fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Box>
 
                                 {/* Edit existing custom fields */}
                                 {(editing?.customFields || []).map((field, idx) => (
