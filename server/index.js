@@ -80,6 +80,8 @@ const chatbotRoutes = require('./routes/chatbot')
 app.use('/sendchatbot', chatbotRoutes)
 const myclients = require('./routes/clients')
 app.use('/api/clients', myclients)
+const readReviewsRoutes = require('./routes/readReviews');
+app.use('/read-reviews', readReviewsRoutes);
 
 
 const db = require('./models');
