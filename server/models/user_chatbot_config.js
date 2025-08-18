@@ -31,9 +31,18 @@ module.exports = (sequelize, DataTypes) => {
         },
         dataRetention: {
             type: DataTypes.BOOLEAN,
-            defaultValue: false,
-            defaultValue: true
-        }
+            defaultValue: false
+        },
+        notificationMethod: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: 'None'
+        },
+        holdingMsg: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+
         // Add more fields as needed for other config options
     }, {
         tableName: 'config_settings'
@@ -41,6 +50,7 @@ module.exports = (sequelize, DataTypes) => {
 
     ConfigSettings.associate = (models) => {
         ConfigSettings.belongsTo(models.User, { foreignKey: 'userId' });
+        ConfigSettings.hasMany(models.ThresholdRule, { foreignKey: 'userId', sourceKey: 'userId', onDelete: 'CASCADE', hooks: true });
     };
 
     return ConfigSettings;

@@ -15,7 +15,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 
 function Contactstaff() {
-    const messageSchema = yup.string().trim().max(2000, 'Message cannot exceed 2000 characters');
+    const messageSchema = yup.string().trim().max(2000, 'Message cannot exceed 2000 characters').required('Message cannot be null');
     const navigate = useNavigate();
     const isLoggedIn = Boolean(localStorage.getItem('accessToken'));
     useEffect(() => {
@@ -98,6 +98,10 @@ function Contactstaff() {
     const inputBoxClass = started ? "slide-to-bottom" : "centered-input";
     const handleCreateTicket = async () => {
         try {
+            if (!message) {
+                showToastWithCooldown('Cannot send null message')
+                return
+            }
             const res = await http.post('/api/ticket', { clientId: localStorage.getItem('userId') });
             setTicketId(res.data.ticketId);
             setOpenModal(false);
@@ -259,9 +263,9 @@ function Contactstaff() {
             bgcolor: bgColor,
             m: 0,
             p: 0,
-            overflow: 'hidden'
+            overflow: 'hidden',
+
         }}>
-            <ToastContainer />
             {/* Header */}
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pl: 2.5, pt: 1.5, pr: 2.5, ml: 27 }}>
                 <Typography variant="h5" sx={{ color: '282424', fontWeight: 'bold' }}>
@@ -435,7 +439,7 @@ function Contactstaff() {
                     position: 'absolute',
                     left: '57.75%',
                     transform: 'translate(-50%, -50%)',
-                    top: started ? 'calc(100vh - 50px)' : '53%',
+                    top: started ? 'calc(100vh - 60px)' : '53%',
                     width: '100%',
                     maxWidth: '76vw',
                     transition: 'all 0.6s cubic-bezier(.68,-0.55,.27,1.55)',
@@ -456,6 +460,9 @@ function Contactstaff() {
                 ) : (<TextField
                     fullWidth
                     variant="outlined"
+                    multiline
+                    minRows={1}
+                    maxRows={3}
                     value={message}
                     onChange={e => {
                         if (e.target.value.length > 2000) {
@@ -467,7 +474,7 @@ function Contactstaff() {
                     onFocus={() => setInputFocused(true)}
                     onBlur={() => setInputFocused(false)}
                     onKeyDown={e => {
-                        if (e.key === 'Enter') {
+                        if (e.key === 'Enter' && !e.shiftKey) {
                             if (!started) {
                                 setOpenModal(true); // show modal on first Enter
                             } else {
@@ -517,7 +524,8 @@ function Contactstaff() {
                         flexDirection: 'column',
                         overflowY: 'auto',
                         zIndex: 2,
-                        pr: 2.5
+                        pr: 2.5,
+                        pb: 2.5
                     }}
                 >
                     <Box sx={{ width: '100%' }}
@@ -576,7 +584,9 @@ function Contactstaff() {
                                             ? <span style={{ fontStyle: 'italic', color: '#888' }}>This message has been deleted</span>
                                             : (
                                                 <>
-                                                    {msg.content}
+                                                    <Typography sx={{ whiteSpace: 'pre-line' }}>
+                                                        {msg.content}
+                                                    </Typography>
                                                     {msg.isEdited && (
                                                         <span
                                                             style={{

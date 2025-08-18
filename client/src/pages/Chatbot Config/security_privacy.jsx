@@ -182,7 +182,7 @@ function Security_privacy() {
                                     Data retention settings
                                 </Typography>
                                 <Typography variant="body2" sx={{ color: "#444" }}>
-                                    Enabled: Your chatbot will have access to the full conversation of each client <br /> Disabled: Your chatbot's context expires after every session
+                                    Enabled: Your chatbot will have access to the full context of each client <br /> Disabled: Your chatbot has limited context to only the client's name
                                 </Typography>
                             </Grid>
                             <Grid item>

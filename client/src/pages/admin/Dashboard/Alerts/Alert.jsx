@@ -4,11 +4,13 @@ import React, { useEffect, useState } from 'react';
 import http from '../../../../http';
 import dayjs from 'dayjs';
 import { AccessTime, Edit, Delete, Refresh, Clear, Search } from '@mui/icons-material';
-import isSameOrAfter from 'dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
+
+dayjs.extend(isSameOrAfter);
 
 function Alert() {
     const [alertList, setAlertList] = useState([]);

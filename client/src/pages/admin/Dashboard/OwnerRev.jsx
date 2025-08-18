@@ -1,8 +1,8 @@
-import { Typography, Box, Button, Grid, Card, CardContent, Icon, IconButton } from "@mui/material";
+import { Typography, Box, Button, Grid, Card, CardContent, Icon, IconButton, Tooltip } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import http from '../../../http';
-import { Star, Delete } from '@mui/icons-material'
+import { Star, Delete, Check, Refresh } from '@mui/icons-material'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dayjs from 'dayjs';
@@ -16,6 +16,8 @@ dayjs.extend(timezone);
 function OwnerRev() {
     const navigate = useNavigate();
     const [reviewList, setReviewList] = useState([]);
+    const [readReviewIds, setReadReviewIds] = useState([]);
+    const [showRead, setShowRead] = useState(false);
 
     useEffect(() => {
         http.get('/reviews')
@@ -23,6 +25,11 @@ function OwnerRev() {
                 setReviewList(res.data)
             })
             .catch((err) => console.error("Failed to fetch review data"))
+        http.get('/read-reviews')
+            .then((res) => {
+                setReadReviewIds(res.data)
+            })
+            .catch((err) => console.error("Failed to fetch read reviews"))
     }, []);
 
     const deleteReview = (id) => {
@@ -32,19 +39,42 @@ function OwnerRev() {
             .catch(() => toast.error('Failed to delete review'));
     };
 
+    const markReviewAsRead = (id) => {
+        http.post(`/read-reviews/${id}/read`)
+            .then(() => {
+                setReadReviewIds(prev => [...prev, id]);
+                toast.success('Marked as read');
+            })
+            .catch(() => toast.error('Failed to mark review as read'));
+    };
+
+    const handleRefreshClick = () => {
+        setShowRead(prev => !prev);
+    };
+
     return (
         <Box>
             <ToastContainer />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant='h5' sx={{ my: 2 }}>
-                    Owner reviews
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant='h5' sx={{ my: 2, mr: 1 }}>
+                        Owner reviews
+                    </Typography>
+                    <Tooltip title={showRead ? "Show Unread" : "Show Read"}>
+                        <IconButton onClick={handleRefreshClick}>
+                            <Refresh />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
                 <Button onClick={() => navigate(-1)} variant="contained" color='inherit'>
                     back
                 </Button>
             </Box>
             <Grid container spacing={2}>
-                {reviewList.map((review) => (
+                {(showRead
+                    ? reviewList.filter(review => readReviewIds.includes(review.id))
+                    : reviewList.filter(review => !readReviewIds.includes(review.id))
+                ).map((review) => (
                     <Grid item xs={12} md={6} lg={4} key={review.id}>
                         <Card>
                             <CardContent>
@@ -52,9 +82,16 @@ function OwnerRev() {
                                     <Typography variant='h6' sx={{ flexGrow: 1 }}>
                                         <Box justifyContent='space-between' display='flex'>
                                             {review.comment}
-                                            <IconButton onClick={() => deleteReview(review.id)}>
-                                                <Delete color='error' />
-                                            </IconButton>
+                                            <Box>
+                                                <IconButton onClick={() => deleteReview(review.id)}>
+                                                    <Delete color='error' />
+                                                </IconButton>
+                                                {!showRead && (<Tooltip title="Mark as read">
+                                                    <IconButton onClick={() => markReviewAsRead(review.id)}>
+                                                        <Check />
+                                                    </IconButton>
+                                                </Tooltip>)}
+                                            </Box>
                                         </Box>
                                         <Box>
                                             {[1, 2, 3, 4, 5].map((star) => (

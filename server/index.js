@@ -40,9 +40,6 @@ app.post('/api/wa/:userId/logout', async (req, res) => {
 
 });
 
-
-const PORT = process.env.APP_PORT;
-app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
 //request and response, respond a "Welcome" message
 app.get("/", (req, res) => {
     res.send("Welcome");
@@ -61,7 +58,7 @@ const ticketRoutes = require('./routes/tickets')
 app.use('/api/ticket', ticketRoutes)
 const alertRoutes = require('./routes/alert');
 app.use('/alert', alertRoutes);
-const testChatRoutes = require('./routes/testChat')
+const testChatRoutes = require('./routes/TestChat')
 app.use('/api/testchat', testChatRoutes);
 const announcementRoutes = require('./routes/announcements')
 app.use('/announcements', announcementRoutes)
@@ -75,11 +72,16 @@ const chooseReviews = require('./routes/choose-review')
 app.use('/choose-review', chooseReviews)
 const analyticsRoutes = require('./routes/analytics');
 app.use('/api', analyticsRoutes);
-const escalationRoutes = require('./routes/escalations');
-app.use('/escalations', escalationRoutes);
+const escalationRoutes = require('./routes/escalations')
+app.use('/escalations', escalationRoutes)
 const clientmsgRoutes = require('./routes/client_messages_routes');
 app.use('/client_messages', clientmsgRoutes);
-
+const chatbotRoutes = require('./routes/chatbot')
+app.use('/sendchatbot', chatbotRoutes)
+const myclients = require('./routes/clients')
+app.use('/api/clients', myclients)
+const readReviewsRoutes = require('./routes/readReviews');
+app.use('/read-reviews', readReviewsRoutes);
 
 
 const db = require('./models');
@@ -107,3 +109,6 @@ db.sequelize.sync({ alter: false }).then(async () => {
 }).catch((err) => {
     console.log(err);
 });
+
+
+

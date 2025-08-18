@@ -44,7 +44,6 @@ module.exports = (sequelize, DataTypes) => {
         tableName: 'client_messages',
         timestamps: false
     });
-
     ClientMessage.associate = (models) => {
         ClientMessage.belongsTo(models.Client, {
             foreignKey: 'senderPhone',
@@ -53,6 +52,7 @@ module.exports = (sequelize, DataTypes) => {
             constraints: false
         });
     };
+
 
     return ClientMessage;
 };

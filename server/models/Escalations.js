@@ -4,10 +4,15 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,
+            autoIncrement: true
         },
         clientId: {
             type: DataTypes.INTEGER,
             allowNull: false,
+        },
+        userId:{
+            type: DataTypes.INTEGER,
+            allowNull: false
         },
         chathistory: {
             type: DataTypes.STRING(2000),
@@ -15,14 +20,20 @@ module.exports = (sequelize, DataTypes) => {
         },
         chatsummary: {
             type: DataTypes.STRING(2000),
-            allownull: true
+            allowNull: false
         },
+        status: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            default: "Pending"
+        }
     }, {
         tableName: 'escalations'
     });
 
     Escalation.associate = (models) => {
-        Escalation.belongsTo(models.Client, { foreignKey: 'clientId', sourceKey: 'id' })
+        Escalation.belongsTo(models.Client, { foreignKey: 'clientId' })
+        Escalation.belongsTo(models.User, { foreignKey: 'userId'})
     };
 
     return Escalation;

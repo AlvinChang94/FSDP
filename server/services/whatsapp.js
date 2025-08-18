@@ -88,22 +88,24 @@ function startSession(rawUserId) {
     }
   });
 
-  // --- Your bot logic here ---
+
   client.on('message', async (msg) => {
     if (msg.fromMe || msg.isStatus) return;
     try {
       const contact = await msg.getContact();
       console.log(`[${userId}] 💬 Message from ${msg.from}, ${contact.pushname || contact.name || "Unknown"}: ${msg.body}`);
-      const { data } = await axios.post('http://localhost:3001/api/testchat/receive', {
+      const { data } = await axios.post('http://localhost:3001/sendchatbot/receive', {
         userId: rawUserId,      // pass the userId that owns this WA session
         From1: msg.from,         // the WhatsApp sender
         Body: msg.body,        // message text
         ProfileName: contact.name || contact.pushname || "Unknown",
+        To1: client.info.wid._serialized
         // add more fields if your API expects them
       });
       const replyText =
         typeof data === 'string' ? data :
           data?.reply || "🤖 Sorry, I didn't quite catch that.";
+      console.log(replyText)
 
       //await msg.reply(String(replyText));
 

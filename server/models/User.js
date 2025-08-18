@@ -27,19 +27,19 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT,
             allowNull: true
         },
-        business_name:{
+        business_name: {
             type: DataTypes.TEXT,
             allowNull: true
         },
-        business_overview:{
+        business_overview: {
             type: DataTypes.TEXT,
             allowNull: true
         },
-        phone_num:{
+        phone_num: {
             type: DataTypes.TEXT,
             allowNull: true
         },
-        profile_picture:{
+        profile_picture: {
             type: DataTypes.TEXT,
             allowNull: true
         }
@@ -58,17 +58,12 @@ module.exports = (sequelize, DataTypes) => {
         });
         User.belongsToMany(models.Client, {
             through: models.ClientUser,
-            foreignKey: 'userId',      
+            foreignKey: 'userId',
             otherKey: 'clientId',
             onDelete: "cascade",
             hooks: true
         });
 
-      
-        User.hasMany(models.ClientUser, {
-            foreignKey: 'userId', onDelete: "cascade",
-            hooks: true
-        });
     };
     return User;
 }

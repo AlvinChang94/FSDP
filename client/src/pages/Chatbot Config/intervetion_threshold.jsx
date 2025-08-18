@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Typography, Paper, FormGroup, FormControlLabel, Checkbox, TextField, Button, Grid, Select, MenuItem, InputLabel, FormControl, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Modal, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
@@ -6,6 +6,7 @@ import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import SecurityIcon from '@mui/icons-material/Security';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import DeleteIcon from '@mui/icons-material/Delete';
+import http from "../../http";
 
 const configNav = [
     {
@@ -54,68 +55,109 @@ function Intervention_threshold() {
     const [holdingMsg, setHoldingMsg] = useState("");
 
     // Threshold rules
-    const [rules, setRules] = useState([
-        {
-            ruleName: "Sensitive Terms",
-            triggerType: "keyword_match",
-            keyword: "surrender, beneficiary, trustee, payout, claim rejection",
-            action: "escalate to human"
-        },
-        {
-            ruleName: "Personal Info Terms",
-            triggerType: "keyword_match",
-            keyword: "NRIC, IC, passport, address, bank account, phone number",
-            action: "mask data"
-        },
-        {
-            ruleName: "Financial Actions",
-            triggerType: "keyword_match",
-            keyword: "cancel my policy, switch payment, withdraw funds",
-            action: "escalate to human"
-        },
-        {
-            ruleName: "Unanswered Questions",
-            triggerType: "retries_exceeded",
-            keyword: "5",
-            action: "escalate to human"
-        },
-        {
-            ruleName: "Frustration Signals",
-            triggerType: "emotion_detected",
-            keyword: 'angry, upset, frustrated, confused, "not helpful", "annoyed"',
-            action: "escalate to human"
-        }
-    ]);
+    const [rules, setRules] = useState([]);
     const [ruleName, setRuleName] = useState("");
     const [triggerType, setTriggerType] = useState("");
     const [keyword, setKeyword] = useState("");
     const [action, setAction] = useState("");
     const [deleteIdx, setDeleteIdx] = useState(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [confidenceScore, setConfidenceScore] = useState(0.8)
+    const [saveStatus, setSaveStatus] = useState("");
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const r = await http.get('/api/config/rules');
+                setRules(r.data.rules || []);
+                const s = await http.get('/api/config/interventionsettings');
+                if (s.data.settings) {
+                    setHoldingMsg(s.data.settings.holdingMsg || '');
+                    // parse notificationMethod if saved as JSON string or set defaults
+                    const nm = s.data.settings.notificationMethod;
+                    if (nm && typeof nm === 'object') {
+                        setNotification({
+                            email: !!nm.email,
+                            dashboard: !!nm.dashboard,
+                            whatsapp: !!nm.whatsapp
+                        });
+                    } else {
+                        // if backend sent a string or null, keep defaults
+                    }
+                }
+            } catch (err) { console.error(err); }
+        };
+        load();
+    }, []);
 
     // Add rule
-    const handleAddRule = () => {
-        if (ruleName && triggerType && keyword && action) {
-            setRules([
-                ...rules,
-                { ruleName, triggerType, keyword, action }
-            ]);
-            setRuleName("");
-            setTriggerType("");
-            setKeyword("");
-            setAction("");
+    const handleAddRule = async () => {
+        if (!ruleName || !triggerType || !keyword || !action) return;
+        try {
+            const res = await http.post('/api/config/rules', {
+                ruleName, triggerType, keyword, action, confidenceThreshold: parseFloat(confidenceScore)
+            });
+            setRules(prev => [res.data.rule, ...prev]);
+            setRuleName(''); setTriggerType(''); setKeyword(''); setAction(''); setConfidenceScore(0.8);
+        } catch (err) { console.error(err); }
+    };
+
+    const handleDeleteRule = async () => {
+        try {
+            const toDelete = rules[deleteIdx];
+            await http.delete(`/api/config/rules/${toDelete.id}`);
+            setRules(prev => prev.filter((_, i) => i !== deleteIdx));
+            setDeleteModalOpen(false);
+        } catch (err) { console.error(err); }
+    };
+
+    const handleConfidenceChange = (e) => {
+        let raw = e.target.value;
+        // Enforce max length of 4 characters
+        if (raw.length > 4) {
+            raw = raw.slice(0, 4);
+        }
+        const val = parseFloat(raw);
+
+        if (isNaN(val)) {
+            setConfidenceScore(0.8); // fallback if cleared
+        } else if (val > 1) {
+            setConfidenceScore(1)
+        }
+        else {
+            setConfidenceScore(val);
         }
     };
-
-    // Delete rule
-    const handleDeleteRule = () => {
-        setRules(rules.filter((_, idx) => idx !== deleteIdx));
-        setDeleteModalOpen(false);
-        setDeleteIdx(null);
+    const saveSettings = async (newNotification = notification, newHoldingMsg = holdingMsg) => {
+        try {
+            await http.put('/api/config/interventionsettings', {
+                notificationMethod: newNotification,
+                holdingMsg: newHoldingMsg
+            });
+            setTimeout(() => setSaveStatus(""), 1600);
+        } catch (err) {
+            console.error(err);
+            setSaveStatus("Failed to save");
+            setTimeout(() => setSaveStatus(""), 2200);
+        }
+    };
+    const onNotificationChange = (key, checked) => {
+        const updated = { ...notification, [key]: checked };
+        setNotification(updated);
+        // save immediately
+        saveSettings(updated, holdingMsg);
     };
 
+    const handleSaveHoldingMsg = async () => {
+        // save current notification + holdingMsg
+        setSaveStatus("Saving...");
+        await saveSettings(notification, holdingMsg);
+        setSaveStatus("Saved");
+    };
+
+
     return (
-        <Box sx={{position: 'absolute', left: {xs: 2, md: 4, lg: 220}, top: 0, width:'80vw'}}>
+        <Box sx={{ position: 'absolute', left: { xs: 2, md: 4, lg: 220 }, top: 0, width: '80vw' }}>
             <Box sx={{ display: "flex", bgcolor: "#181617" }}>
                 {/* Secondary Nav Bar */}
                 <Box sx={{
@@ -183,7 +225,7 @@ function Intervention_threshold() {
                                 control={
                                     <Checkbox
                                         checked={notification.email}
-                                        onChange={e => setNotification({ ...notification, email: e.target.checked })}
+                                        onChange={e => onNotificationChange('email', e.target.checked)}
                                     />
                                 }
                                 label="Email"
@@ -193,7 +235,7 @@ function Intervention_threshold() {
                                 control={
                                     <Checkbox
                                         checked={notification.dashboard}
-                                        onChange={e => setNotification({ ...notification, dashboard: e.target.checked })}
+                                        onChange={e => onNotificationChange('dashboard', e.target.checked)}
                                     />
                                 }
                                 label="Dashboard alert"
@@ -203,13 +245,14 @@ function Intervention_threshold() {
                                 control={
                                     <Checkbox
                                         checked={notification.whatsapp}
-                                        onChange={e => setNotification({ ...notification, whatsapp: e.target.checked })}
+                                        onChange={e => onNotificationChange('whatsapp', e.target.checked)}
                                     />
                                 }
-                                label="Whatsapp"
+                                label="SMS"
                                 sx={{ mr: 3 }}
                             />
                         </FormGroup>
+
                     </Paper>
 
                     {/* Preferred holding message */}
@@ -226,7 +269,12 @@ function Intervention_threshold() {
                             onChange={e => setHoldingMsg(e.target.value)}
                             sx={{ bgcolor: "#fff", borderRadius: 2, mb: 2 }}
                         />
-                        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                        <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 2 }}>
+                            {saveStatus && (
+                                <Typography sx={{ color: saveStatus === 'Saved' ? 'green' : 'orange', mr: 70.5 }}>
+                                    {saveStatus}
+                                </Typography>
+                            )}
                             <Button
                                 variant="contained"
                                 sx={{
@@ -241,9 +289,12 @@ function Intervention_threshold() {
                                     '&:hover': { bgcolor: "#2e6fd8" },
                                     mt: 0.5
                                 }}
+                                onClick={handleSaveHoldingMsg}
                             >
                                 Save changes
                             </Button>
+                            
+
                         </Box>
                     </Paper>
 
@@ -296,7 +347,7 @@ function Intervention_threshold() {
                                 />
                             </Grid>
                             <Grid item xs={12} md={6}>
-                                <FormControl fullWidth variant="outlined" sx={{ bgcolor: "#fff", borderRadius: 2 }}>
+                                <FormControl fullWidth variant="outlined" sx={{ bgcolor: "#fff", borderRadius: 2, mb: 2 }}>
                                     <InputLabel id="action-label">Action</InputLabel>
                                     <Select
                                         labelId="action-label"
@@ -304,11 +355,29 @@ function Intervention_threshold() {
                                         label="Action"
                                         onChange={e => setAction(e.target.value)}
                                     >
-                                        
+
                                         <MenuItem value="escalate to human">escalate to human</MenuItem>
                                         <MenuItem value="log only">log only</MenuItem>
                                         <MenuItem value="mask data">mask data</MenuItem>
                                     </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <FormControl fullWidth sx={{ mb: 0 }}>
+                                    <TextField
+                                        id="confidence-threshold"
+                                        type="number"
+                                        label="Confidence Threshold"
+                                        value={confidenceScore}
+                                        onChange={handleConfidenceChange}
+                                        inputProps={{
+                                            step: 0.1,
+                                            min: 0,
+                                            max: 1
+                                        }}
+                                        variant="outlined"
+                                    />
+
                                 </FormControl>
                             </Grid>
                         </Grid>
@@ -351,16 +420,18 @@ function Intervention_threshold() {
                                         <TableCell sx={{ fontWeight: "bold" }}>Trigger type</TableCell>
                                         <TableCell sx={{ fontWeight: "bold" }}>Keyword/Pattern</TableCell>
                                         <TableCell sx={{ fontWeight: "bold" }}>Action</TableCell>
+                                        <TableCell sx={{ fontWeight: "bold" }}>Confidence</TableCell>
                                         <TableCell sx={{ fontWeight: "bold" }}></TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {rules.map((rule, idx) => (
                                         <TableRow key={idx}>
-                                            <TableCell sx={{whiteSpace: "pre-line", wordBreak: "break-word",}}>{rule.ruleName}</TableCell>
+                                            <TableCell sx={{ whiteSpace: "pre-line", wordBreak: "break-word", }}>{rule.ruleName}</TableCell>
                                             <TableCell>{rule.triggerType}</TableCell>
-                                            <TableCell sx={{whiteSpace: "pre-line", wordBreak: "break-word",}}>{rule.keyword}</TableCell>
+                                            <TableCell sx={{ whiteSpace: "pre-line", wordBreak: "break-word", }}>{rule.keyword}</TableCell>
                                             <TableCell>{rule.action}</TableCell>
+                                            <TableCell>{rule.confidenceThreshold?.toFixed(2) ?? rule.confidenceThreshold}</TableCell>
                                             <TableCell>
                                                 <IconButton onClick={() => { setDeleteIdx(idx); setDeleteModalOpen(true); }}>
                                                     <DeleteIcon sx={{ color: "#e74c3c" }} />

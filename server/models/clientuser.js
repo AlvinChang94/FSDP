@@ -16,17 +16,29 @@ module.exports = (sequelize, DataTypes) => {
       },
       primaryKey: true
     },
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    }
+    clientSummary: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    contactName: {
+      type:DataTypes.STRING,
+      allowNull: true
+    },
+    customFields: { type: DataTypes.JSON }
   }, {
     tableName: 'client_users',
     timestamps: false
   });
   ClientUser.associate = (models) => {
-    ClientUser.belongsTo(models.User, { foreignKey: 'userId' });
-    ClientUser.belongsTo(models.Client, { foreignKey: 'clientId' });
+    ClientUser.belongsTo(models.Client, {
+      foreignKey: 'clientId',
+      onDelete: 'CASCADE'
+    });
+    ClientUser.belongsTo(models.User, {
+      foreignKey: 'userId',
+      onDelete: 'CASCADE'
+    });
   };
+
   return ClientUser;
 };

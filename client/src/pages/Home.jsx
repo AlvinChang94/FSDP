@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-// ✅ Use named import for SVG variant
 import { QRCodeSVG } from 'qrcode.react';
 import http from '../http';
 

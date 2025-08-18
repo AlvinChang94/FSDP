@@ -20,9 +20,29 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Client.associate = (models) => {
-        Client.hasMany(models.ClientMessage, { foreignKey: 'senderPhone', sourceKey: 'phoneNumber' });
         Client.hasMany(models.Escalation, { foreignKey: 'clientId', sourceKey: 'id' })
+        Client.hasMany(models.ClientMessage, {
+            foreignKey: 'senderPhone',   // field in ClientMessage
+            sourceKey: 'phoneNumber',    // field in Client
+            as: 'messages',
+            constraints: false           // don’t enforce strict DB FK
+        });
+        Client.hasMany(models.ClientUser, {
+            foreignKey: 'clientId',
+            onDelete: 'CASCADE'
+        });
+        Client.belongsToMany(models.User, {
+            through: models.ClientUser,
+            foreignKey: 'clientId',
+            otherKey: 'userId',
+            onDelete: 'CASCADE'
+        });
+
+
+
+
     };
+
 
     return Client;
 }
