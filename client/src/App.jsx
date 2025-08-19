@@ -88,14 +88,17 @@ function App() {
         <ThemeProvider theme={MyTheme}>
           <Box sx={{ display: 'flex' }}>
             <ToastContainer
-              position="top-right"
+              position={'top-right'}
+              newestOnTop
               autoClose={3000}
-              hideProgressBar={false}
-              newestOnTop={false}
               closeOnClick
               pauseOnHover
               draggable
+              hideProgressBar={false}
+              theme="light"
+              style={{ zIndex: 20000 }}
             />
+
 
             {/* Sidebar Drawer */}
             <Drawer

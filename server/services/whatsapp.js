@@ -76,10 +76,20 @@ function startSession(rawUserId) {
     markDelinked(userId, state, 'auth_failure', rawUserId);
   });
 
-  client.on('disconnected', (reason) => {
-    console.warn(`[${userId}] ⚠️ Disconnected:`, reason);
-    markDelinked(userId, state, reason || 'disconnected', rawUserId);
+  client.on('disconnected', async (reason) => {
+    console.warn(`[${userId}] ⚠️ Disconnected: ${reason}`);
+    try {
+      await client.destroy();
+    } catch (err) {
+      if (String(err?.message).includes('Session closed')) {
+        console.warn(`[${userId}] Ignored Puppeteer session closed during disconnect.`);
+      } else {
+        console.error(err);
+      }
+    }
+    markDelinked(rawUserId, reason || 'disconnected');
   });
+
 
   client.on('change_state', (newState) => {
     if (String(newState).toUpperCase().includes('UNPAIRED')) {
@@ -105,9 +115,9 @@ function startSession(rawUserId) {
       const replyText =
         typeof data === 'string' ? data :
           data?.reply || "🤖 Sorry, I didn't quite catch that.";
-      if ((msg.from =='6588068242@c.us' && client.info.wid._serialized =='6585678797@c.us') || (msg.from =='6585678797@c.us' && client.info.wid._serialized =='6588068242@c.us')){
+      if ((msg.from == '6588068242@c.us' && client.info.wid._serialized == '6585678797@c.us') || (msg.from == '6585678797@c.us' && client.info.wid._serialized == '6588068242@c.us')) {
         await msg.reply(String(replyText));
-      } else{
+      } else {
         console.log(replyText)
       }
 
@@ -172,8 +182,8 @@ function markDelinked(rawUserId, reason = 'manual') {
   }
 
   state.lastUpdate = { status: 'delinked', reason };
-  try { state.client?.removeAllListeners(); } catch {}
-  try { state.client?.destroy(); } catch {}
+  try { state.client?.removeAllListeners(); } catch { }
+  try { state.client?.destroy(); } catch { }
 
   sessions.set(userId, {
     client: null,
