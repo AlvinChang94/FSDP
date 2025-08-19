@@ -39,6 +39,40 @@ router.post("/", async (req, res) => {
         res.status(400).json({ errors: err.errors });
     }
 });
+router.post("/mark-user-read", async (req, res) => {
+  const { id } = req.body;
+  if (!id) return res.status(400).json({ error: "id is required" });
+
+  try {
+    const announcement = await Announcement.findOne({ where: { id } });
+    if (!announcement) return res.status(404).json({ error: "Announcement not found" });
+
+    announcement.statusForUser = "Read";
+    await announcement.save();
+
+    res.json({ message: "Announcement marked as read", announcement });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update announcement status" });
+  }
+});
+router.post("/mark-admin-read", async (req, res) => {
+  const { id } = req.body;
+  if (!id) return res.status(400).json({ error: "id is required" });
+
+  try {
+    const announcement = await Announcement.findOne({ where: { id } });
+    if (!announcement) return res.status(404).json({ error: "Announcement not found" });
+
+    announcement.statusForAdmin = "Read";
+    await announcement.save();
+
+    res.json({ message: "Announcement marked as read", announcement });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update announcement status" });
+  }
+});
 
 router.get("/", async (req, res) => {
     const condition = {};

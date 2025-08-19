@@ -26,7 +26,18 @@ module.exports = (sequelize, DataTypes) => {
         scheduledDate: {
             type: DataTypes.DATE,
             allownull: true
+        },
+        statusForUser: {
+            type: DataTypes.STRING,
+            defaultValue: "Unread",
+            allownull: false,
+        },
+        statusForAdmin: {
+            type: DataTypes.STRING,
+            defaultValue: "Unread",
+            allownull: false,
         }
+
     }, {
         tableName: 'announcements' 
     });

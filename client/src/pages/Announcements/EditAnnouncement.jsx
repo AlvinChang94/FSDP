@@ -56,6 +56,8 @@ function EditAnnouncement() {
             data.title = data.title.trim();
             data.content = data.content.trim();
             data.scheduledDate = data.scheduledDate || null;
+            data.statusForUser = "Unread";
+            data.statusForAdmin = "Unread";
 
 
             if (!data.AudienceisModerator && !data.AudienceisUser) {
