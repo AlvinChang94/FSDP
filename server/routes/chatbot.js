@@ -13,6 +13,7 @@ const { buildPrompt } = require('./../services/promptBuilder');
 const yup = require('yup'); // ensure yup is available
 const { TestChat } = require('../models');
 const { TestChatMessage } = require('../models');
+const { sendEscalationEmail, sendEscalationSMS } = require('./../services/emailService');
 
 async function ensureClientExists({ userId, phoneNumber, name }) {
     // Try to find by exact number or number without '+'
@@ -23,6 +24,8 @@ async function ensureClientExists({ userId, phoneNumber, name }) {
             ]
         }
     });
+
+
 
     if (!client) {
         client = await Client.create({
@@ -188,6 +191,7 @@ router.post('/receive', async (req, res) => {
         if (!userId || !Body || !fromRaw) {
             return console.log({ error: 'userId, Body, and From/From1 are required' });
         }
+        let user = await User.findByPk(userId);
         const From = `+${String(fromRaw).replace(/@.*$/, '').replace(/^\+?/, '')}`;
         const To = `+${String(To1).replace(/@.*$/, '').replace(/^\+?/, '')}`;
         const now = new Date();
@@ -201,6 +205,7 @@ router.post('/receive', async (req, res) => {
             ConfigSettings.findOne({ where: { userId } }),
             User.findByPk(userId)
         ]);
+
 
         const ownerName = businessOwner?.name || '';
         const businessName = businessOwner?.business_name || '';
@@ -363,6 +368,27 @@ Message: "${Body}"
                         timestamp: now,
                         userId
                     });
+                    let method;
+                    try {
+                        method = JSON.parse(userSettings.notificationMethod);
+                    } catch (err) {
+                        console.error("Invalid JSON in notificationMethod:", err);
+                    }
+                    if (method?.email) {
+                        await sendEscalationEmail({
+                            to: `${user.email}`,
+                            subject: `Escalation from chatbot for client ${ProfileName}`,
+                            body: `Client ${ProfileName} requires human intervention. Do check QueryEase for more information on the client.`
+                        });
+                    }
+                    if (method?.whatsapp) {
+                        await sendEscalationSMS({
+                            phoneNumber: user.phone_num, // ensure it's stored in +65... format
+                            message: `Client ${ProfileName} requires human intervention. Do check QueryEase for more information on the client.`
+                        });
+
+                    }
+
 
                     // 🔧 Place your additional code here
                     // (e.g. notify human operator, send webhook, log activity)
@@ -433,7 +459,7 @@ Message: "${Body}"
                     chatHistory           // chatHistory
                 );
                 if (boo == "True") {
-                    systemPrompt += `Human intervention is currently requested. You will now REQUEST the user if they wish to speak to a human representative of the business for confirmation`
+                    systemPrompt += `Human intervention is currently requested. You will now REQUEST the user if they wish to speak to a human representative of the business for confirmation. DO NOT ask for additional details. Simply ask for their confirmation ONLY`
                     Escalation.create({
                         clientId: clientRecord.id,
                         userId: userId,
@@ -441,6 +467,7 @@ Message: "${Body}"
                         chatsummary: "tbd",
                         status: 'tbc',
                     })
+
                 }
             }
 
