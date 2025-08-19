@@ -13,11 +13,11 @@ function Escalations() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogTitle, setDialogTitle] = useState("");
     const [dialogContent, setDialogContent] = useState("");
-    const [historyExpanded, setHistoryExpanded] = React.useState(false);
-    const [summaryExpanded, setSummaryExpanded] = React.useState(false);
+    const [expandedHistories, setExpandedHistories] = useState({});
+    const [expandedSummaries, setExpandedSummaries] = useState({});
     const [loading, setLoading] = useState(false);
     const [selectedEscalation, setSelectedEscalation] = useState(null);
-    
+
 
     useEffect(() => {
         http.get("/escalations/clients_full_data")
@@ -45,8 +45,13 @@ function Escalations() {
         setDialogOpen(false);
     };
 
-    const handleHistoryToggle = () => setHistoryExpanded(!historyExpanded);
-    const handleSummaryToggle = () => setSummaryExpanded(!summaryExpanded);
+    const toggleHistory = (id) => {
+        setExpandedHistories(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
+    const toggleSummary = (id) => {
+        setExpandedSummaries(prev => ({ ...prev, [id]: !prev[id] }));
+    };
 
     const generateChatSummary = async (escalation) => {
         if (!escalation) return;
@@ -67,7 +72,13 @@ function Escalations() {
             setEscalations(prev =>
                 prev.map(e =>
                     e.escalation.clientId === escalation.escalation.clientId
-                        ? { ...e, chatsummary: summary }
+                        ? {
+                            ...e,
+                            escalation: {
+                                ...e.escalation,
+                                chatsummary: summary
+                            }
+                        }
                         : e
                 )
             );
@@ -82,7 +93,7 @@ function Escalations() {
 
     return (
         <Box >
-            <Typography variant="h5" sx={{mb: 2}}>Escalations</Typography>
+            <Typography variant="h5" sx={{ mb: 2 }}>Escalations</Typography>
             <Grid container spacing={2} direction="column">
                 {escalations.map((escalation) => (
                     <Grid item xs={12} key={escalation.id}>
@@ -93,16 +104,16 @@ function Escalations() {
                                     <Typography variant="h7"><strong>Client ID: </strong> {escalation.escalation.clientId}</Typography>
                                     <Box sx={{
                                         mt: 2, flexGrow: 1,
-                                        overflow: historyExpanded ? 'visible' : 'hidden',
-                                        textOverflow: historyExpanded ? 'unset' : 'ellipsis',
+                                        overflow: expandedHistories[escalation.id] ? 'visible' : 'hidden',
+                                        textOverflow: expandedHistories[escalation.id] ? 'unset' : 'ellipsis',
                                         width: "75%",
-                                        display: historyExpanded ? 'block' : '-webkit-box',
-                                        WebkitBoxOrient: historyExpanded ? 'unset' : 'vertical',
-                                        WebkitLineClamp: historyExpanded ? 'unset' : 2,
+                                        display: expandedHistories[escalation.id] ? 'block' : '-webkit-box',
+                                        WebkitBoxOrient: expandedHistories[escalation.id] ? 'unset' : 'vertical',
+                                        WebkitLineClamp: expandedHistories[escalation.id] ? 'unset' : 2,
                                         cursor: 'pointer',
                                         userSelect: 'none',
                                     }}>
-                                        <Tooltip onClick={handleHistoryToggle}
+                                        <Tooltip onClick={() => toggleHistory(escalation.id)}
                                             sx={{
                                             }}>
                                             <Typography variant="h7" sx={{ whiteSpace: "pre-line" }}><strong>Chat History: </strong> {escalation.escalation.chathistory}</Typography>
@@ -111,24 +122,24 @@ function Escalations() {
                                     </Box>
 
                                     {escalation.escalation.chatsummary && (
-                                    <Box sx={{
-                                        mt: 2, flexGrow: 1,
-                                        overflow: summaryExpanded ? 'visible' : 'hidden',
-                                        textOverflow: summaryExpanded ? 'unset' : 'ellipsis',
-                                        width: "75%",
-                                        display: summaryExpanded ? 'block' : '-webkit-box',
-                                        WebkitBoxOrient: summaryExpanded ? 'unset' : 'vertical',
-                                        WebkitLineClamp: summaryExpanded ? 'unset' : 2,
-                                        cursor: 'pointer',
-                                        userSelect: 'none',
-                                    }}>
-                                        <Tooltip onClick={handleSummaryToggle}
-                                            sx={{
-                                            }}>
-                                            <Typography variant="h7" sx={{ whiteSpace: "pre-line" }}><strong>Chat Summary: </strong> <br/>{escalation.escalation.chatsummary}</Typography>
+                                        <Box sx={{
+                                            mt: 2, flexGrow: 1,
+                                            overflow: expandedSummaries[escalation.id] ? 'visible' : 'hidden',
+                                            textOverflow: expandedSummaries[escalation.id] ? 'unset' : 'ellipsis',
+                                            width: "75%",
+                                            display: expandedSummaries[escalation.id] ? 'block' : '-webkit-box',
+                                            WebkitBoxOrient: expandedSummaries[escalation.id] ? 'unset' : 'vertical',
+                                            WebkitLineClamp: expandedSummaries[escalation.id] ? 'unset' : 2,
+                                            cursor: 'pointer',
+                                            userSelect: 'none',
+                                        }}>
+                                            <Tooltip onClick={() => toggleSummary(escalation.id)}
+                                                sx={{
+                                                }}>
+                                                <Typography variant="h7" sx={{ whiteSpace: "pre-line" }}><strong>Chat Summary: </strong> <br />{escalation.escalation.chatsummary}</Typography>
 
-                                        </Tooltip>
-                                    </Box>
+                                            </Tooltip>
+                                        </Box>
                                     )}
                                 </CardContent>
 

@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         chatsummary: {
             type: DataTypes.STRING(2000),
-            allowNull: false
+            allowNull: true
         },
         status: {
             type: DataTypes.STRING,
@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Escalation.associate = (models) => {
         Escalation.belongsTo(models.Client, { foreignKey: 'clientId' })
-        Escalation.belongsTo(models.User, { foreignKey: 'userId'})
+        Escalation.belongsTo(models.User, { foreignKey: 'userId' })
     };
 
     return Escalation;
