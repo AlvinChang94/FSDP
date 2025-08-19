@@ -83,6 +83,20 @@ const AnnouncementsPanel = () => {
     };
 
     const isPopoverOpen = Boolean(popoverAnchor);
+
+    const sortedForUser = [...panelAnnouncementList].sort((a, b) => {
+        if (a.statusForUser === b.statusForUser) {
+            return a.id - b.id;
+        }
+        return a.statusForUser === "Unread" ? -1 : 1;
+    });
+
+    const sortedForAdmin = [...panelAnnouncementList].sort((a, b) => {
+        if (a.statusForAdmin === b.statusForAdmin) {
+            return a.id - b.id;
+        }
+        return a.statusForAdmin === "Unread" ? -1 : 1;
+    });
     return (
         <>
             <Fab
@@ -93,13 +107,13 @@ const AnnouncementsPanel = () => {
                     top: '50%',
                     transform: 'translateY(-50%)',
                     right: 0,
-                    zIndex: 1300, 
-                    width: 40, 
-                    height: 150, 
-                    borderTopLeftRadius: 16,    
-                    borderBottomLeftRadius: 16, 
-                    borderTopRightRadius: 0,    
-                    borderBottomRightRadius: 0, 
+                    zIndex: 1300,
+                    width: 40,
+                    height: 150,
+                    borderTopLeftRadius: 16,
+                    borderBottomLeftRadius: 16,
+                    borderTopRightRadius: 0,
+                    borderBottomRightRadius: 0,
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -128,45 +142,71 @@ const AnnouncementsPanel = () => {
                             <Box sx={{ overflowY: 'auto', height: 575, ...(user && user.role == 'user' && { height: 263 }) }}>
                                 <AccordionDetails>
                                     <Grid container spacing={2} direction='column'>
-                                        {panelAnnouncementList.filter(announcement =>
+                                        {(user && user.role === 'user' ? sortedForUser : sortedForAdmin).filter(announcement =>
                                             (announcement.sendNow || (!announcement.sendNow && (new Date(announcement.scheduledDate).toLocaleString()) <= today)) && ((user.role == 'admin' && announcement.AudienceisModerator) || (user.role == 'user' && announcement.AudienceisUser)))
                                             .map((announcement) => (
                                                 <Grid item xs={12} >
                                                     <AccordionDetails sx={{ mb: 0.5 }}>
                                                         <Card sx={{ backgroundColor: '#fff', boxShadow: 'none', mb: -3.5, mt: -1, width: 235 }}>
-                                                            <CardContent>
-                                                                {/* Title & Edit Icon */}
-                                                                <Box>
-                                                                    <Typography variant="h7" sx={{
-                                                                        flexGrow: 1, p: '5px', overflow: 'hidden', textOverflow: 'ellipsis',
+                                                            <Box sx={{ display: 'flex' }}>
+                                                                {user.role === "user" ? (
+                                                                    <Box sx={{
+                                                                    width: 6,
+                                                                    height: 60,
+                                                                    alignSelf: 'center',
+                                                                    flexShrink: 0,
+                                                                    backgroundColor: announcement.statusForUser === 'Unread' ? 'red' : 'green',
+                                                                    borderRadius: '2px 0 0 2px',
+                                                                    mr: 1
+                                                                }} />
+                                                                ) : user.role === "admin" ? (
+                                                                    <Box sx={{
+                                                                    width: 6,
+                                                                    height: 60,
+                                                                    alignSelf: 'center',
+                                                                    flexShrink: 0,
+                                                                    backgroundColor: announcement.statusForAdmin === 'Unread' ? 'red' : 'green',
+                                                                    borderRadius: '2px 0 0 2px',
+                                                                    mr: 1
+                                                                }} />
+                                                                ) : (null)}
+                                                                
+
+                                                                <CardContent sx={{ flex: 'grow' }}>
+                                                                    {/* Title & Edit Icon */}
+                                                                    <Box>
+                                                                        <Typography variant="h7" sx={{
+                                                                            flexGrow: 1, p: '5px', overflow: 'hidden', textOverflow: 'ellipsis',
+                                                                            display: '-webkit-box',
+                                                                            WebkitBoxOrient: 'vertical',
+                                                                            WebkitLineClamp: 1
+                                                                        }}>
+                                                                            <strong>
+                                                                                {announcement.title}
+                                                                            </strong>
+                                                                        </Typography>
+                                                                    </Box>
+
+                                                                    {/* Content */}
+                                                                    <Typography sx={{
+                                                                        whiteSpace: 'pre-wrap', p: '4px', fontSize: '12px', color: '#7f7f7f', overflow: 'hidden', textOverflow: 'ellipsis',
                                                                         display: '-webkit-box',
                                                                         WebkitBoxOrient: 'vertical',
-                                                                        WebkitLineClamp: 1
+                                                                        WebkitLineClamp: 2
                                                                     }}>
-                                                                        <strong>
-                                                                            {announcement.title}
-                                                                        </strong>
+                                                                        {announcement.content}
                                                                     </Typography>
-                                                                </Box>
+                                                                </CardContent>
+                                                                <IconButton
+                                                                    type="button"
+                                                                    aria-describedby={popoverAnnouncementId === announcement.id ? 'simple-popover' : undefined}
+                                                                    onClick={(e) => handlePopoverOpen(e, announcement.id)}
+                                                                    sx={{ alignSelf: 'flex-start', ml: 'auto', mt: 2 }}
+                                                                >
+                                                                    <MoreVertIcon />
+                                                                </IconButton>
+                                                            </Box>
 
-                                                                {/* Content */}
-                                                                <Typography sx={{
-                                                                    whiteSpace: 'pre-wrap', p: '4px', fontSize: '12px', color: '#7f7f7f', overflow: 'hidden', textOverflow: 'ellipsis',
-                                                                    display: '-webkit-box',
-                                                                    WebkitBoxOrient: 'vertical',
-                                                                    WebkitLineClamp: 2
-                                                                }}>
-                                                                    {announcement.content}
-                                                                </Typography>
-                                                            </CardContent>
-                                                            <IconButton
-                                                                type="button"
-                                                                aria-describedby={popoverAnnouncementId === announcement.id ? 'simple-popover' : undefined}
-                                                                onClick={(e) => handlePopoverOpen(e, announcement.id)}
-                                                                sx={{ ml: 22 }}
-                                                            >
-                                                                <MoreVertIcon />
-                                                            </IconButton>
 
                                                             {/* Popover for this announcement */}
                                                             <Popover
@@ -186,7 +226,7 @@ const AnnouncementsPanel = () => {
                                                             </Popover>
                                                         </Card>
                                                         <Dialog open={dialogOpen} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-                                                            <DialogTitle>{dialogAnnouncement?.title}</DialogTitle>
+                                                            <DialogTitle><strong>{dialogAnnouncement?.title}</strong></DialogTitle>
                                                             <DialogContent dividers>
                                                                 <Typography whiteSpace="pre-wrap">
                                                                     {dialogAnnouncement?.content}
