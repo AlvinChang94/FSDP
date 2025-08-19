@@ -354,7 +354,16 @@ router.get('/profilepic/:id', (req, res) => {
 
 });
 
+//Auto delete feature
+router.get('/auto-delete', validateToken, async (req, res) => {
+  const user = await User.findByPk(req.user.id);
+  res.json({ autoDelete: user.autoDelete });
+});
 
-
+router.put('/auto-delete', validateToken, async (req, res) => {
+  const { autoDelete } = req.body;
+  await User.update({ autoDelete }, { where: { id: req.user.id } });
+  res.json({ success: true, autoDelete });
+});
 
 module.exports = router;
