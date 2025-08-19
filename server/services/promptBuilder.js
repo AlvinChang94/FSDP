@@ -5,7 +5,7 @@ function buildPrompt({ systemPrompt, docs, faqs, userMsg }) {
     ];
 
     const contextPolicy = [
-        "Use only the CONTEXT below for factual claims.",
+        "Use only the CONTEXT above for factual claims.",
         "If not enough info, ask a clarifying question.",
         "Prefer FAQ guidance when available."
     ].join(' ');

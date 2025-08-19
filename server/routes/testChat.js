@@ -4,6 +4,7 @@ const router = express.Router();
 const { TestChat } = require('../models');
 const { TestChatMessage } = require('../models');
 const { ClientMessage } = require('../models')
+const { ConfigSettings } = require('../models')
 const { User } = require('../models')
 const { validateToken } = require('../middlewares/auth');
 const yup = require("yup");
@@ -11,6 +12,8 @@ const { LexRuntimeV2Client, RecognizeTextCommand } = require('@aws-sdk/client-le
 const bodyParser = require("body-parser");
 const twilio = require("twilio");
 const { Op } = require('sequelize');
+const { retrieveContext } = require('./../services/retrievalService');
+const { buildPrompt } = require('./../services/promptBuilder');
 
 
 //const waRouter = require('./waRouter');
@@ -132,7 +135,6 @@ router.post('/botmessage', validateToken, async (req, res) => {
     const businessOwner = await User.findByPk(sender_id);
     const businessName = businessOwner?.business_name || "";
     const businessOverview = businessOwner?.business_overview || "";
-    console.log(businessName)
     const userTimestamp = new Date();
     await TestChatMessage.create({
       sender_id,

@@ -44,20 +44,20 @@ const actionOptions = [
 ];
 function Intervention_threshold() {
     const toastCooldownRef = useRef(0);
-      const showErrorWithCooldown = (msg) => {
+    const showErrorWithCooldown = (msg) => {
         const now = Date.now();
         if (now - toastCooldownRef.current > 5000) { // 5 seconds
-          toast.error(msg);
-          toastCooldownRef.current = now;
+            toast.error(msg);
+            toastCooldownRef.current = now;
         }
-      };
-      const showSuccessWithCooldown = (msg) => {
+    };
+    const showSuccessWithCooldown = (msg) => {
         const now = Date.now();
         if (now - toastCooldownRef.current > 5000) { // 5 seconds
-          toast.success(msg)
-          toastCooldownRef.current = now;
+            toast.success(msg)
+            toastCooldownRef.current = now;
         }
-      };
+    };
     const location = useLocation();
 
     // Agent notification method
@@ -78,7 +78,7 @@ function Intervention_threshold() {
     const [action, setAction] = useState("");
     const [deleteIdx, setDeleteIdx] = useState(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [confidenceScore, setConfidenceScore] = useState(0.8)
+    const [confidenceScore, setConfidenceScore] = useState(0.5)
 
 
     useEffect(() => {
@@ -114,7 +114,7 @@ function Intervention_threshold() {
                 ruleName, triggerType, keyword, action, confidenceThreshold: parseFloat(confidenceScore)
             });
             setRules(prev => [res.data.rule, ...prev]);
-            setRuleName(''); setTriggerType(''); setKeyword(''); setAction(''); setConfidenceScore(0.8);
+            setRuleName(''); setTriggerType(''); setKeyword(''); setAction(''); setConfidenceScore(0.5);
         } catch (err) { console.error(err); }
     };
 
@@ -136,7 +136,7 @@ function Intervention_threshold() {
         const val = parseFloat(raw);
 
         if (isNaN(val)) {
-            setConfidenceScore(0.8); // fallback if cleared
+            setConfidenceScore(0.5); // fallback if cleared
         } else if (val > 1) {
             setConfidenceScore(1)
         }
@@ -150,7 +150,7 @@ function Intervention_threshold() {
                 notificationMethod: newNotification,
                 holdingMsg: newHoldingMsg
             });
-            showSuccessWithCooldown('Settings saved!')
+
         } catch (err) {
             console.error(err);
             showErrorWithCooldown('Failed to save settings')
@@ -281,9 +281,10 @@ function Intervention_threshold() {
                             value={holdingMsg}
                             onChange={e => setHoldingMsg(e.target.value)}
                             sx={{ bgcolor: "#fff", borderRadius: 2, mb: 2 }}
+                            inputProps={{ maxLength: 100 }}
                         />
                         <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 2 }}>
-                            
+
                             <Button
                                 variant="contained"
                                 sx={{
@@ -298,11 +299,11 @@ function Intervention_threshold() {
                                     '&:hover': { bgcolor: "#2e6fd8" },
                                     mt: 0.5
                                 }}
-                                onClick={handleSaveHoldingMsg}
+                                onClick={() => (handleSaveHoldingMsg(), showSuccessWithCooldown('Settings saved!'))}
                             >
                                 Save changes
                             </Button>
-                            
+
 
                         </Box>
                     </Paper>
@@ -326,6 +327,7 @@ function Intervention_threshold() {
                                     variant="outlined"
                                     InputLabelProps={{ shrink: true }}
                                     sx={{ bgcolor: "#fff", borderRadius: 2 }}
+                                    inputProps={{ maxLength: 30 }}
                                 />
                             </Grid>
                             <Grid item xs={12} md={6}>
@@ -338,7 +340,9 @@ function Intervention_threshold() {
                                         onChange={e => setTriggerType(e.target.value)}
                                     >
                                         {triggerTypeOptions.map(opt => (
-                                            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                                            <MenuItem key={opt} value={opt}>{opt.replace(/_/g, ' ')
+                                                .replace(/\b\w/g, c => c.toUpperCase())
+                                            }</MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
@@ -347,15 +351,42 @@ function Intervention_threshold() {
                                 <TextField
                                     fullWidth
                                     label="Trigger Keyword/Pattern"
-                                    placeholder="e.g. cancel my policy"
+                                    placeholder={
+                                        !triggerType
+                                            ? "Select a trigger type first"
+                                            : triggerType === "retries_exceeded"
+                                                ? "Enter number of retries"
+                                                : triggerType === "emotion_detected"
+                                                    ? "e.g. anger"
+                                                    : "e.g. cancel my policy"
+                                    }
+
+
                                     value={keyword}
-                                    onChange={e => setKeyword(e.target.value)}
+                                    onChange={e => {
+                                        let val = e.target.value;
+                                        if (triggerType === "retries_exceeded") {
+                                            // Convert to number and clamp between 0 and 20
+                                            const num = Math.min(Number(val), 20);
+                                            val = num < 3 ? 3 : num;
+                                        }
+                                        setKeyword(val);
+                                    }}
                                     variant="outlined"
                                     InputLabelProps={{ shrink: true }}
                                     sx={{ bgcolor: "#fff", borderRadius: 2 }}
+                                    disabled={!triggerType} // disables if empty/null
+                                    type={triggerType === "retries_exceeded" ? "number" : "text"}
+                                    inputProps={
+                                        triggerType === "retries_exceeded"
+                                            ? { step: 1, min: 3, max: 20 } // integer only with arrows
+                                            : { maxLength: 70 }   // string with max length
+                                    }
                                 />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+
+
+                            {/*<Grid item xs={12} md={6}>
                                 <FormControl fullWidth variant="outlined" sx={{ bgcolor: "#fff", borderRadius: 2, mb: 2 }}>
                                     <InputLabel id="action-label">Action</InputLabel>
                                     <Select
@@ -370,7 +401,8 @@ function Intervention_threshold() {
                                         <MenuItem value="mask data">mask data</MenuItem>
                                     </Select>
                                 </FormControl>
-                            </Grid>
+                            </Grid>*/}
+                            {/*}
                             <Grid item xs={12} md={6}>
                                 <FormControl fullWidth sx={{ mb: 0 }}>
                                     <TextField
@@ -388,7 +420,7 @@ function Intervention_threshold() {
                                     />
 
                                 </FormControl>
-                            </Grid>
+                            </Grid>*/}
                         </Grid>
                         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                             <Button
@@ -406,7 +438,7 @@ function Intervention_threshold() {
                                     mt: 0.5
                                 }}
                                 onClick={handleAddRule}
-                                disabled={!ruleName || !triggerType || !keyword || !action}
+                                disabled={!ruleName || !triggerType || !keyword}
                             >
                                 Add
                             </Button>
@@ -428,8 +460,8 @@ function Intervention_threshold() {
                                         <TableCell sx={{ fontWeight: "bold" }}>Rule name</TableCell>
                                         <TableCell sx={{ fontWeight: "bold" }}>Trigger type</TableCell>
                                         <TableCell sx={{ fontWeight: "bold" }}>Keyword/Pattern</TableCell>
-                                        <TableCell sx={{ fontWeight: "bold" }}>Action</TableCell>
-                                        <TableCell sx={{ fontWeight: "bold" }}>Confidence</TableCell>
+                                        {/*<TableCell sx={{ fontWeight: "bold" }}>Action</TableCell>
+                                        <TableCell sx={{ fontWeight: "bold" }}>Confidence</TableCell>*/}
                                         <TableCell sx={{ fontWeight: "bold" }}></TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -437,10 +469,13 @@ function Intervention_threshold() {
                                     {rules.map((rule, idx) => (
                                         <TableRow key={idx}>
                                             <TableCell sx={{ whiteSpace: "pre-line", wordBreak: "break-word", }}>{rule.ruleName}</TableCell>
-                                            <TableCell>{rule.triggerType}</TableCell>
+                                            <TableCell>{rule.triggerType
+                                                .replace(/_/g, ' ')
+                                                .replace(/\b\w/g, c => c.toUpperCase())
+                                            }</TableCell>
                                             <TableCell sx={{ whiteSpace: "pre-line", wordBreak: "break-word", }}>{rule.keyword}</TableCell>
-                                            <TableCell>{rule.action}</TableCell>
-                                            <TableCell>{rule.confidenceThreshold?.toFixed(2) ?? rule.confidenceThreshold}</TableCell>
+                                            {/*<TableCell>{rule.action}</TableCell>
+                                            <TableCell>{rule.confidenceThreshold?.toFixed(2) ?? rule.confidenceThreshold}</TableCell>*/}
                                             <TableCell>
                                                 <IconButton onClick={() => { setDeleteIdx(idx); setDeleteModalOpen(true); }}>
                                                     <DeleteIcon sx={{ color: "#e74c3c" }} />

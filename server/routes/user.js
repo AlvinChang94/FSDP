@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const { User } = require('../models');
+const { User, ThresholdRule } = require('../models');
 const yup = require("yup");
 const { sign } = require('jsonwebtoken');
 require('dotenv').config();
@@ -99,11 +99,37 @@ router.post("/register", async (req, res) => {
     data.link_code = await generateUniqueLinkCode();
     // Create user
     let result = await User.create(data);
+    const defaultRules = [
+      {
+        ruleName: "Default human intervention trigger",
+        triggerType: "keyword_match",
+        keyword: "Speak to business owner",
+        action: "", // <-- change to the desired default action
+        confidenceThreshold: 0.5
+      },
+      {
+        ruleName: "Default human intervention trigger",
+        triggerType: "keyword_match",
+        keyword: "Speak to a human",
+        action: "",
+        confidenceThreshold: 0.5
+      },
+      {
+        ruleName: "Default human intervention trigger",
+        triggerType: "keyword_match",
+        keyword: "Speak to a representative",
+        action: "",
+        confidenceThreshold: 0.5
+      }
+    ].map(rule => ({ ...rule, userId: result.id }));
+    await ThresholdRule.bulkCreate(defaultRules);
+
     res.json({
       message: `Email ${result.email} was registered successfully.`
     });
   }
   catch (err) {
+    console.log(err)
     res.status(400).json({ errors: err.errors });
   }
 
@@ -357,7 +383,7 @@ router.get('/policy-files', validateToken, (req, res) => {
 
 router.delete('/policy-files/:filename', validateToken, async (req, res) => {
   try {
-    
+
     const userFolder = path.join(__dirname, '../uploaded', String(req.user.id));
     const filePath = path.join(userFolder, req.params.filename);
 

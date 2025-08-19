@@ -51,7 +51,6 @@ function TonePersonality() {
   const location = useLocation();
   const [tones, setTones] = useState({
     Professional: false,
-    Neutral: false,
     Formal: false,
     Friendly: false,
     Empathetic: false
@@ -212,6 +211,7 @@ function TonePersonality() {
             value={signature}
             onChange={e => setSignature(e.target.value)}
             sx={{ bgcolor: "#fff", borderRadius: 2 }}
+            inputProps = {{maxLength: 100}}
           />
         </Paper>
 

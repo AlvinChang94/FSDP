@@ -65,7 +65,7 @@ function Preview() {
                     role: msg.sender === 'user' ? 'user' : 'assistant',
                     content: [msg.content]
                 }));
-                const res = await http.post('/api/testchat/botmessage', {
+                const res = await http.post('/sendchatbot/receive_preview', {
                     messages: bedrockMessages,
                     sender_id: localStorage.getItem('userId'),
                     chat_id: currentChatId,

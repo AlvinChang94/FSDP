@@ -30,9 +30,14 @@ app.post('/api/wa/:userId/start', (req, res) => {
 
 // Poll status
 app.get('/api/wa/:userId/status', (req, res) => {
-    const { userId } = req.params;
-    res.json(getLastUpdate(userId));
+  const { userId } = req.params;
+  const update = getLastUpdate(userId);
+
+  // clone to plain object without cycles
+  const safe = JSON.parse(JSON.stringify(update));
+  res.json(safe);
 });
+
 
 // Logout/delink
 app.post('/api/wa/:userId/logout', async (req, res) => {

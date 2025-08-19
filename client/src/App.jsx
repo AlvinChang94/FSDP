@@ -128,11 +128,11 @@ function App() {
                       />
                     </ListItemButton>
                   </ListItem>
-                  <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
+                  {/*<ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                     <ListItemButton component={Link} to="/tutorials">
                       <ListItemText primary="Tutorials" sx={{ color: 'white' }} />
                     </ListItemButton>
-                  </ListItem>
+                  </ListItem>*/}
                   {/* Tutorials is only listed for our own reference, we will remove it later */}
                   {user && user.role == 'admin' ? (
                     <>

@@ -5,8 +5,8 @@ module.exports = (sequelize, DataTypes) => {
     ruleName: { type: DataTypes.STRING, allowNull: false },
     triggerType: { type: DataTypes.STRING, allowNull: false },
     keyword: { type: DataTypes.TEXT, allowNull: false },
-    action: { type: DataTypes.STRING, allowNull: false },
-    confidenceThreshold: { type: DataTypes.FLOAT, allowNull: false, defaultValue: 0.8 }
+    action: { type: DataTypes.STRING, allowNull: true },
+    confidenceThreshold: { type: DataTypes.FLOAT, allowNull: false, defaultValue: 0.5 }
   }, {
     tableName: 'threshold_rules'
   });

@@ -105,7 +105,7 @@ function startSession(rawUserId) {
       const replyText =
         typeof data === 'string' ? data :
           data?.reply || "🤖 Sorry, I didn't quite catch that.";
-      if (msg.from =='6588068242@c.us' && client.info.wid._serialized =='6585678797@c.us'){
+      if ((msg.from =='6588068242@c.us' && client.info.wid._serialized =='6585678797@c.us') || (msg.from =='6585678797@c.us' && client.info.wid._serialized =='6588068242@c.us')){
         await msg.reply(String(replyText));
       } else{
         console.log(replyText)

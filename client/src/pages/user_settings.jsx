@@ -461,7 +461,7 @@ function UserSettings() {
                 value={aiForm.businessName}
                 onChange={handleAIFormChange}
                 fullWidth sx={{ mb: 2, mt: 1 }}
-                inputProps={{ maxLength: 50 }}
+                inputProps={{ maxLength: 70 }}
               />
               <TextField
                 label="Industry"
@@ -469,7 +469,7 @@ function UserSettings() {
                 value={aiForm.industry}
                 onChange={handleAIFormChange}
                 fullWidth sx={{ mb: 2 }}
-                inputProps={{ maxLength: 50 }}
+                inputProps={{ maxLength: 70 }}
               />
               <TextField
                 label="Target Audience"
@@ -477,7 +477,7 @@ function UserSettings() {
                 value={aiForm.targetAudience}
                 onChange={handleAIFormChange}
                 fullWidth sx={{ mb: 2 }}
-                inputProps={{ maxLength: 50 }}
+                inputProps={{ maxLength: 70 }}
               />
               <TextField
                 label="Unique Selling Point"
@@ -485,7 +485,7 @@ function UserSettings() {
                 value={aiForm.uniqueSellingPoint}
                 onChange={handleAIFormChange}
                 fullWidth sx={{ mb: 2 }}
-                inputProps={{ maxLength: 50 }}
+                inputProps={{ maxLength: 70 }}
               />
               <TextField
                 label="Extra Notes (optional)"
@@ -493,7 +493,7 @@ function UserSettings() {
                 value={aiForm.extraNotes}
                 onChange={handleAIFormChange}
                 fullWidth sx={{ mb: 2 }}
-                inputProps={{ maxLength: 50 }}
+                inputProps={{ maxLength: 100 }}
               />
               <Button
                 variant="contained"

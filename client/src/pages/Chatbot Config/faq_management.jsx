@@ -247,6 +247,7 @@ function Faq_Management() {
                             value={newQuestion}
                             onChange={e => setNewQuestion(e.target.value)}
                             sx={{ mb: 2, bgcolor: "#fff", borderRadius: 2 }}
+                            inputProps={{maxLength:100}}
                         />
                         <Typography variant="h6" sx={{ fontWeight: "bold", mb: 0.5 }}>
                             Add an FAQ answer
@@ -255,10 +256,11 @@ function Faq_Management() {
                             fullWidth
                             multiline
                             minRows={2}
-                            placeholder="e.g. What is your policy on premiums?"
+                            placeholder="e.g. Payments must be made 2 weeks in advance of purchase"
                             value={newAnswer}
                             onChange={e => setNewAnswer(e.target.value)}
                             sx={{ mb: 1, bgcolor: "#fff", borderRadius: 2 }}
+                            inputProps={{maxLength:600}}
                         />
                         <Typography variant="caption" sx={{ color: "#888", display: "block", mb: 2 }}>
                             {/*special requests to the AI can be used via encapsulating your message with "//" quotations*/}
