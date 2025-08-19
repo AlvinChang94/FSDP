@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Box, Typography, Grid, Card, CardContent, IconButton, Button, Input, TextField, Icon } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, IconButton, Button, Input, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import http from '../../../../http';
 import dayjs from 'dayjs';
@@ -23,8 +23,23 @@ function Alert() {
     const getAlerts = () => {
         http.get("/alert")
             .then((res) => {
-                setAlertList(sortAlerts(res.data));
+                const alerts = sortAlerts(res.data);
+                setAlertList(alerts);
                 setFilteredAlerts([]);
+                if (autoDelete) {
+                    const now = dayjs();
+                    const expired = alerts.filter(alert => dayjs(alert.endDate).isBefore(now));
+                    if (expired.length > 0) {
+                        Promise.all(expired.map(alert => http.delete(`/alert/${alert.id}`)))
+                            .then(() => {
+                                toast.info(`Auto-deleted ${expired.length} expired alert(s)`);
+                                // Refetch alerts after deletion
+                                http.get("/alert").then((res2) => {
+                                    setAlertList(sortAlerts(res2.data));
+                                });
+                            });
+                    }
+                }
             })
             .catch((err) => console.error("Failed to fetch alert", err));
     };
@@ -68,12 +83,8 @@ function Alert() {
     };
 
     useEffect(() => {
-        http.get("/alert")
-            .then((res) => {
-                setAlertList(sortAlerts(res.data));
-            })
-            .catch((err) => console.error("Failed to fetch alert", err));
-    }, [sortedby]);
+        getAlerts();
+    }, [sortedby, autoDelete]);
 
     const checkTodayAlerts = () => {
         const startOfDay = dayjs().startOf('day').format('YYYY-MM-DDTHH:mm');
@@ -140,7 +151,12 @@ function Alert() {
 
     const handleToggleAutoDelete = () => {
         http.put('/user/auto-delete', { autoDelete: !autoDelete })
-            .then(res => setAutoDelete(res.data.autoDelete))
+            .then(res => {
+                setAutoDelete(res.data.autoDelete);
+                if (res.data.autoDelete) {
+                    getAlerts();
+                }
+            })
             .catch(err => console.error('Failed to update autoDelete', err));
     };
     return (
