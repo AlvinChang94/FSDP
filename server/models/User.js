@@ -39,6 +39,14 @@ module.exports = (sequelize, DataTypes) => {
         phone_num: {
             type: DataTypes.TEXT,
             allowNull: true
+        },
+        profile_picture: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        autoDelete: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
         }
     }, {
         tableName: 'users'

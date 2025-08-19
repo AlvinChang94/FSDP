@@ -228,11 +228,11 @@ function App() {
                     src={`http://localhost:3001/user/profilepic/${localStorage.getItem('userId')}?t=${Date.now()}`}
                     sx={{ width: 40, height: 40, mr: 2, border: '2px solid black' }}
                   > <img
-    src={placeholderPfp}
-    alt="Placeholder"
-    style={{ width: '100%', height: '100%' }}
-  />
-</Avatar>
+                      src={placeholderPfp}
+                      alt="Placeholder"
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  </Avatar>
 
 
                   <Typography variant="body1" sx={{ flexGrow: 1, fontSize: '1.4rem', mt: -2.2, fontWeight: 'bold' }}>
@@ -314,7 +314,8 @@ function App() {
                     <Route path="/conv-analytics/response-time/:clientId" element={<RespTime />} />
                     <Route path="/analytics/most-common-topic" element={<ConversationDb />} />
                     <Route path="/conv-analytics/average-chats/:id" element={<AverageChats />} />
-                    <Route path="/conv-analytics/average-chat-groups/:id" element={<AverageChatGroups />} />
+                    <Route path="/conv-analytics/average-chat-users/:id" element={<AverageChatGroups />} />
+
 
 
                   </Route>

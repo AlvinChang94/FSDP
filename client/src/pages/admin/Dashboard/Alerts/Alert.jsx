@@ -3,7 +3,7 @@ import { Box, Typography, Grid, Card, CardContent, IconButton, Button, Input, Te
 import React, { useEffect, useState } from 'react';
 import http from '../../../../http';
 import dayjs from 'dayjs';
-import { AccessTime, Edit, Delete, Refresh, Clear, Search } from '@mui/icons-material';
+import { AccessTime, Edit, Delete, Refresh, Clear, Search, ToggleOn, ToggleOff } from '@mui/icons-material';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -18,16 +18,28 @@ function Alert() {
     const navigate = useNavigate();
     const [sortedby, changeSortedBy] = useState('send')
     const [search, setSearch] = useState('')
-
-    // Check if alert between time periods
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
+    const [autoDelete, setAutoDelete] = useState(false);
 
     const getAlerts = () => {
         http.get("/alert")
             .then((res) => {
-                setAlertList(sortAlerts(res.data));
+                const alerts = sortAlerts(res.data);
+                setAlertList(alerts);
                 setFilteredAlerts([]);
+                if (autoDelete) {
+                    const now = dayjs();
+                    const expired = alerts.filter(alert => dayjs(alert.endDate).isBefore(now));
+                    if (expired.length > 0) {
+                        Promise.all(expired.map(alert => http.delete(`/alert/${alert.id}`)))
+                            .then(() => {
+                                toast.info(`Auto-deleted ${expired.length} expired alert(s)`);
+                                // Refetch alerts after deletion
+                                http.get("/alert").then((res2) => {
+                                    setAlertList(sortAlerts(res2.data));
+                                });
+                            });
+                    }
+                }
             })
             .catch((err) => console.error("Failed to fetch alert", err));
     };
@@ -71,37 +83,8 @@ function Alert() {
     };
 
     useEffect(() => {
-        http.get("/alert")
-            .then((res) => {
-                setAlertList(sortAlerts(res.data));
-            })
-            .catch((err) => console.error("Failed to fetch alert", err));
-    }, [sortedby]);
-
-    const filterByDateRange = () => {
-        if (!startDate || !endDate) {
-            toast.error('Please select both start and end dates');
-            return;
-        }
-
-        const rangeStart = dayjs(startDate);
-        const rangeEnd = dayjs(endDate);
-
-        const activeAlerts = alertList.filter(alert => {
-            const alertStart = dayjs(alert.sendDate);
-            const alertEnd = dayjs(alert.endDate);
-            return alertEnd.isAfter(rangeStart) && alertStart.isBefore(rangeEnd);
-        });
-
-        const activeIds = activeAlerts.map(a => a.id);
-        setFilteredAlerts(activeIds);
-
-        if (activeAlerts.length === 0) {
-            toast.info('No active alerts in the selected period');
-        } else {
-            toast.success(`${activeAlerts.length} alert(s) active in the selected period`);
-        }
-    };
+        getAlerts();
+    }, [sortedby, autoDelete]);
 
     const checkTodayAlerts = () => {
         const startOfDay = dayjs().startOf('day').format('YYYY-MM-DDTHH:mm');
@@ -160,6 +143,22 @@ function Alert() {
         }
     });
 
+    useEffect(() => {
+        http.get('/user/auto-delete')
+            .then(res => setAutoDelete(res.data.autoDelete))
+            .catch(err => console.error('Failed to fetch autoDelete', err));
+    }, []);
+
+    const handleToggleAutoDelete = () => {
+        http.put('/user/auto-delete', { autoDelete: !autoDelete })
+            .then(res => {
+                setAutoDelete(res.data.autoDelete);
+                if (res.data.autoDelete) {
+                    getAlerts();
+                }
+            })
+            .catch(err => console.error('Failed to update autoDelete', err));
+    };
     return (
         <Box>
             <ToastContainer />
@@ -227,6 +226,14 @@ function Alert() {
                 <Button variant="outlined" color="info" onClick={checkTodayAlerts}>
                     Check Today's Alerts
                 </Button>
+                <Box display="flex" alignItems="center" gap={1}>
+                    <IconButton color={autoDelete ? 'secondary' : 'error'} onClick={handleToggleAutoDelete}>
+                        {autoDelete ? <ToggleOn /> : <ToggleOff />}
+                    </IconButton>
+                    <Typography variant="body2" color="text.secondary">
+                        {autoDelete ? "Auto Delete ON" : "Auto Delete OFF"}
+                    </Typography>
+                </Box>
             </Box>
 
             <Grid container spacing={2}>

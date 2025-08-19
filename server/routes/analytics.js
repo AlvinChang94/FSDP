@@ -144,10 +144,7 @@ router.get('/analytics/average-chats/:clientId', validateToken, async (req, res)
 });
 
 
-
-
-
-router.get('/analytics/average-chat-groups/:clientId', validateToken, async (req, res) => {
+router.get('/analytics/average-chat-users/:clientId', validateToken, async (req, res) => {
   const { clientId } = req.params;
 
   if (parseInt(clientId) !== req.user.id) {
@@ -155,48 +152,44 @@ router.get('/analytics/average-chat-groups/:clientId', validateToken, async (req
   }
 
   try {
-    const messages = await TestChatMessage.findAll({
-      include: [{
-        model: TestChat,
-        where: { clientId: req.user.id },
-        attributes: []
-      }],
-      attributes: ['chat_id', 'timestamp'],
+    const messages = await ClientMessage.findAll({
+      where: { userId: req.user.id },
+      attributes: ['timestamp', 'senderPhone'],
       raw: true
     });
 
 
     if (!messages.length) {
-      return res.json({ averageGroups: 0, chatGroupsByDay: {} });
+      return res.json({ averageUsers: 0, chatUsersByDay: {} });
     }
 
-    const sessionTracker = {};
+    const userTracker = {}; // key: date:senderPhone
     messages.forEach(msg => {
       const date = new Date(msg.timestamp).toISOString().slice(0, 10);
-      const key = `${date}:${msg.chat_id}`;
-      sessionTracker[key] = true;
+      const key = `${date}:${msg.senderPhone}`;
+      userTracker[key] = true;
     });
 
-    const groupedCounts = {};
-    Object.keys(sessionTracker).forEach(key => {
+    const groupedCounts = {}; // key: date, value: unique user count
+    Object.keys(userTracker).forEach(key => {
       const [date] = key.split(':');
       groupedCounts[date] = (groupedCounts[date] || 0) + 1;
     });
 
-    const totalSessions = Object.values(groupedCounts).reduce((sum, count) => sum + count, 0);
-    const averageGroups = parseFloat((totalSessions / Object.keys(groupedCounts).length).toFixed(2));
-
+    const totalUsers = Object.values(groupedCounts).reduce((sum, count) => sum + count, 0);
+    const averageUsers = Math.round(totalUsers / Object.keys(groupedCounts).length);
     res.json({
-      title: 'Chatbot Sessions per Day',
-      averageGroups,
-      chatGroupsByDay: groupedCounts
+      average_group_count: averageUsers,
+      chatUsersByDay: groupedCounts
     });
 
+
   } catch (error) {
-    console.error('Failed to compute average chat groups:', error);
+    console.error('Failed to compute average chat users:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 module.exports = router;

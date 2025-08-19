@@ -46,20 +46,24 @@ function ConversationDb() {
             if (user?.id) {
                 try {
                     const token = localStorage.getItem('accessToken');
-                    const res = await axios.get(`http://localhost:3001/api/analytics/average-chat-groups/${user.id}`, {
+                    const res = await axios.get(`http://localhost:3001/api/analytics/average-chat-users/${user.id}`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
-                    setChatbotSessions(res.data.averageGroups);
+                    const dailyCounts = Object.values(res.data.chatUsersByDay || {});
+                    const avg = dailyCounts.length > 0
+                        ? dailyCounts.reduce((sum, val) => sum + val, 0) / dailyCounts.length
+                        : null;
+
+
+                    setChatbotSessions(avg);
+
                 } catch (err) {
                     setChatbotSessions(null);
                 }
             }
         };
         fetchChatbotSessions();
-    }, []);
-
-
-
+    }, [user]);
 
     useEffect(() => {
         const fetchSummarisedTopics = async () => {
@@ -151,12 +155,13 @@ function ConversationDb() {
                     }
                     ,
                     {
-                        title: "Chatbot sessions per day",
+                        title: "Unique users per day",
                         value: chatbotSessions !== null && !isNaN(chatbotSessions)
-                            ? `${parseFloat(chatbotSessions).toFixed(2)} sessions`
+                            ? `${Math.round(chatbotSessions)} users`
                             : "Loading...",
-                        to: `/conv-analytics/average-chat-groups/${user?.id}`
+                        to: `/conv-analytics/average-chat-users/${user?.id}`
                     }
+
 
                 ].map((stat, index) => (
                     <Grid item xs={12} md={4} key={index}>
@@ -226,18 +231,17 @@ function ConversationDb() {
                     </Paper>
                 )}
 
-                {showTopics && (
-                    <Box textAlign="right">
-                        <MuiLink
-                            component={Link}
-                            to="/ConversationAI"
-                            underline="hover"
-                            sx={{ color: '#1a73e8', fontWeight: 'bold' }}
-                        >
-                            View AI Analytics Summary
-                        </MuiLink>
-                    </Box>
-                )}
+                <Box textAlign="right">
+                    <MuiLink
+                        component={Link}
+                        to="/ConversationAI"
+                        underline="hover"
+                        sx={{ color: '#1a73e8', fontWeight: 'bold' }}
+                    >
+                        View AI Analytics Summary
+                    </MuiLink>
+                </Box>
+
             </Box>
 
         </Box>

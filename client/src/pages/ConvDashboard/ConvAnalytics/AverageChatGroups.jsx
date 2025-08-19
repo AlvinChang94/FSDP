@@ -31,14 +31,14 @@ function AnalyticsDetail() {
           return;
         }
 
-        const res = await axios.get(`http://localhost:3001/api/analytics/average-chat-groups/${effectiveId}`, {
+        const res = await axios.get(`http://localhost:3001/api/analytics/average-chat-users/${effectiveId}`, {
+
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        const rawData = res.data.chatGroupsByDay || {};
+        const rawData = res.data.chatUsersByDay || {};
         const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         const weekMap = Object.fromEntries(weekdays.map(day => [day, 0]));
-
         Object.entries(rawData).forEach(([date, count]) => {
           const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
           if (weekMap.hasOwnProperty(dayName)) {
@@ -46,8 +46,10 @@ function AnalyticsDetail() {
           }
         });
 
-        const transformed = weekdays.map(day => ({ day, sessions: weekMap[day] }));
+
+        const transformed = weekdays.map(day => ({ day, users: weekMap[day] }));
         setGroupData(transformed);
+
       } catch (err) {
         console.error('Failed to fetch group data', err);
         setGroupData([]);
@@ -70,8 +72,9 @@ function AnalyticsDetail() {
       </IconButton>
 
       <Typography variant="h4" fontWeight="bold" gutterBottom>
-        Chatbot Sessions per Day
+        Unique Users per Day
       </Typography>
+
 
       <ToggleButtonGroup
         value={chartType}
@@ -85,14 +88,15 @@ function AnalyticsDetail() {
 
       <Paper elevation={3} sx={{ p: 4, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Sessions by Weekday
+           Users by Weekday
+
         </Typography>
 
         {loading ? (
           <Typography variant="body1">Loading chart...</Typography>
         ) : groupData.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
-            No chatbot sessions recorded for this week.
+            No chatbot users recorded for this week.
           </Typography>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
@@ -100,17 +104,17 @@ function AnalyticsDetail() {
               <BarChart data={groupData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" />
-                <YAxis label={{ value: 'Sessions', angle: -90, position: 'insideLeft' }} />
+                <YAxis label={{ value: 'Users', angle: -90, position: 'insideLeft' }} />
                 <Tooltip />
-                <Bar dataKey="sessions" fill="#2e7d32" />
+                <Bar dataKey="users" fill="#2e7d32" />
               </BarChart>
             ) : (
               <LineChart data={groupData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" />
-                <YAxis label={{ value: 'Sessions', angle: -90, position: 'insideLeft' }} />
+                <YAxis label={{ value: 'Users', angle: -90, position: 'insideLeft' }} />
                 <Tooltip />
-                <Line type="monotone" dataKey="sessions" stroke="#2e7d32" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="users" stroke="#2e7d32" strokeWidth={2} dot={false} />
               </LineChart>
             )}
           </ResponsiveContainer>
@@ -122,10 +126,9 @@ function AnalyticsDetail() {
           Engagement Insights
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          This metric refers to the total number of conversational sessions initiated and managed by the automated chatbot within a given time frame. Each session typically starts when a user sends a message and continues until the conversation naturally ends or transitions to a human agent. It’s a direct indicator of how frequently users are relying on the chatbot for assistance.
-          A high number of sessions suggests strong adoption of self-service support, while fluctuations can highlight shifts in user preference, technical issues, or content relevance. If paired with completion or escalation rates, it provides deeper insight into bot effectiveness and user satisfaction
-
+          This metric reflects the number of distinct users who interacted with the chatbot each day. It helps measure reach and adoption, showing how many individuals rely on the bot for support. A rising user count suggests growing engagement, while dips may indicate usability issues, content gaps, or shifts in user behavior. When combined with session depth or repeat usage, it offers a fuller picture of chatbot effectiveness.
         </Typography>
+
       </Paper>
 
     </Box>
