@@ -1,13 +1,14 @@
 import React, { useState, useEffect, handleClick } from 'react';
 import {
     Drawer, Button, Box, IconButton, Typography, Accordion, AccordionSummary, AccordionDetails,
-    List, ListItemButton, ListItemText, Tooltip, Grid, Card, CardContent, Dialog, DialogTitle, DialogContent
+    Fab, Grid, Card, CardContent, Dialog, DialogTitle, DialogContent
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import http from '../../http.js';
 import { Link } from 'react-router-dom';
 import Popover from '@mui/material/Popover';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CampaignIcon from '@mui/icons-material/Campaign';
 
 const AnnouncementsPanel = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -84,9 +85,29 @@ const AnnouncementsPanel = () => {
     const isPopoverOpen = Boolean(popoverAnchor);
     return (
         <>
-            <ListItemButton onClick={toggleDrawer(true)} sx={{ textTransform: 'none', color: 'white' }}>
-                <ListItemText primary='Announcements' />
-            </ListItemButton>
+            <Fab
+                color="primary"
+                aria-label="announcements"
+                sx={{
+                    position: 'fixed',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    right: 0,
+                    zIndex: 1300, 
+                    width: 40, 
+                    height: 150, 
+                    borderTopLeftRadius: 16,    
+                    borderBottomLeftRadius: 16, 
+                    borderTopRightRadius: 0,    
+                    borderBottomRightRadius: 0, 
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}
+                onClick={toggleDrawer(true)}
+            >
+                <CampaignIcon sx={{ fontSize: 32 }} /> {/* Adjust icon size */}
+            </Fab>
             <Drawer anchor='right' open={isOpen} onClose={toggleDrawer(false)}>
                 <Box sx={{ width: 300, height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#1e212e' }}>
 
@@ -232,7 +253,7 @@ const AnnouncementsPanel = () => {
                                                                             flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis',
                                                                             display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, mt: 1
                                                                         }}>
-                                                                            <Typography  sx={{ whiteSpace: "pre-line", fontSize: '12px' }}>
+                                                                            <Typography sx={{ whiteSpace: "pre-line", fontSize: '12px' }}>
                                                                                 <strong>Chat History: </strong>
                                                                                 <Typography sx={{ fontSize: '12px' }}>{escalation.escalation.chathistory}</Typography>
                                                                             </Typography>
@@ -242,7 +263,7 @@ const AnnouncementsPanel = () => {
                                                                                 flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis',
                                                                                 display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, mt: 1, mb: -1
                                                                             }}>
-                                                                                <Typography  sx={{ whiteSpace: "pre-line", fontSize: '12px' }}>
+                                                                                <Typography sx={{ whiteSpace: "pre-line", fontSize: '12px' }}>
                                                                                     <strong>Chat Summary: </strong>
                                                                                     <Typography sx={{ fontSize: '12px' }}>{escalation.escalation.chatsummary}</Typography>
                                                                                 </Typography>

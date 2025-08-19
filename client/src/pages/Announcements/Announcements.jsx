@@ -44,14 +44,15 @@ function Announcements() {
             <Grid container spacing={2} direction='column'>
                 {announcementList.map((announcement) => (
                     <Grid item xs={12} key={announcement.id}>
-                        {user && user.role == 'user' && ((announcement.sendNow || (!announcement.sendNow && (new Date(announcement.scheduledDate).toLocaleString()) <= today)) && ((user.role == 'admin' && announcement.AudienceisModerator) || (user.role == 'user' && announcement.AudienceisUser)) ) ? (
-                            <Card sx={{ width: '100%', padding: '16px', backgroundColor: '#fff', boxShadow: 3, minHeight: 150 }}>
+                        {user && user.role == 'user' && ((announcement.sendNow || (!announcement.sendNow && (new Date(announcement.scheduledDate).toLocaleString()) <= today))
+                            && ((user.role == 'admin' && announcement.AudienceisModerator) || (user.role == 'user' && announcement.AudienceisUser))) ? (
+                            <Card sx={{ width: '96%', padding: '16px', backgroundColor: '#fff', boxShadow: 3, minHeight: 150 }}>
                                 <CardContent>
                                     {/* Title & Edit Icon */}
                                     <Box sx={{ display: 'flex', mb: 1 }}>
                                         <Typography variant="h6" sx={{ flexGrow: 1 }}>
                                             <strong>
-                                            {announcement.title}
+                                                {announcement.title}
                                             </strong>
                                         </Typography>
                                         {user && user.role == 'admin' && (
@@ -81,10 +82,24 @@ function Announcements() {
                                             <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                                                 Audience:
                                             </Typography>
-                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                                {announcement.AudienceisModerator ? 'Moderator' : ''} <br></br>
-                                                {announcement.AudienceisUser ? 'User' : ''}
-                                            </Typography>
+                                            {announcement.AudienceisModerator && !announcement.AudienceisUser ? (
+                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                    Moderator
+                                                </Typography>
+                                            ) : announcement.AudienceisUser && !announcement.AudienceisModerator ? (
+                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                    User
+                                                </Typography>
+                                            ) : (
+                                                <>
+                                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                        Moderator
+                                                    </Typography>
+                                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                        User
+                                                    </Typography>
+                                                </>
+                                            )}
                                         </Box>
                                     )}
                                 </CardContent>
@@ -96,7 +111,7 @@ function Announcements() {
                                     <Box sx={{ display: 'flex', mb: 1 }}>
                                         <Typography variant="h6" sx={{ flexGrow: 1 }}>
                                             <strong>
-                                            {announcement.title}
+                                                {announcement.title}
                                             </strong>
                                         </Typography>
                                         {user && user.role == 'admin' && (
@@ -126,10 +141,24 @@ function Announcements() {
                                             <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                                                 Audience:
                                             </Typography>
-                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                                {announcement.AudienceisModerator ? 'Moderator' : ''} <br></br>
-                                                {announcement.AudienceisUser ? 'User' : ''}
-                                            </Typography>
+                                            {announcement.AudienceisModerator && !announcement.AudienceisUser ? (
+                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                    Moderator
+                                                </Typography>
+                                            ) : announcement.AudienceisUser && !announcement.AudienceisModerator ? (
+                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                    User
+                                                </Typography>
+                                            ) : (
+                                                <>
+                                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                        Moderator
+                                                    </Typography>
+                                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                        User
+                                                    </Typography>
+                                                </>
+                                            )}
                                         </Box>
                                     )}
                                 </CardContent>

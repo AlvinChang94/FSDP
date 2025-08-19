@@ -64,6 +64,7 @@ function App() {
 
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem("accessToken")) {
@@ -79,6 +80,10 @@ function App() {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+
+  };
+  const toggleDrawer = (open) => () => {
+    setIsOpen(open);
   };
 
 
@@ -96,6 +101,12 @@ function App() {
               pauseOnHover
               draggable
             />
+
+
+            {/* Announcements Panel */}
+            {user && (
+              <AnnouncementsPanel />
+            )}
 
             {/* Sidebar Drawer */}
             <Drawer
@@ -152,7 +163,9 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <AnnouncementsPanel />
+                        <ListItemButton component={Link} to="/Announcements">
+                          <ListItemText primary="Announcements" sx={{ color: 'white' }} />
+                        </ListItemButton>
                       </ListItem>
                     </>
                   ) : user ? (
@@ -198,7 +211,9 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <AnnouncementsPanel />
+                        <ListItemButton component={Link} to="/Announcements">
+                          <ListItemText primary="Announcements" sx={{ color: 'white' }} />
+                        </ListItemButton>
                       </ListItem>
                     </>
                   ) : null}
