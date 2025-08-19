@@ -91,7 +91,7 @@ const AnnouncementsPanel = () => {
                 <Box sx={{ width: 300, height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#1e212e' }}>
 
                     <Accordion defaultExpanded disableGutters='true' expanded={announcementsExpanded}
-                        onChange={() => setAnnouncementsExpanded(!announcementsExpanded)} square sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none'}}>
+                        onChange={() => setAnnouncementsExpanded(!announcementsExpanded)} square sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none' }}>
                         <AccordionSummary sx={{
                             position: 'relative',
                             pl: 4,
@@ -110,81 +110,81 @@ const AnnouncementsPanel = () => {
                                         {panelAnnouncementList.filter(announcement =>
                                             (announcement.sendNow || (!announcement.sendNow && (new Date(announcement.scheduledDate).toLocaleString()) <= today)) && ((user.role == 'admin' && announcement.AudienceisModerator) || (user.role == 'user' && announcement.AudienceisUser)))
                                             .map((announcement) => (
-                                            <Grid item xs={12} >
-                                                <AccordionDetails sx={{ mb: 0.5 }}>
-                                                    <Card sx={{ backgroundColor: '#fff', boxShadow: 'none', mb: -3.5, mt: -1, width: 235 }}>
-                                                        <CardContent>
-                                                            {/* Title & Edit Icon */}
-                                                            <Box>
-                                                                <Typography variant="h7" sx={{
-                                                                    flexGrow: 1, p: '5px', overflow: 'hidden', textOverflow: 'ellipsis',
+                                                <Grid item xs={12} >
+                                                    <AccordionDetails sx={{ mb: 0.5 }}>
+                                                        <Card sx={{ backgroundColor: '#fff', boxShadow: 'none', mb: -3.5, mt: -1, width: 235 }}>
+                                                            <CardContent>
+                                                                {/* Title & Edit Icon */}
+                                                                <Box>
+                                                                    <Typography variant="h7" sx={{
+                                                                        flexGrow: 1, p: '5px', overflow: 'hidden', textOverflow: 'ellipsis',
+                                                                        display: '-webkit-box',
+                                                                        WebkitBoxOrient: 'vertical',
+                                                                        WebkitLineClamp: 1
+                                                                    }}>
+                                                                        <strong>
+                                                                            {announcement.title}
+                                                                        </strong>
+                                                                    </Typography>
+                                                                </Box>
+
+                                                                {/* Content */}
+                                                                <Typography sx={{
+                                                                    whiteSpace: 'pre-wrap', p: '4px', fontSize: '12px', color: '#7f7f7f', overflow: 'hidden', textOverflow: 'ellipsis',
                                                                     display: '-webkit-box',
                                                                     WebkitBoxOrient: 'vertical',
-                                                                    WebkitLineClamp: 1
+                                                                    WebkitLineClamp: 2
                                                                 }}>
-                                                                    <strong>
-                                                                        {announcement.title}
-                                                                    </strong>
+                                                                    {announcement.content}
                                                                 </Typography>
-                                                            </Box>
+                                                            </CardContent>
+                                                            <IconButton
+                                                                type="button"
+                                                                aria-describedby={popoverAnnouncementId === announcement.id ? 'simple-popover' : undefined}
+                                                                onClick={(e) => handlePopoverOpen(e, announcement.id)}
+                                                                sx={{ ml: 22 }}
+                                                            >
+                                                                <MoreVertIcon />
+                                                            </IconButton>
 
-                                                            {/* Content */}
-                                                            <Typography sx={{
-                                                                whiteSpace: 'pre-wrap', p: '4px', fontSize: '12px', color: '#7f7f7f', overflow: 'hidden', textOverflow: 'ellipsis',
-                                                                display: '-webkit-box',
-                                                                WebkitBoxOrient: 'vertical',
-                                                                WebkitLineClamp: 2
-                                                            }}>
-                                                                {announcement.content}
-                                                            </Typography>
-                                                        </CardContent>
-                                                        <IconButton
-                                                            type="button"
-                                                            aria-describedby={popoverAnnouncementId === announcement.id ? 'simple-popover' : undefined}
-                                                            onClick={(e) => handlePopoverOpen(e, announcement.id)}
-                                                            sx={{ml: 22 }}
-                                                        >
-                                                            <MoreVertIcon />
-                                                        </IconButton>
-
-                                                        {/* Popover for this announcement */}
-                                                        <Popover
-                                                            id="simple-popover"
-                                                            open={popoverAnnouncementId === announcement.id && isPopoverOpen}
-                                                            anchorEl={popoverAnchor}
-                                                            onClose={handlePopoverClose}
-                                                            anchorOrigin={{
-                                                                vertical: 'bottom',
-                                                                horizontal: 'left',
-                                                            }}
-                                                            elevation={3}
-                                                        >
-                                                            <Button sx={{ textTransform: 'none' }} onClick={handleExpandClick}>
-                                                                Expand
+                                                            {/* Popover for this announcement */}
+                                                            <Popover
+                                                                id="simple-popover"
+                                                                open={popoverAnnouncementId === announcement.id && isPopoverOpen}
+                                                                anchorEl={popoverAnchor}
+                                                                onClose={handlePopoverClose}
+                                                                anchorOrigin={{
+                                                                    vertical: 'bottom',
+                                                                    horizontal: 'left',
+                                                                }}
+                                                                elevation={3}
+                                                            >
+                                                                <Button sx={{ textTransform: 'none' }} onClick={handleExpandClick}>
+                                                                    Expand
+                                                                </Button>
+                                                            </Popover>
+                                                        </Card>
+                                                        <Dialog open={dialogOpen} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+                                                            <DialogTitle>{dialogAnnouncement?.title}</DialogTitle>
+                                                            <DialogContent dividers>
+                                                                <Typography whiteSpace="pre-wrap">
+                                                                    {dialogAnnouncement?.content}
+                                                                </Typography>
+                                                            </DialogContent>
+                                                            <Button onClick={handleDialogClose} sx={{ m: 2 }}>
+                                                                Close
                                                             </Button>
-                                                        </Popover>
-                                                    </Card>
-                                                    <Dialog open={dialogOpen} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-                                                        <DialogTitle>{dialogAnnouncement?.title}</DialogTitle>
-                                                        <DialogContent dividers>
-                                                            <Typography whiteSpace="pre-wrap">
-                                                                {dialogAnnouncement?.content}
-                                                            </Typography>
-                                                        </DialogContent>
-                                                        <Button onClick={handleDialogClose} sx={{ m: 2 }}>
-                                                            Close
-                                                        </Button>
-                                                    </Dialog>
-                                                </AccordionDetails>
-                                            </Grid>
-                                        ))}
+                                                        </Dialog>
+                                                    </AccordionDetails>
+                                                </Grid>
+                                            ))}
                                     </Grid>
                                 </AccordionDetails>
                             </Box>
                         </AccordionDetails>
                     </Accordion>
                     {user && user.role == "user" && (
-                        <Accordion defaultExpanded disableGutters='true' square='true' sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none'}}>
+                        <Accordion defaultExpanded disableGutters='true' square='true' sx={{ backgroundColor: '#1e212e', color: 'white', boxShadow: 'none' }}>
                             <AccordionSummary sx={{
                                 position: 'relative',
                                 pl: 4,
@@ -197,33 +197,63 @@ const AnnouncementsPanel = () => {
                                 <Typography>ESCALATIONS</Typography>
                             </AccordionSummary>
                             <AccordionDetails sx={{ backgroundColor: '#cdcdcd', p: 0 }}>
-                                <Box sx={{ overflowY: 'auto', height: announcementsExpanded ? 263 : 526}}>
+                                <Box sx={{ overflowY: 'auto', height: announcementsExpanded ? 263 : 526 }}>
                                     <AccordionDetails>
                                         <Grid container spacing={2} direction='column'>
-                                            {escalationsList.map((escalation) => (
-                                                <Grid item xs={12} >
-                                                    <AccordionDetails sx={{ mb: 0.5 }}>
-                                                        <Card sx={{ backgroundColor: '#fff', boxShadow: 'none', mb: -3.5, mt: -1, width: 235 }}>
-                                                            <CardContent>
-                                                                {/* Title & Edit Icon */}
-                                                                <Box>
-                                                                    <Typography variant="h7" sx={{p: '4px'}} ><strong>Client: </strong> {escalation.name}</Typography>
-                                                                    <br />
-                                                                    <Typography variant="h7" sx={{p: '4px', fontSize: '12px'}}><strong>Client ID: </strong> {escalation.escalation.clientId}</Typography>
+                                            {escalationsList
+                                                .sort((a, b) => {
+                                                    if (a.escalation.status === b.escalation.status) {
+                                                        return a.escalation.clientId - b.escalation.clientId;
+                                                    }
+                                                    return a.escalation.status === "Pending" ? -1 : 1;
+                                                })
+                                                .map((escalation) => (
+                                                    <Grid item xs={12}>
+                                                        <AccordionDetails sx={{ mb: 0.5 }}>
+                                                            <Card sx={{ backgroundColor: '#fff', boxShadow: 'none', mb: -3.5, mt: -1, width: 235 }}>
+                                                                <Box sx={{ display: 'flex', mt: 1, mb: 1 }}>
+                                                                    {/* Status Indicator Bar */}
+                                                                    <Box sx={{
+                                                                        width: 6,
+                                                                        height: 80,
+                                                                        alignSelf: 'center',
+                                                                        flexShrink: 0,
+                                                                        backgroundColor: escalation.escalation.status === 'Pending' ? 'red' : 'green',
+                                                                        borderRadius: '2px 0 0 2px',
+                                                                        mr: 1
+                                                                    }} />
+
+                                                                    <CardContent sx={{ flexGrow: 1, p: 1 }}>
+                                                                        <Typography sx={{ fontSize: '15px' }}><strong>Client: </strong>{escalation.name}</Typography>
+                                                                        <Typography sx={{ fontSize: '12px' }}><strong>Client ID: </strong>{escalation.escalation.clientId}</Typography>
+                                                                        <Typography sx={{ fontSize: '12px' }}><strong>Status: </strong>{escalation.escalation.status}</Typography>
+
+                                                                        <Box sx={{
+                                                                            flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis',
+                                                                            display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, mt: 1
+                                                                        }}>
+                                                                            <Typography  sx={{ whiteSpace: "pre-line", fontSize: '12px' }}>
+                                                                                <strong>Chat History: </strong>
+                                                                                <Typography sx={{ fontSize: '12px' }}>{escalation.escalation.chathistory}</Typography>
+                                                                            </Typography>
+                                                                        </Box>
+                                                                        {escalation.escalation.chatsummary && (
+                                                                            <Box sx={{
+                                                                                flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis',
+                                                                                display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, mt: 1, mb: -1
+                                                                            }}>
+                                                                                <Typography  sx={{ whiteSpace: "pre-line", fontSize: '12px' }}>
+                                                                                    <strong>Chat Summary: </strong>
+                                                                                    <Typography sx={{ fontSize: '12px' }}>{escalation.escalation.chatsummary}</Typography>
+                                                                                </Typography>
+                                                                            </Box>
+                                                                        )}
+                                                                    </CardContent>
                                                                 </Box>
-                                                                <Box sx={{
-                                                                    flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis', pl: '4px',
-                                                                    display: '-webkit-box',
-                                                                    WebkitBoxOrient: 'vertical',
-                                                                    WebkitLineClamp: 2,
-                                                                }}>
-                                                                    <Typography variant="h7" sx={{ whiteSpace: "pre-line", fontSize: '12px' }}><strong>Chat History: </strong> {escalation.escalation.chathistory}</Typography>
-                                                                </Box>
-                                                            </CardContent>
-                                                        </Card>
-                                                    </AccordionDetails>
-                                                </Grid>
-                                            ))}
+                                                            </Card>
+                                                        </AccordionDetails>
+                                                    </Grid>
+                                                ))}
                                         </Grid>
                                     </AccordionDetails>
                                 </Box>
@@ -254,7 +284,7 @@ const AnnouncementsPanel = () => {
                         )}
                         <Link to='/Announcements'>
                             <Button variant="contained" fullWidth>
-                                { user && user.role == 'admin' ? (
+                                {user && user.role == 'admin' ? (
                                     <Typography>View All Announcements</Typography>
                                 ) : (
                                     <Typography>View Announcements</Typography>

@@ -19,10 +19,10 @@ const lexClient = new LexRuntimeV2Client({
 
 
 const escalationvalidation = yup.object({
-    escalationId: yup.number().integer(),
-    clientId: yup.number().integer(),
-    chathistory: yup.string().max(2000),
-    chatsummary: yup.string().max(2000),
+  escalationId: yup.number().integer(),
+  clientId: yup.number().integer(),
+  chathistory: yup.string().max(2000),
+  chatsummary: yup.string().max(2000),
 });
 router.post('/generate-summary', async (req, res) => {
   try {
@@ -34,7 +34,7 @@ router.post('/generate-summary', async (req, res) => {
     const systemPrompt = `You are a financial advisor assistant. Summarize the following client-chatbot conversation into a short and clear summary of the client's concern, suitable for quick review by a human advisor. Do not start the summary with the word "Summary" or any similar heading.`;
     messages = [{
       role: "user",
-      content: [{text: systemPrompt + chathistory}],
+      content: [{ text: systemPrompt + chathistory }],
     }];
     const apiKey = process.env.AWS_BEARER_TOKEN_BEDROCK;
     const response = await axios.post(
@@ -52,8 +52,8 @@ router.post('/generate-summary', async (req, res) => {
     await schema.validate(req.body);
     const escalation = await Escalation.findByPk(clientId)
     if (escalation) {
-        escalation.chatsummary = chatsummary
-        await escalation.save()
+      escalation.chatsummary = chatsummary
+      await escalation.save()
     }
     res.json(escalation);
 
@@ -65,39 +65,56 @@ router.post('/generate-summary', async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    let data = req.body;
+  let data = req.body;
 
-    // Validate request body
-    const validationSchema = escalationvalidation
-    try {
-        data = await validationSchema.validate(data,
-            { abortEarly: false });
-        // Process valid data
-        const result = await Escalation.create(data);
-        res.json(result);
-    }
-    catch (err) {
-        res.status(400).json({ errors: err.errors });
-    }
+  // Validate request body
+  const validationSchema = escalationvalidation
+  try {
+    data = await validationSchema.validate(data,
+      { abortEarly: false });
+    // Process valid data
+    const result = await Escalation.create(data);
+    res.json(result);
+  }
+  catch (err) {
+    res.status(400).json({ errors: err.errors });
+  }
+});
+router.post("/mark-complete", async (req, res) => {
+  const { clientId } = req.body;
+  if (!clientId) return res.status(400).json({ error: "clientId is required" });
+
+  try {
+    const escalation = await Escalation.findOne({ where: { clientId } });
+    if (!escalation) return res.status(404).json({ error: "Escalation not found" });
+
+    escalation.status = "Completed";
+    await escalation.save();
+
+    res.json({ message: "Escalation marked as completed", escalation });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update escalation status" });
+  }
 });
 
 router.get("/", async (req, res) => {
-    const condition = {};
-    const search = req.query.search;
-    if (search) {
-        condition[Op.or] = [
-            { escalationId: { [Op.like]: `%${search}%` } },
-        ];
-    }
-    const list = await Escalation.findAll({
-        where: condition,
-        order: [['createdAt', 'ASC']],
-    });
-    res.json(list);
+  const condition = {};
+  const search = req.query.search;
+  if (search) {
+    condition[Op.or] = [
+      { escalationId: { [Op.like]: `%${search}%` } },
+    ];
+  }
+  const list = await Escalation.findAll({
+    where: condition,
+    order: [['createdAt', 'ASC']],
+  });
+  res.json(list);
 });
 
 router.get("/clients_full_data", async (req, res) => {
-    try {
+  try {
     const clients = await Client.findAll({
       include: [
         { model: Escalation },
@@ -122,70 +139,70 @@ router.get("/clients_full_data", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-    const id = req.params.id;
-    const escalation = await Escalation.findByPk(id)
+  const id = req.params.id;
+  const escalation = await Escalation.findByPk(id)
 
-    if (!escalation) {
-        res.sendStatus(404);
-        return;
-    }
-    res.json(escalation);
+  if (!escalation) {
+    res.sendStatus(404);
+    return;
+  }
+  res.json(escalation);
 });
 
 
 router.put("/:id", async (req, res) => {
-    let id = req.params.id;
-    const validationSchema = escalationvalidation
-    let data = req.body;
-    try {
-        data = await validationSchema.validate(data,
-            { abortEarly: false });
-        let escalation = await Escalation.findByPk(id);
-        if (!escalation) {
-            res.sendStatus(404);
-            return;
-        }
-        let num = await Escalation.update(data, { //Actually execute the update
-            where: { id: id }
-        });
-        if (num == 1) { //checks if update is true
-            res.json({
-                message: "Escalation was updated successfully."
-            });
-        }
-        else {
-            res.status(400).json({
-                message: `Cannot update Escalation with id ${id}.`
-            });
-        }
+  let id = req.params.id;
+  const validationSchema = escalationvalidation
+  let data = req.body;
+  try {
+    data = await validationSchema.validate(data,
+      { abortEarly: false });
+    let escalation = await Escalation.findByPk(id);
+    if (!escalation) {
+      res.sendStatus(404);
+      return;
     }
-    catch (err) {
-        res.status(400).json({ errors: err.errors });
-        return;
+    let num = await Escalation.update(data, { //Actually execute the update
+      where: { id: id }
+    });
+    if (num == 1) { //checks if update is true
+      res.json({
+        message: "Escalation was updated successfully."
+      });
     }
+    else {
+      res.status(400).json({
+        message: `Cannot update Escalation with id ${id}.`
+      });
+    }
+  }
+  catch (err) {
+    res.status(400).json({ errors: err.errors });
+    return;
+  }
 });
 
 router.delete("/:id", async (req, res) => {
-    const id = req.params.id;
-    const escalation = await Escalation.findByPk(id);
-    if (!escalation) {
-        res.sendStatus(404);
-        return;
-    }
+  const id = req.params.id;
+  const escalation = await Escalation.findByPk(id);
+  if (!escalation) {
+    res.sendStatus(404);
+    return;
+  }
 
-    let num = await Escalation.destroy({
-        where: { id: id }
-    })
-    if (num == 1) {
-        res.json({
-            message: "Escalation was deleted successfully."
-        });
-    }
-    else {
-        res.status(400).json({
-            message: `Cannot delete escalation with id ${id}.`
-        });
-    }
+  let num = await Escalation.destroy({
+    where: { id: id }
+  })
+  if (num == 1) {
+    res.json({
+      message: "Escalation was deleted successfully."
+    });
+  }
+  else {
+    res.status(400).json({
+      message: `Cannot delete escalation with id ${id}.`
+    });
+  }
 });
 
 module.exports = router;
