@@ -10,6 +10,9 @@ const { validateToken } = require('../middlewares/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { ingestPdf, removePdf } = require('../services/pdfService');
+
+
 
 
 function generateLinkCode(length = 8) {
@@ -42,7 +45,19 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + '-' + file.originalname);
   }
 });
-const upload = multer({ storage });
+const fileFilter = (req, file, cb) => {
+  const isPdfExt = path.extname(file.originalname).toLowerCase() === '.pdf';
+  const isPdfMime = file.mimetype === 'application/pdf';
+
+  if (isPdfExt && isPdfMime) {
+    cb(null, true); // Accept
+  } else {
+    cb(new Error('Only PDF files are allowed'), false);
+  }
+};
+
+
+const upload = multer({ storage, fileFilter });
 
 // Storage config: save file as "<userid>.<ext>"
 const storage1 = multer.diskStorage({
@@ -300,22 +315,36 @@ router.post("/verify-password", validateToken, async (req, res) => {
   }
 });
 
-router.post('/upload-policy', validateToken, upload.array('files'), async (req, res) => {
-  const userFolder = path.join(__dirname, '../uploaded', String(req.user.id));
+router.post(
+  '/upload-policy',
+  validateToken, // check auth first
+  (req, res, next) => {
+    upload.array('files')(req, res, function (err) {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+      next();
+    });
+  },
+  async (req, res) => {
+    const userFolder = path.join(__dirname, '../uploaded', String(req.user.id));
+    // Check total folder size
+    const files = fs.readdirSync(userFolder);
+    const totalSize = files.reduce((acc, file) => {
+      const stats = fs.statSync(path.join(userFolder, file));
+      return acc + stats.size;
+    }, 0);
 
-  // Check total folder size
-  const files = fs.readdirSync(userFolder);
-  const totalSize = files.reduce((acc, file) => {
-    const stats = fs.statSync(path.join(userFolder, file));
-    return acc + stats.size;
-  }, 0);
+    if (totalSize > 100 * 1024 * 1024) {
+      return res.status(400).json({ message: 'Storage limit exceeded (100MB)' });
+    }
+    for (const file of req.files) {
+      await ingestPdf(req.user.id, file.filename);
+    }
 
-  if (totalSize > 100 * 1024 * 1024) {
-    return res.status(400).json({ message: 'Storage limit exceeded (100MB)' });
-  }
 
-  res.json({ message: 'Files uploaded successfully' });
-});
+    res.json({ message: 'Files uploaded successfully' });
+  });
 
 router.get('/policy-files', validateToken, (req, res) => {
   const userFolder = path.join(__dirname, '../uploaded', String(req.user.id));
@@ -326,15 +355,27 @@ router.get('/policy-files', validateToken, (req, res) => {
   res.json(files); // just filenames for now
 });
 
-router.delete('/policy-files/:filename', validateToken, (req, res) => {
-  const userFolder = path.join(__dirname, '../uploaded', String(req.user.id));
-  const filePath = path.join(userFolder, req.params.filename);
-  if (fs.existsSync(filePath)) {
+router.delete('/policy-files/:filename', validateToken, async (req, res) => {
+  try {
+    
+    const userFolder = path.join(__dirname, '../uploaded', String(req.user.id));
+    const filePath = path.join(userFolder, req.params.filename);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'File not found' });
+    }
+
     fs.unlinkSync(filePath);
-    return res.json({ message: 'File deleted' });
+    await removePdf(req.user.id, req.params.filename,);
+
+    res.json({ message: 'File deleted and removed from index' });
   }
-  res.status(404).json({ message: 'File not found' });
+  catch (err) {
+    console.log(err)
+  }
 });
+
+
 
 router.get('/profilepic/:id', (req, res) => {
   const { id } = req.params;

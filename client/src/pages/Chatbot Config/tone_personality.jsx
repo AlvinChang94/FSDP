@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Box, Typography, Paper, Checkbox, FormControlLabel, FormGroup, Radio, RadioGroup, TextField, Button, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
@@ -6,6 +6,7 @@ import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import SecurityIcon from '@mui/icons-material/Security';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import http from "../../http";
+import { toast } from 'react-toastify';
 
 const configNav = [
   {
@@ -18,11 +19,11 @@ const configNav = [
     icon: <QuestionMarkIcon />,
     path: "/config/faq_management"
   },
-  {
-    label: "Security & Privacy",
-    icon: <SecurityIcon />,
-    path: "/config/security_privacy"
-  },
+  //{
+    //    label: "Security & Privacy",
+    //    icon: <SecurityIcon />,
+    //    path: "/config/security_privacy"
+    //},
   {
     label: "Intervention Threshold",
     icon: <EmojiEmotionsIcon />,
@@ -31,9 +32,23 @@ const configNav = [
 ];
 
 function TonePersonality() {
+  const toastCooldownRef = useRef(0);
+    const showErrorWithCooldown = (msg) => {
+      const now = Date.now();
+      if (now - toastCooldownRef.current > 5000) { // 5 seconds
+        toast.error(msg);
+        toastCooldownRef.current = now;
+      }
+    };
+    const showSuccessWithCooldown = (msg) => {
+      const now = Date.now();
+      if (now - toastCooldownRef.current > 5000) { // 5 seconds
+        toast.success(msg)
+        toastCooldownRef.current = now;
+      }
+    };
   const userId = localStorage.getItem('userId');
   const location = useLocation();
-  const [saveStatus, setSaveStatus] = useState('');
   const [tones, setTones] = useState({
     Professional: false,
     Neutral: false,
@@ -55,11 +70,9 @@ function TonePersonality() {
         emojiUsage,
         signature
       });
-      setSaveStatus('Settings saved!');
-      setTimeout(() => setSaveStatus(''), 2000);
+      showSuccessWithCooldown('Settings saved!')
     } catch (err) {
-      setSaveStatus('Failed to save settings.');
-      setTimeout(() => setSaveStatus(''), 2000);
+      showErrorWithCooldown('Failed to save')
     }
   };
   useEffect(() => {
@@ -222,11 +235,6 @@ function TonePersonality() {
             Save changes
           </Button>
         </Box>
-        {saveStatus && (
-  <Typography sx={{ color: saveStatus === 'Settings saved!' ? 'green' : 'red', mb: 2 }}>
-    {saveStatus}
-  </Typography>
-)}
       </Box>
     </Box>
     </Box>

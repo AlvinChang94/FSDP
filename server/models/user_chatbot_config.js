@@ -42,6 +42,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true,
         },
+        dataRetention: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        }
 
         // Add more fields as needed for other config options
     }, {

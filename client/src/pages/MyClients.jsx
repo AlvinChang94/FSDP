@@ -36,14 +36,10 @@ import * as Yup from 'yup';
 import DOMPurify from 'dompurify';
 import { Formik, Form, FieldArray, ErrorMessage } from 'formik';
 
-
-
-
 export default function MyClients() {
     const editClientSchema = Yup.object().shape({
         contactName: Yup.string()
-            .max(100, 'Contact name must be at most 100 characters')
-            .required('Contact name is required'),
+            .max(100, 'Contact name must be at most 100 characters'),
 
         // Array of custom fields
         customFields: Yup.array().of(

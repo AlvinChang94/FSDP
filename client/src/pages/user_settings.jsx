@@ -197,6 +197,8 @@ function UserSettings() {
   });
   const [aiOverview, setAIOverview] = useState("");
   const [aiLoading, setAILoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
 
   const handleAIFormChange = (e) => {
     setAIForm({ ...aiForm, [e.target.name]: e.target.value });
@@ -220,7 +222,7 @@ function UserSettings() {
   };
 
   const handleDelete = (filename) => {
-    http.delete(`user/policy-files/${filename}`).then(() => {
+    http.delete(`/user/policy-files/${encodeURIComponent(filename)}`).then(() => {
       setFiles(prev => prev.filter(f => f !== filename));
     });
   };
@@ -233,6 +235,7 @@ function UserSettings() {
     }
 
     try {
+      setIsUploading(true);
       await http.post('user/upload-policy', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
@@ -240,7 +243,13 @@ function UserSettings() {
       const res = await http.get('/user/policy-files');
       setFiles(res.data);
     } catch (err) {
-      console.error('Error uploading or fetching files', err);
+      if (err.response?.data?.message) {
+        showErrorWithCooldown(err.response.data.message);
+      } else {
+        showErrorWithCooldown('Error uploading or fetching files', err);
+      }
+    } finally {
+      setIsUploading(false);
     }
 
   };
@@ -516,14 +525,15 @@ function UserSettings() {
           <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
             Company Policy Documents
           </Typography>
-          <Button variant="outlined" component="label">
-            Upload Documents
+          <Button variant="outlined" component="label" disabled={isUploading}>
+            {isUploading ? 'Uploading documents…' : 'Upload documents'}
+
             <input
               type="file"
               multiple
               id="file-upload"
-              accept=".pdf,.doc,.docx"
-              hidden // same as style={{ display: 'none' }}
+              accept=".pdf"
+              hidden
               onChange={handleFileUpload}
 
             />

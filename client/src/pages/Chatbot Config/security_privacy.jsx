@@ -19,11 +19,11 @@ const configNav = [
         icon: <QuestionMarkIcon />,
         path: "/config/faq_management"
     },
-    {
-        label: "Security & Privacy",
-        icon: <SecurityIcon />,
-        path: "/config/security_privacy"
-    },
+    //{
+    //    label: "Security & Privacy",
+    //    icon: <SecurityIcon />,
+    //    path: "/config/security_privacy"
+    //},
     {
         label: "Intervention Threshold",
         icon: <EmojiEmotionsIcon />,
@@ -203,7 +203,7 @@ function Security_privacy() {
                         </Grid>
                     </Paper>
 
-                    {/* Human-intervention log */}
+                    {/* Human-intervention log 
                     <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
                         <Grid container alignItems="center" justifyContent="space-between">
                             <Grid item>
@@ -234,7 +234,7 @@ function Security_privacy() {
                                 </Button>
                             </Grid>
                         </Grid>
-                    </Paper>
+                    </Paper>*/}
 
                     {/* Sensitive Data Filter */}
                     <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3 }}>

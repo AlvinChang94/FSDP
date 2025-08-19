@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Box, Typography, Paper, FormGroup, FormControlLabel, Checkbox, TextField, Button, Grid, Select, MenuItem, InputLabel, FormControl, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Modal, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
@@ -7,6 +7,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import DeleteIcon from '@mui/icons-material/Delete';
 import http from "../../http";
+import { toast } from 'react-toastify';
 
 const configNav = [
     {
@@ -19,11 +20,11 @@ const configNav = [
         icon: <QuestionMarkIcon />,
         path: "/config/faq_management"
     },
-    {
-        label: "Security & Privacy",
-        icon: <SecurityIcon />,
-        path: "/config/security_privacy"
-    },
+    //{
+    //    label: "Security & Privacy",
+    //    icon: <SecurityIcon />,
+    //    path: "/config/security_privacy"
+    //},
     {
         label: "Intervention Threshold",
         icon: <EmojiEmotionsIcon />,
@@ -42,6 +43,21 @@ const actionOptions = [
     "mask data"
 ];
 function Intervention_threshold() {
+    const toastCooldownRef = useRef(0);
+      const showErrorWithCooldown = (msg) => {
+        const now = Date.now();
+        if (now - toastCooldownRef.current > 5000) { // 5 seconds
+          toast.error(msg);
+          toastCooldownRef.current = now;
+        }
+      };
+      const showSuccessWithCooldown = (msg) => {
+        const now = Date.now();
+        if (now - toastCooldownRef.current > 5000) { // 5 seconds
+          toast.success(msg)
+          toastCooldownRef.current = now;
+        }
+      };
     const location = useLocation();
 
     // Agent notification method
@@ -63,7 +79,7 @@ function Intervention_threshold() {
     const [deleteIdx, setDeleteIdx] = useState(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [confidenceScore, setConfidenceScore] = useState(0.8)
-    const [saveStatus, setSaveStatus] = useState("");
+
 
     useEffect(() => {
         const load = async () => {
@@ -92,7 +108,7 @@ function Intervention_threshold() {
 
     // Add rule
     const handleAddRule = async () => {
-        if (!ruleName || !triggerType || !keyword || !action) return;
+        if (!ruleName || !triggerType || !keyword) return;
         try {
             const res = await http.post('/api/config/rules', {
                 ruleName, triggerType, keyword, action, confidenceThreshold: parseFloat(confidenceScore)
@@ -134,11 +150,10 @@ function Intervention_threshold() {
                 notificationMethod: newNotification,
                 holdingMsg: newHoldingMsg
             });
-            setTimeout(() => setSaveStatus(""), 1600);
+            showSuccessWithCooldown('Settings saved!')
         } catch (err) {
             console.error(err);
-            setSaveStatus("Failed to save");
-            setTimeout(() => setSaveStatus(""), 2200);
+            showErrorWithCooldown('Failed to save settings')
         }
     };
     const onNotificationChange = (key, checked) => {
@@ -150,9 +165,7 @@ function Intervention_threshold() {
 
     const handleSaveHoldingMsg = async () => {
         // save current notification + holdingMsg
-        setSaveStatus("Saving...");
         await saveSettings(notification, holdingMsg);
-        setSaveStatus("Saved");
     };
 
 
@@ -270,11 +283,7 @@ function Intervention_threshold() {
                             sx={{ bgcolor: "#fff", borderRadius: 2, mb: 2 }}
                         />
                         <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 2 }}>
-                            {saveStatus && (
-                                <Typography sx={{ color: saveStatus === 'Saved' ? 'green' : 'orange', mr: 70.5 }}>
-                                    {saveStatus}
-                                </Typography>
-                            )}
+                            
                             <Button
                                 variant="contained"
                                 sx={{

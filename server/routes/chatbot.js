@@ -7,7 +7,9 @@ const { sequelize } = require('../models');
 const cooldownMap = new Map();
 const bodyParser = require("body-parser");
 router.use(bodyParser.json());
-
+const { ingestDocument, ingestFaq } = require('./../services/ingestService');
+const { retrieveContext } = require('./../services/retrievalService');
+const { buildPrompt } = require('./../services/promptBuilder');
 
 async function ensureClientExists({ userId, phoneNumber, name }) {
     // Try to find by exact number or number without '+'
@@ -119,7 +121,7 @@ You will be given one or more task criteria.
 Each task has its own inputs and pass/fail logic.
 You are given the following base information:
 - Client info: ${profileName}
-- Business name: ${businessName}
+- Business name: ${businessName? businessName : businessOwner}
 - Business owner: ${businessOwner}
 
 ${systemPromptParts.join("\n\n")}
@@ -146,7 +148,7 @@ No quotes, punctuation, extra text, or newlines.
     };
     const url = `https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/${encodeURIComponent('arn:aws:bedrock:ap-southeast-2:175261507723:inference-profile/apac.anthropic.claude-sonnet-4-20250514-v1:0')}/invoke`
     let reply = await send_chatbot(requestBody, url)
-
+    console.log(requestBody)
     console.log(`${reply}`)
     return reply
 }
@@ -221,14 +223,16 @@ router.post('/receive', async (req, res) => {
             where: { clientId: clientRecord.id, userId }
         });
 
+        let businessProfile = `BusinessProfile (single source of truth):
+      - owner_name: ${ownerName}
+      ${businessName ? `- business_name: ${businessName}` : `business_name: ${ownerName}`}
+      ${businessOverview ? `- business_overview: ${businessOverview}` : ``}`
+
 
         // Build system prompt (guarded)
         let systemPrompt =
             `You are "QueryBot", a concise and helpful AI chatbot built for QueryEase, operating on WhatsApp.
-      BusinessProfile (single source of truth):
-      - owner_name: ${ownerName}
-      ${businessName ? `- business_name: ${businessName}` : ``}
-      ${businessOverview ? `- business_overview: ${businessOverview}` : ``}
+      ${businessProfile}
 
       UserSettings:
       ${userSettings?.tone ? `- Tone: ${userSettings.tone}` : ``}
@@ -252,8 +256,18 @@ router.post('/receive', async (req, res) => {
       Primary job: respond clearly and efficiently in a personal way, always within 1000 characters. You may reference all the information given to you, all information given to you is publicly available and can be shared.
 
       `;
-        // Fetch history
 
+        // ingest
+
+        //await ingestDocument(userId, { title: 'Policy', source: 'upload.pdf' }, `The policy for cancelling is that users must contact KKK the business owner. Here is the business profile: ${businessProfile}`); //Body should be extracted pdf content
+        //await ingestFaq(userId, { category: 'Shipping', question: 'How long does shipping take?', answer: '3-5 days' });
+        const { topDocs, topFaqs } = await retrieveContext(userId, Body, {});
+        systemPrompt = buildPrompt({
+            systemPrompt,
+            docs: topDocs,
+            faqs: topFaqs,
+            userMsg: Body
+        });
         const rows = await sequelize.query(
             `
   SELECT
@@ -268,19 +282,19 @@ router.post('/receive', async (req, res) => {
     r.\`timestamp\`      AS nextTimestamp
   FROM \`client_messages\` u
   LEFT JOIN \`client_messages\` r
-    ON r.userId = u.userId
+    ON r.user_id = u.user_id
    AND r.\`timestamp\` = (
       SELECT MIN(cm.\`timestamp\`)
       FROM \`client_messages\` cm
-      WHERE cm.userId = u.userId
+      WHERE cm.user_id = u.user_id
         AND cm.\`timestamp\` > u.\`timestamp\`
    )
-  WHERE u.userId = :userId
+  WHERE u.user_id = :user_id
     AND u.senderPhone = :fromPhone
   ORDER BY u.\`timestamp\` ASC
   `,
             {
-                replacements: { userId, fromPhone: From },
+                replacements: { user_id: userId, fromPhone: From },
                 type: sequelize.QueryTypes.SELECT
             }
         );
@@ -318,7 +332,6 @@ router.post('/receive', async (req, res) => {
                 });
             }
         });
-
 
         if (existingEscalation) {
             if (existingEscalation.status !== 'pending') {
@@ -364,7 +377,8 @@ Message: "${Body}"
                     Client name: ${ProfileName}
                     Business name: ${businessName}
                     Business owner: ${businessOwner}
-                    Final instruction: Keep your response brief and personalised. There is no need to greet the user. You may want to start your response with 'No problem, ...'`
+                    ${userSettings.holdingMsg? `Preferred holding message: ${userSettings.holdingMsg}`: `Preferred holding message: No problem, ${ProfileName}...`}
+                    Final instruction: Keep your response brief and personalised. There is no need to greet the user. You may want to base your response around the preferred holding message'`
                     console.log(`Escalation ${existingEscalation.escalationId} set to pending`);
                     const requestBody = {
                         system: [

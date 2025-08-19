@@ -2,6 +2,7 @@ const { Hooks } = require("sequelize/lib/hooks");
 
 module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define("User", {
+
         name: {
             type: DataTypes.STRING(50),
             allowNull: false
@@ -36,10 +37,6 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         phone_num: {
-            type: DataTypes.TEXT,
-            allowNull: true
-        },
-        profile_picture: {
             type: DataTypes.TEXT,
             allowNull: true
         }

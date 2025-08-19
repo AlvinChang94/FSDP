@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Typography, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, TextField, Button, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Modal, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { Link } from "react-router-dom";
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
@@ -8,6 +8,7 @@ import PsychologyIcon from '@mui/icons-material/Psychology';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import http from "../../http";
 
 const configNav = [
     {
@@ -20,11 +21,11 @@ const configNav = [
         icon: <QuestionMarkIcon />,
         path: "/config/faq_management"
     },
-    {
-        label: "Security & Privacy",
-        icon: <SecurityIcon />,
-        path: "/config/security_privacy"
-    },
+    //{
+    //    label: "Security & Privacy",
+    //    icon: <SecurityIcon />,
+    //    path: "/config/security_privacy"
+    //},
     {
         label: "Intervention Threshold",
         icon: <EmojiEmotionsIcon />,
@@ -32,11 +33,7 @@ const configNav = [
     }
 ];
 function Faq_Management() {
-    const [faqs, setFaqs] = useState([
-        { category: "Payments", question: "When is my premium due?", answer: "Your premium is due on the 1st of every month.", updated: "May 19th 2025" },
-        { category: "Claims", question: "How do I file a claim?", answer: "You can file a claim via our portal.", updated: "April 20th 2025" },
-        { category: "Account", question: "How can I update my contact details?", answer: "Go to your profile settings.", updated: "May 15th 2025" }
-    ]);
+    const [faqs, setFaqs] = useState([]);
     const [newQuestion, setNewQuestion] = useState("");
     const [newAnswer, setNewAnswer] = useState("");
     const [editIndex, setEditIndex] = useState(null);
@@ -48,6 +45,11 @@ function Faq_Management() {
     const [hoveredEye, setHoveredEye] = useState(null);
     const [category, setCategory] = useState("");
     const [editCategory, setEditCategory] = useState("");
+    const userId = localStorage.getItem('userId')
+    const [isAdding, setIsAdding] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+
+
     const categoryOptions = [
         "Payments",
         "Claims",
@@ -57,21 +59,53 @@ function Faq_Management() {
         "Policy",
         "Other"
     ];
+    useEffect(() => {
+        const fetchFaqs = async () => {
+            try {
+                const res = await http.get(`/api/config/faqmanagement`, {
+                    params: { userId } // if you filter by user
+                });
+                setFaqs(res.data); // assuming API returns an array of FAQs
+            } catch (err) {
+                console.error("Error fetching FAQs:", err);
+            }
+        };
+
+        fetchFaqs();
+    }, [userId]);
 
     // Add FAQ
-    const handleAddFaq = () => {
+    const handleAddFaq = async () => {
         if (newQuestion.trim() && newAnswer.trim()) {
-            setFaqs([
-                ...faqs,
-                {
-                    category,
-                    question: newQuestion,
-                    answer: newAnswer,
-                    updated: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-                }
-            ]);
-            setNewQuestion("");
-            setNewAnswer("");
+            try {
+                setIsAdding(true);
+                let res = await http.post(
+                    '/api/config/faqmanagement',
+                    {
+                        userId,
+                        category,
+                        question: newQuestion,
+                        answer: newAnswer
+                    },
+                    {
+                        headers: { 'Content-Type': 'application/json' }
+                    }
+                );
+                setFaqs([
+                    ...faqs,
+                    {
+                        id: res.data.id,
+                        category,
+                        question: newQuestion,
+                        answer: newAnswer,
+                        updatedAt: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                    }
+                ]);
+                setNewQuestion("");
+                setNewAnswer("");
+            } finally {
+                setIsAdding(false)
+            }
         }
     };
 
@@ -83,14 +117,31 @@ function Faq_Management() {
         setEditAnswer(faqs[idx].answer);
         setEditModalOpen(true);
     };
-    const handleEditSave = () => {
-        setFaqs(faqs.map((faq, idx) =>
-            idx === editIndex
-                ? { ...faq, category: editCategory, question: editQuestion, answer: editAnswer, updated: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) }
-                : faq
-        ));
-        setEditModalOpen(false);
-        setEditIndex(null);
+    const handleEditSave = async () => {
+        try {
+            setIsSaving(true)
+            const faqId = faqs[editIndex].id;
+            await http.put(
+                `/api/config/faqmanagement/${faqId}`,
+                {
+                    category: editCategory,
+                    question: editQuestion,
+                    answer: editAnswer
+                },
+                {
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            );
+            setFaqs(faqs.map((faq, idx) =>
+                idx === editIndex
+                    ? { ...faq, category: editCategory, question: editQuestion, answer: editAnswer, updated: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) }
+                    : faq
+            ));
+            setEditModalOpen(false);
+            setEditIndex(null);
+        } finally {
+            setIsSaving(false)
+        }
     };
 
     // Delete FAQ
@@ -98,13 +149,20 @@ function Faq_Management() {
         setDeleteIndex(idx);
         setDeleteModalOpen(true);
     };
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = async () => {
+        const faqId = faqs[deleteIndex].id;
+        await http.delete(
+            `/api/config/faqmanagement/${faqId}`,
+            {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
         setFaqs(faqs.filter((_, idx) => idx !== deleteIndex));
         setDeleteModalOpen(false);
         setDeleteIndex(null);
     };
     return (
-        <Box sx={{position: 'absolute', left: 220, top: 0, width:'80vw'}}>
+        <Box sx={{ position: 'absolute', left: 220, top: 0, width: '80vw' }}>
             <Box sx={{ display: "flex", bgcolor: "#181617" }}>
                 {/* Secondary Nav Bar */}
                 <Box sx={{
@@ -203,7 +261,7 @@ function Faq_Management() {
                             sx={{ mb: 1, bgcolor: "#fff", borderRadius: 2 }}
                         />
                         <Typography variant="caption" sx={{ color: "#888", display: "block", mb: 2 }}>
-                            *special requests to the AI can be used via encapsulating your message with "//" quotations
+                            {/*special requests to the AI can be used via encapsulating your message with "//" quotations*/}
                         </Typography>
                         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                             <Button
@@ -220,9 +278,9 @@ function Faq_Management() {
                                     '&:hover': { bgcolor: "#2e6fd8" }
                                 }}
                                 onClick={handleAddFaq}
-                                disabled={!category || !newQuestion.trim() || !newAnswer.trim()}
+                                disabled={!category || !newQuestion.trim() || !newAnswer.trim() || isAdding }
                             >
-                                Add
+                                {isAdding ? 'Adding…' : 'Add'}
                             </Button>
                         </Box>
                     </Paper>
@@ -246,8 +304,13 @@ function Faq_Management() {
                                     {faqs.map((faq, idx) => (
                                         <TableRow key={idx}>
                                             <TableCell>{faq.category}</TableCell>
-                                            <TableCell sx={{whiteSpace: "pre-line", wordBreak: "break-word",}}>{faq.question}</TableCell>
-                                            <TableCell>{faq.updated}</TableCell>
+                                            <TableCell sx={{ whiteSpace: "pre-line", wordBreak: "break-word", }}>{faq.question}</TableCell>
+                                            <TableCell>{new Date(faq.updatedAt).toLocaleDateString('en-GB', {
+                                                day: 'numeric',
+                                                month: 'long',
+                                                year: 'numeric'
+                                            })}
+                                            </TableCell>
                                             <TableCell>
                                                 <IconButton onClick={() => handleEditFaq(idx)}>
                                                     <EditIcon />
@@ -275,10 +338,17 @@ function Faq_Management() {
                                                             mt: 0.2,
                                                             zIndex: 10,
                                                             minWidth: 200,
-                                                            boxShadow: 3
+                                                            maxWidth: 200,
+                                                            boxShadow: 3,
+                                                            whiteSpace: 'normal',
+                                                            wordBreak: 'break-word'
                                                         }}
                                                     >
-                                                        {/* Blank for now */}
+                                                        <strong>{faq.question}</strong>
+                                                        <Box sx={{ mt: 1, fontSize: '0.9rem', whiteSpace: 'pre-line' }}>
+                                                            {faq.answer}
+                                                        </Box>
+
                                                     </Box>
                                                 )}
                                             </TableCell>
@@ -341,9 +411,9 @@ function Faq_Management() {
                                 <Button
                                     variant="contained"
                                     onClick={handleEditSave}
-                                    disabled={!editQuestion.trim() || !editAnswer.trim()}
+                                    disabled={!editQuestion.trim() || !editAnswer.trim() || isSaving}
                                 >
-                                    Save
+                                    {isSaving ? 'Saving…' : 'Save'}
                                 </Button>
                                 <Button variant="outlined" onClick={() => setEditModalOpen(false)}>
                                     Cancel

@@ -107,30 +107,30 @@ router.post('/generate-summary', async (req, res) => {
         const rows = await sequelize.query(
             `
           SELECT
-            u.id                AS userIdMsgId,
+            u.user_id                AS userIdMsgId,
             u.senderPhone       AS userSenderPhone,
             u.content           AS userMessage,
             u.\`timestamp\`      AS userTimestamp,
         
-            r.id                AS nextId,
+            r.user_id                AS nextId,
             r.senderPhone       AS nextSenderPhone,
             r.content           AS nextMessage,
             r.\`timestamp\`      AS nextTimestamp
           FROM \`client_messages\` u
           LEFT JOIN \`client_messages\` r
-            ON r.userId = u.userId
+            ON r.user_Id = u.user_Id
            AND r.\`timestamp\` = (
               SELECT MIN(cm.\`timestamp\`)
               FROM \`client_messages\` cm
-              WHERE cm.userId = u.userId
+              WHERE cm.user_Id = u.user_Id
                 AND cm.\`timestamp\` > u.\`timestamp\`
            )
-          WHERE u.userId = :userId
+          WHERE u.user_Id = :user_Id
             AND u.senderPhone = :fromPhone
           ORDER BY u.\`timestamp\` ASC
           `,
             {
-                replacements: { userId, fromPhone: client.phoneNumber },
+                replacements: { user_Id: userId, fromPhone: client.phoneNumber },
                 type: sequelize.QueryTypes.SELECT
             }
         );
