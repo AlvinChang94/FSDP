@@ -214,7 +214,7 @@ function AdminSupport() {
                     </List>
                 </Paper>
                 {/* Right side: Conversation */}
-                <Box sx={{ flex: 1, p: 3, display: 'flex', flexDirection: 'column', bgcolor: 'white', width: '71vw' }}>
+                <Box sx={{ flex: 1, p: 3, display: 'flex', flexDirection: 'column', bgcolor: 'white', }}>
                     <Typography variant="h6">
                         {selectedTicket ? `Conversation for ticket ${selectedTicket.ticketId}` : 'Select a ticket'}
                     </Typography>
@@ -517,9 +517,9 @@ function AdminSupport() {
                     <Box
                         sx={{
                             position: 'fixed',
-                            left: 1200,
+                            left: 970,
                             right: 0,
-                            bottom: 0,
+                            bottom: 55,
                             transform: 'translate(-50%, -50%)',
                             width: '100%',
                             maxWidth: '58vw',
@@ -534,6 +534,7 @@ function AdminSupport() {
                                     textAlign: 'center',
                                     width: '100%',
                                     py: 2,
+                                    
                                 }}
                             >
                                 This case has been marked as complete. You cannot edit it anymore.
@@ -541,12 +542,11 @@ function AdminSupport() {
                         ) : selectedTicket ? (<Box
                             sx={{
                                 position: 'fixed',
-                                bottom: 0,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
                                 left: 0,
                                 right: 0,
-                                bgcolor: '#fff',
-                                p: 2,
-                                zIndex: 10,
+                                bgcolor: '#fff'
                             }}
                         >
                             <TextField
@@ -557,6 +557,7 @@ function AdminSupport() {
                                     if (e.target.value.length <= 2000) setNewMessage(e.target.value);
                                 }}
                                 multiline
+
                                 minRows={1}
                                 maxRows={3}
                                 onFocus={() => setInputFocused(true)}

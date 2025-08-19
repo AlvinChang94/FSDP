@@ -79,6 +79,8 @@ function Intervention_threshold() {
     const [deleteIdx, setDeleteIdx] = useState(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [confidenceScore, setConfidenceScore] = useState(0.5)
+    const [user, setUser] = useState(null);
+
 
 
     useEffect(() => {
@@ -105,6 +107,23 @@ function Intervention_threshold() {
         };
         load();
     }, []);
+    useEffect(() => {
+        // wrap in async function
+        const getUser = async () => {
+            try {
+                const res = await http.get("/user/me", {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                    }
+                });
+                setUser(res.data);
+            } catch (err) {
+                console.error("Error fetching /me:", err);
+            }
+        };
+        getUser();
+    }, []);
+
 
     // Add rule
     const handleAddRule = async () => {
@@ -239,6 +258,7 @@ function Intervention_threshold() {
                                     <Checkbox
                                         checked={notification.email}
                                         onChange={e => onNotificationChange('email', e.target.checked)}
+
                                     />
                                 }
                                 label="Email"
@@ -259,6 +279,7 @@ function Intervention_threshold() {
                                     <Checkbox
                                         checked={notification.whatsapp}
                                         onChange={e => onNotificationChange('whatsapp', e.target.checked)}
+                                        disabled={!user?.phone_num}
                                     />
                                 }
                                 label="SMS"

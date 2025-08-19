@@ -215,7 +215,7 @@ function Faq_Management() {
                 </Box>
 
                 {/* Main Content */}
-                <Box sx={{ flex: 1, bgcolor: "#f7f8fa", p: 5, minHeight: "100vh", mr: '-48px', ml: '261px' }}>
+                <Box sx={{ flex: 1, bgcolor: "#f7f8fa", p: 5, minHeight: "100vh", mr: '-48px', ml: '261px', pb: 18 }}>
                     <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3 }}>
                         FAQ Management
                     </Typography>
@@ -340,7 +340,7 @@ function Faq_Management() {
                                                             mt: 0.2,
                                                             zIndex: 10,
                                                             minWidth: 200,
-                                                            maxWidth: 200,
+                                                            maxWidth: 400,
                                                             boxShadow: 3,
                                                             whiteSpace: 'normal',
                                                             wordBreak: 'break-word'

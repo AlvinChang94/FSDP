@@ -257,62 +257,57 @@ function UserSettings() {
   //Whatsapp linking
   const [status, setStatus] = useState('init');
   const [qr, setQr] = useState(null);
-  const [poller, setPoller] = useState(null);
-  const [userName, setName] = useState(null);
-  const [userId, setId] = useState(null);
+  const [userName, setName] = useState('');
+  const [userId, setId] = useState('');
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const pollerRef = useRef(null);
+
+  // Centralized update
   const updateStatusAndQr = (data) => {
     setStatus(data.status);
+
     if (['ready', 'delinked', 'auth_failure'].includes(data.status)) {
       setQr(null);
     } else {
-      setQr(data.qr || null);
+      // only overwrite if server sends a qr field
+      if ('qr' in data) {
+        setQr(data.qr || null);
+      }
     }
   };
 
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await http.get('/user/me', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        });
-        setName(res.data.name || "");
-        setId(res.data.id || "");
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    }
-    fetchUser();
-    if (!userId) return;
-    (async () => {
-      try {
-        const { data } = await http.get(`/api/wa/${userId}/status`);
-        updateStatusAndQr(data);
+  const fetchStatusOnce = async () => {
+    try {
+      const { data } = await http.get(`/api/wa/${userId}/status`);
+      console.log(data.qr)
+      updateStatusAndQr(data);
 
-      } catch (err) {
-        console.error("Error fetching WA status:", err);
+      // stop polling on terminal statuses
+      if (['ready', 'delinked', 'auth_failure'].includes(data.status)) {
+        if (pollerRef.current) clearInterval(pollerRef.current);
+        pollerRef.current = null;
+        setIsConnecting(false);
+        return true;
       }
-    })();
-  }, [userId]);
+    } catch (err) {
+      console.error('Error fetching WA status:', err);
+    }
+    return false;
+  };
+
+  const poll = async () => {
+    if (pollerRef.current) clearInterval(pollerRef.current);
+    const done = await fetchStatusOnce();
+    if (done) return;
+
+    pollerRef.current = setInterval(fetchStatusOnce, 1500);
+  };
 
   const start = async () => {
     await http.post(`/api/wa/${userId}/start`);
+    await fetchStatusOnce(); // instant update
     poll();
-  };
-
-  const poll = () => {
-    clearInterval(poller);
-    const id = setInterval(async () => {
-      const { data } = await http.get(`/api/wa/${userId}/status`);
-      updateStatusAndQr(data);
-      if (['ready', 'delinked', 'auth_failure'].includes(data.status)) {
-        clearInterval(id);
-        setPoller(null);
-        setIsConnecting(false);
-      }
-    }, 1500);
-    setPoller(id);
   };
 
   const logout = async () => {
@@ -321,27 +316,50 @@ function UserSettings() {
     setQr(null);
   };
 
-  useEffect(() => {
-    return () => clearInterval(poller);
-  }, [poller]);
-
-  const [isConnecting, setIsConnecting] = useState(false);
-
   const handleWhatsAppConnect = async () => {
-    if (poller) {
-      clearInterval(poller);
-      setPoller(null);
+    if (pollerRef.current) {
+      clearInterval(pollerRef.current);
+      pollerRef.current = null;
     }
     setIsConnecting(true);
-    await start(); // no finally here!
-
+    await start();
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (pollerRef.current) clearInterval(pollerRef.current);
+    };
+  }, []);
+
+  // Fetch user + initial status
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await http.get('/user/me', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+          }
+        });
+        setName(res.data.name || '');
+        setId(res.data.id || '');
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    poll()
+  }, [userId]);
 
   return (
     <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start', width: '100%' }}>
 
       <Box sx={{ width: '650px' }}>
-        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 1 }}>
+        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2 }}>
           User Settings
         </Typography>
         <Paper elevation={2} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
@@ -573,7 +591,7 @@ function UserSettings() {
         </Paper>
       </Box>
       <Box sx={{ width: '300px' }}>
-        <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+        <Paper elevation={2} sx={{ p: 3, borderRadius: 2, mt: 7 }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, textAlign: 'center' }}>
             WhatsApp Linking {userName && `for ${userName}`}
           </Typography>

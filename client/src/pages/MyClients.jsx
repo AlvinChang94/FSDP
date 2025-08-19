@@ -156,7 +156,7 @@ export default function MyClients() {
     };
 
     return (
-        <Box sx={{ ml: -25 }}>
+        <Box sx={{ }}>
             <Typography variant="h4" gutterBottom>
                 <b>My clients</b>
             </Typography>

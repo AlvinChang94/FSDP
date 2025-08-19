@@ -439,7 +439,7 @@ function Contactstaff() {
                     position: 'absolute',
                     left: '57.75%',
                     transform: 'translate(-50%, -50%)',
-                    top: started ? 'calc(100vh - 60px)' : '53%',
+                    top: started ? 'calc(100vh - 60px)' : '54%',
                     width: '100%',
                     maxWidth: '76vw',
                     transition: 'all 0.6s cubic-bezier(.68,-0.55,.27,1.55)',

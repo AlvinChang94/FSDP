@@ -10,6 +10,14 @@ const {
     markDelinked
 } = require('./services/whatsapp');
 const { User } = require('./models');
+process.on('unhandledRejection', (reason) => {
+  const msg = String(reason?.message || reason || '');
+  if (msg.includes('Session closed') || msg.includes('Target closed')) {
+    console.warn('Ignored Puppeteer session/target closed during shutdown.');
+    return;
+  }
+  console.error('Unhandled rejection:', reason);
+});
 
 const app = express();
 // Simple Route
