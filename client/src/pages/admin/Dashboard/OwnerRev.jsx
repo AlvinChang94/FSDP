@@ -2,7 +2,7 @@ import { Typography, Box, Button, Grid, Card, CardContent, Icon, IconButton, Too
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import http from '../../../http';
-import { Star, Delete, Check, Refresh } from '@mui/icons-material'
+import { Star, Delete, Check } from '@mui/icons-material'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dayjs from 'dayjs';
@@ -60,11 +60,9 @@ function OwnerRev() {
                     <Typography variant='h5' sx={{ my: 2, mr: 1 }}>
                         Owner reviews
                     </Typography>
-                    <Tooltip title={showRead ? "Show Unread" : "Show Read"}>
-                        <IconButton onClick={handleRefreshClick}>
-                            <Refresh />
-                        </IconButton>
-                    </Tooltip>
+                    <Button variant="outlined" onClick={handleRefreshClick}>
+                        {showRead ? 'Show Unread' : 'Show Read'}
+                    </Button>
                 </Box>
                 <Button onClick={() => navigate(-1)} variant="contained" color='inherit'>
                     back
