@@ -282,8 +282,8 @@ router.post('/receive', async (req, res) => {
       ${userSettings?.tone ? `- Tone: ${userSettings.tone}` : ``}
       ${userSettings?.emojiUsage ? `- Emoji usage: ${userSettings.emojiUsage}` : ``}
       ${userSettings?.signature && userSettings.signature !== 'None'
-              ? `- Use signature "${userSettings.signature}" occasionally at the end of complete responses only (never in short replies, clarifications, or follow‑ups)`
-              : ``}
+        ? `- Use signature "${userSettings.signature}" occasionally at the end of complete responses only (never in short replies, clarifications, or follow‑ups)`
+        : ``}
       Client profile:
       You are currently speaking to ${ProfileName}
 
@@ -377,42 +377,31 @@ router.post('/receive', async (req, res) => {
 router.post('/summary', validateToken, async (req, res) => {
   try {
     const metrics = req.body.data || {};
-    metrics.faq = Array.isArray(metrics.faq) && metrics.faq.length > 0
-      ? metrics.faq
-      : [];
-    const faqListHtml = metrics.faq.length
-      ? `<ul style="margin-top: 0; padding-left: 20px;">
-      ${metrics.faq.map(topic => `<li><strong>${topic}</strong></li>`).join('\n')}
-    </ul>`
-      : '<p>No FAQ topics identified.</p>';
-
-    const exampleStyleText = `STYLE EXAMPLE ONLY — DO NOT COPY DATA:
-The average response time across all queries was <strong>20.5 seconds</strong> .Some queries showed elevated response times, suggesting these may involve more nuanced issues or require deeper contextual processing by the chatbot.
- On average, <strong>25 chats</strong> were initiated daily across all users, with <strong>10 unique chat groups</strong> actively used during that time. This reflects strong platform engagement and healthy group-level traction. The most commonly asked topics include:
-<ul style="margin-top: 0; padding-left: 20px;">
-  <li><strong>Billing inquiries</strong></li>
-  <li><strong>Password resets</strong></li>
-  <li><strong>Subscription cancellations</strong></li>
-</ul>`;
-
-
-    const faqInlineText = metrics.faq.join(', ');
+    const faqTopics = Array.isArray(metrics.faq) && metrics.faq.length > 0 ? metrics.faq : [];
+    const faqMarkdownList = faqTopics.length
+      ? faqTopics.map(topic => `- **${topic}**`).join('\n')
+      : '_No FAQ topics identified._';
 
     const summaryPrompt = `
-Write a short, clear, and impactful summary of this data for a business report. Mirror the sentence structure and flow of the example. Use <strong> tags to highlight key numbers. Present the actual FAQ topics as a list and DO NOT repeat any sample data from the example.
+Generate a concise Markdown-formatted summary of the following chatbot analytics. Highlight key metrics in bold, list FAQ topics clearly, and include a short insights section that interprets the data. Keep the tone professional and the length compact — suitable for a dashboard or executive overview.
 
-Metrics:
-Average Response Time: ${metrics.average_response_time}
-Average Chats Per Day: ${metrics.average_chats_per_day}
-Average Chat Groups Per Day: ${metrics.average_group_count}
-Actual FAQ Topics: ${faqInlineText}
+**Metrics:**
+- Average Response Time: ${metrics.average_response_time}
+- Average Chats Per Day: ${metrics.average_chats_per_day}
+- Unique Users Per Day: ${metrics.average_group_count}
 
-${exampleStyleText}
+**FAQ Topics:**
+${faqMarkdownList}
+
+**Insights:**
+Summarize user behavior, engagement trends, and what the FAQ topics suggest about user intent. Avoid repeating the metrics verbatim — focus on what they mean.
 `;
+
 
 
     const apiKey = process.env.AWS_BEARER_TOKEN_BEDROCK;
     const summaryMessages = [{ role: 'user', content: [{ text: summaryPrompt }] }];
+
     const summaryResponse = await axios.post(
       'https://bedrock-runtime.ap-southeast-2.amazonaws.com/model/amazon.nova-pro-v1:0/invoke',
       { messages: summaryMessages },
@@ -452,9 +441,11 @@ ${exampleStyleText}
     return res.json({ summary, answer });
 
   } catch (err) {
+    console.error('Summary generation error:', err);
     return res.status(500).json({ error: 'Failed to generate summary or answer' });
   }
 });
+
 
 router.post('/analytics/summarise-topic', validateToken, async (req, res) => {
   try {

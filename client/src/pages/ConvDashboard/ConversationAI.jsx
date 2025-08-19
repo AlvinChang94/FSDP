@@ -5,6 +5,8 @@ import {
 import axios from 'axios';
 import UserContext from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+
 
 function ConversationAI() {
   const { user } = useContext(UserContext);
@@ -19,8 +21,8 @@ function ConversationAI() {
   const [loadingAnswer, setLoadingAnswer] = useState(false);
   const [commonTopics, setCommonTopics] = useState([]);
   const [chatAvg, setChatAvg] = useState(null);
-  const realAverageResponseTime = localStorage.getItem('realAverageResponseTime');
   const [groupAvg, setGroupAvg] = useState(null);
+  const realAverageResponseTime = localStorage.getItem('realAverageResponseTime');
 
   const handleBack = () => {
     navigate('/ConversationDb');
@@ -31,8 +33,10 @@ function ConversationAI() {
 
     const fetchCommonTopics = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:3001/api/analytics/common-topics/${userId}`,
+        const res = await axios.post('http://localhost:3001/api/testchat/analytics/summarise-topic',
+
+
+          {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setCommonTopics(res.data.topics || []);
@@ -58,16 +62,15 @@ function ConversationAI() {
     const fetchGroupAverage = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/analytics/average-chat-groups/${userId}`,
+          `http://localhost:3001/api/analytics/average-chat-users/${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setGroupAvg(res.data.averageGroups);
+        setGroupAvg(res.data.average_group_count);
       } catch (err) {
-        console.error('Failed to fetch average chat groups', err);
+        console.error('Failed to fetch unique users', err);
         setGroupAvg(null);
       }
     };
-
 
     fetchCommonTopics();
     fetchChatAverage();
@@ -81,36 +84,40 @@ function ConversationAI() {
   const faqString = faqList.join('; ');
 
   useEffect(() => {
-    if (!userId || chatAvg === null) return;
+  if (!userId || chatAvg === null || groupAvg === null || commonTopics.length === 0) return;
 
-    const fetchSummary = async () => {
-      setLoadingSummary(true);
+  const fetchSummary = async () => {
+    setLoadingSummary(true);
 
-      const payload = {
-        average_response_time: realAverageResponseTime || '20 seconds',
-        payment_schedule_response_time: '2 seconds',
-        average_group_count: groupAvg,
-        average_chats_per_day: chatAvg,
-        faq: faqList
-      };
+    const faqList = commonTopics
+      .filter(t => t.topic?.trim())
+      .map(t => t.topic.trim());
 
-      try {
-        const res = await axios.post(
-          'http://localhost:3001/api/testchat/summary',
-          { data: payload },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setSummary(res.data.summary || 'No summary available.');
-      } catch (err) {
-        console.error('Summary error:', err);
-        setSummary('Failed to generate summary.');
-      }
-
-      setLoadingSummary(false);
+    const payload = {
+      average_response_time: realAverageResponseTime || '20 seconds',
+      payment_schedule_response_time: '2 seconds',
+      average_group_count: groupAvg ?? 0,
+      average_chats_per_day: chatAvg ?? 0,
+      faq: faqList
     };
 
-    fetchSummary();
-  }, [token, userId, chatAvg, faqString]);
+    try {
+      const res = await axios.post(
+        'http://localhost:3001/api/testchat/summary',
+        { data: payload },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSummary(res.data.summary || 'No summary available.');
+    } catch (err) {
+      console.error('Summary error:', err);
+      setSummary('Failed to generate summary.');
+    }
+
+    setLoadingSummary(false);
+  };
+
+  fetchSummary();
+}, [token, userId, chatAvg, groupAvg, commonTopics]);
 
   const handleAsk = async () => {
     if (!question.trim()) return;
@@ -120,7 +127,7 @@ function ConversationAI() {
       average_response_time: realAverageResponseTime || '20 seconds',
       payment_schedule_response_time: '2 seconds',
       escalation_delay: '10.2 seconds',
-      average_chats_per_day: chatAvg,
+      average_chats_per_day: chatAvg ?? 0,
       faq: faqList
     };
 
@@ -157,10 +164,8 @@ function ConversationAI() {
           borderRadius: 2,
           boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.5)',
         }}>
-          <Typography
-            sx={{ whiteSpace: 'pre-wrap' }}
-            dangerouslySetInnerHTML={{ __html: summary }}
-          />
+          <ReactMarkdown>{summary}</ReactMarkdown>
+
         </Paper>
       )}
 
@@ -198,9 +203,8 @@ function ConversationAI() {
           <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
             AI answer:
           </Typography>
-          <Typography sx={{ whiteSpace: 'pre-wrap' }}>
-            {chatResponse}
-          </Typography>
+          <ReactMarkdown>{chatResponse}</ReactMarkdown>
+
         </Paper>
       )}
     </Box>
