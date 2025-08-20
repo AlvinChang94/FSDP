@@ -58,6 +58,7 @@ function EditAnnouncement() {
             data.scheduledDate = data.scheduledDate || null;
             data.statusForUser = "Unread";
             data.statusForAdmin = "Unread";
+            data.editedAt = new Date().toLocaleString()
 
 
             if (!data.AudienceisModerator && !data.AudienceisUser) {
