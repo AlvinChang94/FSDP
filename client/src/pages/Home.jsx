@@ -57,6 +57,10 @@ export default function Home() {
   }, []);
   useEffect(() => {
     const connected = waStatus?.status === 'ready' || waStatus?.status === 'authenticated';
+    if(localStorage.getItem == 1){
+      return
+    }
+    else
     setShowWaTutorial(!connected);
   }, [waStatus]);
 
@@ -181,8 +185,6 @@ export default function Home() {
     );
   }
 
-
-
   return (
     <Box>
       {loadingUser && <CircularProgress />}
@@ -270,7 +272,7 @@ export default function Home() {
                             {[
                               { label: 'Bot config', href: '/config/tone_personality' },
                               { label: 'My Clients', href: '/myclients' },
-                              { label: 'Notifications', href: '/notifications' },
+                              { label: 'Announcement', href: '/announcements' },
                               { label: 'Analytics', href: '/ConversationDb' }
                             ].map(btn => (
                               <Grid item key={btn.label} sm={6}>
@@ -361,7 +363,7 @@ export default function Home() {
                       },
                       {
                         title: 'Set business hours',
-                        desc: 'Add your business hours as an FAQ in your chatbot config',
+                        desc: 'Add your business hours as an FAQ in your chatbot',
                         icon: '/hours.svg',
                         actionLabel: 'Configure',
                         href: '/config/faq_management'
