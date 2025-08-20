@@ -13,6 +13,7 @@ import LinkOffIcon from '@mui/icons-material/LinkOff';
 import { toast } from 'react-toastify';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import placeholderPfp from '../assets/placeholderpfp.png';
+import NotificationButton from '../components/NotificationButton'
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -203,13 +204,18 @@ export default function Home() {
                         style={{ width: '100%', height: '100%' }}
                       />
                     </Avatar>
-                    <Box>
-                      <Typography variant="h5" fontWeight={700}>
-                        Welcome{user?.name ? `, ${user.name}` : ''}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Manage your workspace, clients and chatbot settings from here.
-                      </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start' }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="h5" fontWeight={700}>
+                          Welcome{user?.name ? `, ${user.name}` : ''}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Manage your workspace, clients and chatbot settings from here.
+                        </Typography>
+                      </Box>
+                      <Box sx={{ ml: 'auto' }}>
+                        <NotificationButton/>
+                      </Box>
                     </Box>
                   </Stack>
 
