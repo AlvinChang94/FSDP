@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import {
-    Box, Card, CardContent, Typography, IconButton, Menu, MenuItem, Button, Grid,
+    Box, Card, CardContent, Typography, IconButton, Menu, MenuItem, Button, Grid, Tooltip, Collapse
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import http from '../../http';
@@ -14,6 +14,7 @@ function Announcements() {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [today, setToday] = useState(new Date().toLocaleString());
+    const [expandedContent, setExpandedContent] = useState({});
 
     useEffect(() => {
         if (localStorage.getItem("accessToken")) {
@@ -41,17 +42,21 @@ function Announcements() {
 
     const sortedForUser = [...announcementList].sort((a, b) => {
         if (a.statusForUser === b.statusForUser) {
-            return a.id - b.id; 
+            return a.id - b.id;
         }
-        return a.statusForUser === "Unread" ? -1 : 1; 
+        return a.statusForUser === "Unread" ? -1 : 1;
     });
 
     const sortedForAdmin = [...announcementList].sort((a, b) => {
         if (a.statusForAdmin === b.statusForAdmin) {
             return a.id - b.id;
         }
-        return a.statusForAdmin === "Unread" ? -1 : 1; 
+        return a.statusForAdmin === "Unread" ? -1 : 1;
     });
+
+    const toggleContent = (id) => {
+        setExpandedContent(prev => ({ ...prev, [id]: !prev[id] }));
+    };
 
     return (
         <Box>
@@ -77,12 +82,12 @@ function Announcements() {
                             <Card sx={{ display: 'flex', width: '96%', padding: '16px', backgroundColor: '#fff', boxShadow: 3, minHeight: 150 }}>
                                 {/* Status Bar */}
                                 <Box sx={{
-                                    width: 6, height: 120, alignSelf: 'center',
+                                    width: 6, height: 120, alignSelf: 'center', flexShrink: 0,
                                     backgroundColor: announcement.statusForUser === "Read" ? "green" : "red",
                                     borderRadius: '3px 0 0 3px',
                                 }} />
 
-                                <CardContent>
+                                <CardContent sx={{maxWidth: '80%'}}>
                                     {/* Title & Edit Icon */}
                                     <Box sx={{ display: 'flex', mb: 1 }}>
                                         <Typography variant="h6" sx={{ flexGrow: 1 }}>
@@ -93,16 +98,23 @@ function Announcements() {
                                     </Box>
 
                                     {/* Content */}
-                                    <Typography sx={{ whiteSpace: 'pre-wrap', mb: 1 }}>
-                                        {announcement.content}
-                                    </Typography>
-
-                                    {/* Scheduled Date */}
-                                    {user && user.role == 'admin' && announcement.scheduledDate && !announcement.sendNow && (
-                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                            Scheduled Date: {new Date(announcement.scheduledDate).toLocaleString()}
+                                    <Box sx={{ mt: 2, cursor: 'pointer' }} onClick={() => toggleContent(announcement.id)}>
+                                        <Typography>
+                                            {!expandedContent[announcement.id] && (
+                                                <Typography sx={{ whiteSpace: 'pre-line', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                                    {announcement.content}
+                                                </Typography>
+                                            )}
                                         </Typography>
-                                    )}
+
+                                        <Collapse in={expandedContent[announcement.id]}>
+
+                                            <Typography sx={{ whiteSpace: 'pre-line' }}>
+                                                {announcement.content}
+                                            </Typography>
+
+                                        </Collapse>
+                                    </Box>
 
                                     {/* Audience */}
                                     {user && user.role == 'admin' && (
@@ -130,6 +142,35 @@ function Announcements() {
                                             )}
                                         </Box>
                                     )}
+                                    {/* Scheduled Date & Date Edited */}
+                                    <Box sx={{ color: 'text.secondary', mt: 2 }}>
+                                        {user && user.role == 'admin' && announcement.scheduledDate && !announcement.sendNow && (
+                                            <Tooltip>
+                                                <Typography sx={{ fontSize: '10px' }}>
+                                                    Scheduled Date: {new Date(announcement.scheduledDate).toLocaleString()}
+                                                </Typography>
+                                            </Tooltip>
+                                        )}
+                                        {announcement.editedAt && (
+                                            <Tooltip >
+                                                <Typography sx={{ fontSize: '10px' }}>
+                                                    Edited At: {announcement.editedAt}
+                                                </Typography>
+                                            </Tooltip>
+                                        )}
+                                        <Tooltip>
+                                            <Typography sx={{ fontSize: '10px' }}>
+                                                Sent at: {today}
+                                            </Typography>
+                                        </Tooltip>
+                                        {announcement.statusForUser === "Read" && (
+                                            <Tooltip>
+                                                <Typography sx={{ fontSize: '10px' }}>
+                                                    Read At: {new Date().toLocaleString()}
+                                                </Typography>
+                                            </Tooltip>
+                                        )}
+                                    </Box>
                                 </CardContent>
                                 <Box sx={{ alignSelf: 'flex-start', ml: 'auto' }}>
 
@@ -172,12 +213,12 @@ function Announcements() {
                             <Card sx={{ display: 'flex', width: '97%', padding: '16px', backgroundColor: '#fff', boxShadow: 3, minHeight: 150 }}>
                                 {/* Status Bar */}
                                 <Box sx={{
-                                    width: 6, height: 120, alignSelf: 'center',
+                                    width: 6, height: 120, alignSelf: 'center', flexShrink: 0,
                                     backgroundColor: announcement.statusForAdmin === "Read" ? "green" : "red",
                                     borderRadius: '3px 0 0 3px',
                                 }} />
 
-                                <CardContent>
+                                <CardContent sx={{maxWidth: '80%'}}>
                                     {/* Title & Edit Icon */}
                                     <Box sx={{ display: 'flex', mb: 1 }}>
                                         <Typography variant="h6" sx={{ flexGrow: 1 }}>
@@ -190,16 +231,25 @@ function Announcements() {
 
 
                                     {/* Content */}
-                                    <Typography sx={{ whiteSpace: 'pre-wrap', mb: 1 }}>
-                                        {announcement.content}
-                                    </Typography>
-
-                                    {/* Scheduled Date */}
-                                    {user && user.role == 'admin' && announcement.scheduledDate && !announcement.sendNow && (
-                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                            Scheduled Date: {new Date(announcement.scheduledDate).toLocaleString()}
+                                    <Box sx={{ mt: 2, cursor: 'pointer' }} onClick={() => toggleContent(announcement.id)}>
+                                        <Typography>
+                                            {!expandedContent[announcement.id] && (
+                                                <Typography sx={{ whiteSpace: 'pre-line', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                                    {announcement.content}
+                                                </Typography>
+                                            )}
                                         </Typography>
-                                    )}
+
+                                        <Collapse in={expandedContent[announcement.id]}>
+
+                                            <Typography sx={{ whiteSpace: 'pre-line' }}>
+                                                {announcement.content}
+                                            </Typography>
+
+                                        </Collapse>
+                                    </Box>
+
+
 
                                     {/* Audience */}
                                     {user && user.role == 'admin' && (
@@ -227,8 +277,39 @@ function Announcements() {
                                             )}
                                         </Box>
                                     )}
+                                    {/* Scheduled Date & Date Edited */}
+                                    <Box sx={{ color: 'text.secondary', mt: 2 }}>
+                                        {user && user.role == 'admin' && announcement.scheduledDate && !announcement.sendNow ? (
+                                            <Tooltip>
+                                                <Typography sx={{ fontSize: '10px' }}>
+                                                    Scheduled Date: {new Date(announcement.scheduledDate).toLocaleString()}
+                                                </Typography>
+                                            </Tooltip>
+                                        ) : announcement.sendNow ? (
+                                            <Tooltip>
+                                                <Typography sx={{ fontSize: '10px' }}>
+                                                    Sent at: {today}
+                                                </Typography>
+                                            </Tooltip>
+                                        ) : (null)}
+                                        {announcement.editedAt && (
+                                            <Tooltip >
+                                                <Typography sx={{ fontSize: '10px' }}>
+                                                    Edited At: {announcement.editedAt}
+                                                </Typography>
+                                            </Tooltip>
+                                        )}
+                                        {announcement.statusForAdmin === "Read" && (
+                                            <Tooltip>
+                                                <Typography sx={{ fontSize: '10px' }}>
+                                                    Read At: {new Date().toLocaleString()}
+                                                </Typography>
+                                            </Tooltip>
+                                        )}
+                                    </Box>
 
                                 </CardContent>
+
                                 <Box sx={{ alignSelf: 'flex-start', ml: 'auto' }}>
                                     {user && user.role == 'admin' && (
                                         <Link to={`/EditAnnouncement/${announcement.id}`}>
@@ -269,7 +350,9 @@ function Announcements() {
                                             Mark as Read
                                         </MenuItem>
                                     </Menu>
+
                                 </Box>
+
                             </Card>
                         )}
                     </Grid>
