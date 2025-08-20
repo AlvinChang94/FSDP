@@ -87,7 +87,7 @@ function Announcements() {
                                     borderRadius: '3px 0 0 3px',
                                 }} />
 
-                                <CardContent sx={{maxWidth: '80%'}}>
+                                <CardContent sx={{ maxWidth: '80%' }}>
                                     {/* Title & Edit Icon */}
                                     <Box sx={{ display: 'flex', mb: 1 }}>
                                         <Typography variant="h6" sx={{ flexGrow: 1 }}>
@@ -98,21 +98,18 @@ function Announcements() {
                                     </Box>
 
                                     {/* Content */}
-                                    <Box sx={{ mt: 2, cursor: 'pointer' }} onClick={() => toggleContent(announcement.id)}>
-                                        <Typography>
-                                            {!expandedContent[announcement.id] && (
-                                                <Typography sx={{ whiteSpace: 'pre-line', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                                                    {announcement.content}
-                                                </Typography>
-                                            )}
-                                        </Typography>
-
-                                        <Collapse in={expandedContent[announcement.id]}>
-
-                                            <Typography sx={{ whiteSpace: 'pre-line' }}>
+                                    <Box sx={{ mt: 2, cursor: 'pointer', width: "80%" }} onClick={() => toggleContent(announcement.id)}>
+                                        <Collapse in={expandedContent[announcement.id]} collapsedSize={48} timeout="auto">
+                                            <Typography
+                                                sx={{
+                                                    whiteSpace: 'pre-line',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                            >
                                                 {announcement.content}
                                             </Typography>
-
                                         </Collapse>
                                     </Box>
 
@@ -218,7 +215,7 @@ function Announcements() {
                                     borderRadius: '3px 0 0 3px',
                                 }} />
 
-                                <CardContent sx={{maxWidth: '80%'}}>
+                                <CardContent sx={{ maxWidth: '80%' }}>
                                     {/* Title & Edit Icon */}
                                     <Box sx={{ display: 'flex', mb: 1 }}>
                                         <Typography variant="h6" sx={{ flexGrow: 1 }}>
@@ -231,21 +228,18 @@ function Announcements() {
 
 
                                     {/* Content */}
-                                    <Box sx={{ mt: 2, cursor: 'pointer' }} onClick={() => toggleContent(announcement.id)}>
-                                        <Typography>
-                                            {!expandedContent[announcement.id] && (
-                                                <Typography sx={{ whiteSpace: 'pre-line', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                                                    {announcement.content}
-                                                </Typography>
-                                            )}
-                                        </Typography>
-
-                                        <Collapse in={expandedContent[announcement.id]}>
-
-                                            <Typography sx={{ whiteSpace: 'pre-line' }}>
+                                    <Box sx={{ mt: 2, cursor: 'pointer', width: "80%" }} onClick={() => toggleContent(announcement.id)}>
+                                        <Collapse in={expandedContent[announcement.id]} collapsedSize={48} timeout="auto">
+                                            <Typography
+                                                sx={{
+                                                    whiteSpace: 'pre-line',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                            >
                                                 {announcement.content}
                                             </Typography>
-
                                         </Collapse>
                                     </Box>
 

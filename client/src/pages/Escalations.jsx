@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box, Card, CardContent, Typography, IconButton, Menu, MenuItem, Dialog,
-    DialogTitle, DialogContent, DialogContentText, Grid, Tooltip, Collapse
+    DialogTitle, DialogContent, DialogContentText, Grid, Collapse
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import http from '../http';
@@ -117,42 +117,36 @@ function Escalations() {
                                         <Typography variant="h6"><strong>Client: </strong> {escalation.name}</Typography>
                                         <Typography variant="h7"><strong>Client ID: </strong> {escalation.escalation.clientId}</Typography> <br />
                                         <Typography variant="h7"><strong>Status: </strong> {escalation.escalation.status}</Typography>
-                                        <Box sx={{ mt: 2, cursor: 'pointer' }} onClick={() => toggleHistory(escalation.id)}>
-                                            <Typography>
-                                                <strong>Chat History:</strong>
-                                                {!expandedHistories[escalation.id] && (
-                                                    <Typography sx={{ whiteSpace: 'pre-line', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                                                        {escalation.escalation.chathistory}
-                                                    </Typography>
-                                                )}
-                                            </Typography>
-
-                                            <Collapse in={expandedHistories[escalation.id]}>
-
-                                                <Typography sx={{ whiteSpace: 'pre-line' }}>
+                                        <Box sx={{ mt: 2, cursor: 'pointer', width: "80%" }} onClick={() => toggleHistory(escalation.id)}>
+                                            <Collapse in={expandedHistories[escalation.id]} collapsedSize={48} timeout="auto">
+                                                <Typography
+                                                    sx={{
+                                                        whiteSpace: 'pre-line',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        transition: 'all 0.3s ease'
+                                                    }}
+                                                >
+                                                    <strong>Chat History:</strong> <br />
                                                     {escalation.escalation.chathistory}
                                                 </Typography>
-
                                             </Collapse>
                                         </Box>
 
                                         {escalation.escalation.chatsummary && (
-                                            <Box sx={{ mt: 2, cursor: 'pointer' }} onClick={() => toggleSummary(escalation.id)}>
-                                                <Typography>
-                                                    <strong>Chat Summary:</strong>
-                                                    {!expandedSummaries[escalation.id] && (
-                                                        <Typography sx={{ whiteSpace: 'pre-line', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
-                                                            {escalation.escalation.chatsummary}
-                                                        </Typography>
-                                                    )}
-                                                </Typography>
-
-                                                <Collapse in={expandedSummaries[escalation.id]}>
-
-                                                    <Typography sx={{ whiteSpace: 'pre-line' }}>
+                                            <Box sx={{ mt: 2, cursor: 'pointer', width: "80%" }} onClick={() => toggleSummary(escalation.id)}>
+                                                <Collapse in={expandedSummaries[escalation.id]} collapsedSize={48} timeout="auto">
+                                                    <Typography
+                                                        sx={{
+                                                            whiteSpace: 'pre-line',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            transition: 'all 0.3s ease'
+                                                        }}
+                                                    >
+                                                        <strong>Chat Summary:</strong> <br />
                                                         {escalation.escalation.chatsummary}
                                                     </Typography>
-
                                                 </Collapse>
                                             </Box>
                                         )}
@@ -160,55 +154,55 @@ function Escalations() {
 
                                     <Box sx={{ alignSelf: 'flex-start', ml: 'auto' }}>
                                         {escalation.escalation.status === 'Pending' && (
-                                        <>
-                                        <IconButton onClick={(e) => handleMenuClick(e, escalation)}>
-                                            <MoreVertIcon />
-                                        </IconButton>
-                                        <Menu
-                                            anchorEl={anchorEl}
-                                            open={Boolean(anchorEl)}
-                                            onClose={handleMenuClose}
-                                        >
-                                            <MenuItem onClick={() => {
-                                                openDialog("Chat Summary", selectedEscalation);
-                                                generateChatSummary(selectedEscalation);
-                                                handleMenuClose();
-                                            }}>
-                                                Generate Chat Summary
-                                            </MenuItem>
-                                            
-                                                <MenuItem onClick={async () => {
-                                                    try {
-                                                        // Call API to mark as complete
-                                                        await http.post('/escalations/mark-complete', {
-                                                            clientId: selectedEscalation.escalation.clientId
-                                                        });
-
-                                                        // Update local state
-                                                        setEscalations(prev =>
-                                                            prev.map(e =>
-                                                                e.escalation.clientId === selectedEscalation.escalation.clientId
-                                                                    ? {
-                                                                        ...e,
-                                                                        escalation: {
-                                                                            ...e.escalation,
-                                                                            status: 'Completed'
-                                                                        }
-                                                                    }
-                                                                    : e
-                                                            )
-                                                        );
-                                                    } catch (err) {
-                                                        console.error("Failed to mark as complete", err);
-                                                    } finally {
+                                            <>
+                                                <IconButton onClick={(e) => handleMenuClick(e, escalation)}>
+                                                    <MoreVertIcon />
+                                                </IconButton>
+                                                <Menu
+                                                    anchorEl={anchorEl}
+                                                    open={Boolean(anchorEl)}
+                                                    onClose={handleMenuClose}
+                                                >
+                                                    <MenuItem onClick={() => {
+                                                        openDialog("Chat Summary", selectedEscalation);
+                                                        generateChatSummary(selectedEscalation);
                                                         handleMenuClose();
-                                                    }
-                                                }}>
-                                                    Mark as Complete
-                                                </MenuItem>
-                                            
-                                        </Menu>
-                                        </>
+                                                    }}>
+                                                        Generate Chat Summary
+                                                    </MenuItem>
+
+                                                    <MenuItem onClick={async () => {
+                                                        try {
+                                                            // Call API to mark as complete
+                                                            await http.post('/escalations/mark-complete', {
+                                                                clientId: selectedEscalation.escalation.clientId
+                                                            });
+
+                                                            // Update local state
+                                                            setEscalations(prev =>
+                                                                prev.map(e =>
+                                                                    e.escalation.clientId === selectedEscalation.escalation.clientId
+                                                                        ? {
+                                                                            ...e,
+                                                                            escalation: {
+                                                                                ...e.escalation,
+                                                                                status: 'Completed'
+                                                                            }
+                                                                        }
+                                                                        : e
+                                                                )
+                                                            );
+                                                        } catch (err) {
+                                                            console.error("Failed to mark as complete", err);
+                                                        } finally {
+                                                            handleMenuClose();
+                                                        }
+                                                    }}>
+                                                        Mark as Complete
+                                                    </MenuItem>
+
+                                                </Menu>
+                                            </>
                                         )}
                                     </Box>
                                 </Box>
@@ -233,7 +227,7 @@ function Escalations() {
                 <DialogContent sx={{ minHeight: 250 }}>
                     <DialogContentText
                         component="pre"
-                        sx={{ mt: 2, whiteSpace: "pre-wrap", fontFamily: "inherit" , color: 'black'}}
+                        sx={{ mt: 2, whiteSpace: "pre-wrap", fontFamily: "inherit", color: 'black' }}
                     >
                         {dialogContent}
                     </DialogContentText>
