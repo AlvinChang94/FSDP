@@ -8,7 +8,10 @@ function GlobalBanner() {
 
     useEffect(() => {
         http.get("/alert/active")
-            .then(res => setActiveAlerts(res.data))
+            .then(res => {
+                const data = Array.isArray(res.data) ? res.data : [];
+                setActiveAlerts(data);
+            })
             .catch(err => console.error("Failed to fetch alerts", err));
     }, []);
 
@@ -42,34 +45,29 @@ function GlobalBanner() {
                 '&::-webkit-scrollbar-thumb': { backgroundColor: '#ccc', borderRadius: '3px' }
             }}
         >
-            {Array.isArray(activeAlerts) && activeAlerts.length > 0 ? (
-                activeAlerts.map((alert) => (
-                    <Box
-                        key={alert.id}
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            mb: 1
-                        }}
+            {activeAlerts.map((alert) => (
+                <Box
+                    key={alert.id}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        mb: 1
+                    }}
+                >
+                    <Typography>
+                        <strong>{alert.title}:</strong> {alert.message}
+                    </Typography>
+                    <IconButton
+                        onClick={() => handleDismiss(alert.id)}
+                        size="small"
+                        aria-label="close"
                     >
-                        <Typography>
-                            <strong>{alert.title}:</strong> {alert.message}
-                        </Typography>
-                        <IconButton
-                            onClick={() => handleDismiss(alert.id)}
-                            size="small"
-                            aria-label="close"
-                        >
-                            <CloseIcon fontSize="small" />
-                        </IconButton>
-                    </Box>
-                ))
-            ) : (
-                <Typography variant="body2" color="text.secondary">
-                    No active alerts at the moment.
-                </Typography>
-            )}
+                        <CloseIcon fontSize="small" />
+                    </IconButton>
+                </Box>
+            ))
+            }
 
         </Box>
     );
