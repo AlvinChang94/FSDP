@@ -14,6 +14,7 @@ const yup = require('yup'); // ensure yup is available
 const { TestChat } = require('../models');
 const { TestChatMessage } = require('../models');
 const { sendEscalationEmail, sendEscalationSMS } = require('./../services/emailService');
+const { sendDashBoard } = require('./../services/dashboardService')
 
 async function ensureClientExists({ userId, phoneNumber, name }) {
     // Try to find by exact number or number without '+'
@@ -65,7 +66,7 @@ async function check(keywords, confidence_keywords, no_of_retries, confidence_tr
 
     let systemPromptParts = [];
 
-    // 1️⃣ Keyword match section
+    // Keyword match section
     if (keywords?.length && confidence_keywords?.length) {
         systemPromptParts.push(`
 Task: Keyword Intent Match
@@ -79,7 +80,7 @@ If your confidence ≥ its threshold, output True; otherwise False.
 `);
     }
 
-    // 2️⃣ Retries exceeded section
+    // Retries exceeded section
     if (no_of_retries && confidence_tries?.length) {
         systemPromptParts.push(`
 Task: Retries Exceeded
@@ -96,7 +97,7 @@ If count > ${no_of_retries} based on confidence: ${confidence_tries}, output Tru
 `);
     }
 
-    // 3️⃣ Emotion detection section
+    // Emotion detection section
     if (emotions?.length && confidence_emotions?.length) {
         systemPromptParts.push(`
 Task: Emotion Detection
@@ -388,10 +389,21 @@ Message: "${Body}"
                         });
 
                     }
+                    if (method?.dashboard) {
+                        const sgNow = new Date().toLocaleString('en-US', { timeZone: 'Asia/Singapore' });
+                        const sgDate = new Date(sgNow);
+                        const endOfDay = new Date(sgDate);
+                        endOfDay.setHours(23, 59, 59, 999);
+                        await sendDashBoard({
+                            title: 'Human intervention',
+                            message: `Client ${ProfileName} requires human intervention. Do check QueryEase for more information on the client.`,
+                            sendDate: sgDate,
+                            endDate: endOfDay,
+                            userId: userId
+                        });
+                    }
 
 
-                    // 🔧 Place your additional code here
-                    // (e.g. notify human operator, send webhook, log activity)
                     let affirmPrompt = `You are currently affirming a user that a human representative will reach them soon. Here is more information you can use to personalise your answer:
                     Client name: ${ProfileName}
                     Business name: ${businessName}

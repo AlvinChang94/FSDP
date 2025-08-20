@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Box, Typography, Paper, FormGroup, FormControlLabel, Checkbox, TextField, Button, Grid, Select, MenuItem, InputLabel, FormControl, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Modal, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { Box, Typography, Paper, FormGroup, FormControlLabel, Checkbox, TextField, Button, Grid, Select, MenuItem, InputLabel, FormControl, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Modal, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack, Tooltip } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
@@ -249,9 +249,17 @@ function Intervention_threshold() {
 
                     {/* Agent notification method */}
                     <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
-                        <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-                            Agent notification method
-                        </Typography>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                Agent Notification Method
+                            </Typography>
+
+                            <Tooltip title="This setting controls how you, as the business owner, will be notified when human intervention is required">
+                                <IconButton size="small">
+                                    <Typography variant="body2" fontWeight="bold">?</Typography>
+                                </IconButton>
+                            </Tooltip>
+                        </Stack>
                         <FormGroup row>
                             <FormControlLabel
                                 control={
@@ -291,9 +299,17 @@ function Intervention_threshold() {
 
                     {/* Preferred holding message */}
                     <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
-                        <Typography variant="h6" sx={{ fontWeight: "bold", mb: 0.5 }}>
-                            Preferred holding message
-                        </Typography>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                Preferred Holding Message
+                            </Typography>
+
+                            <Tooltip title="This setting controls how the chatbot will tell the client to wait while a human is being contacted">
+                                <IconButton size="small">
+                                    <Typography variant="body2" fontWeight="bold">?</Typography>
+                                </IconButton>
+                            </Tooltip>
+                        </Stack>
                         <TextField
                             fullWidth
                             multiline
@@ -331,10 +347,36 @@ function Intervention_threshold() {
 
                     {/* Intervention threshold keywords */}
                     <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
-                        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                            Intervention threshold keywords
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: "#444", mb: 2 }}>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{mb: 0.5 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                Intervention threshold keywords
+                            </Typography>
+
+                            <Tooltip
+                                title={
+                                    <span style={{ whiteSpace: 'pre-line' }}>
+                                        Keyword Match: Requests human intervention when keyword is matched{'\n'}
+                                        Retries Exceeded: Requests human intervention when user repeats themself too much {'\n'}
+                                        Emotion detected: Requests human intervention when client tone and emotion is matched from their messages
+                                    </span>
+                                }
+                                slotProps={{
+                                    popper: {
+                                        sx: {
+                                            '& .MuiTooltip-tooltip': {
+                                                maxWidth: 450 // pixels
+                                            }
+                                        }
+                                    }
+                                }}
+                            >
+                                <IconButton size="small">
+                                    <Typography variant="body2" fontWeight="bold">?</Typography>
+                                </IconButton>
+                            </Tooltip>
+
+                        </Stack>
+                        <Typography variant="body2" sx={{ color: "#444", mb: 2}}>
                             Phrases that trigger a human intervention
                         </Typography>
                         <Grid container spacing={2} sx={{ mb: 2 }}>

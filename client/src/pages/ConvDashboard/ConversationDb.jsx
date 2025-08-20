@@ -157,7 +157,7 @@ function ConversationDb() {
                     {
                         title: "Unique users per day",
                         value: chatbotSessions !== null && !isNaN(chatbotSessions)
-                            ? `${Math.round(chatbotSessions)} users`
+                            ? `${Math.max(Math.round(chatbotSessions - 1), 0)} users`
                             : "Loading...",
                         to: `/conv-analytics/average-chat-users/${user?.id}`
                     }
@@ -191,7 +191,7 @@ function ConversationDb() {
 
             <Box sx={{ maxWidth: 1100, mx: 'auto' }}>
                 <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
-                    Frequently asked questions
+                    Frequently asked Topics
                 </Typography>
 
                 {!showTopics ? (
