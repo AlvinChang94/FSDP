@@ -65,7 +65,7 @@ async function check(keywords, confidence_keywords, no_of_retries, confidence_tr
 
     let systemPromptParts = [];
 
-    // 1️⃣ Keyword match section
+    // Keyword match section
     if (keywords?.length && confidence_keywords?.length) {
         systemPromptParts.push(`
 Task: Keyword Intent Match
@@ -79,7 +79,7 @@ If your confidence ≥ its threshold, output True; otherwise False.
 `);
     }
 
-    // 2️⃣ Retries exceeded section
+    // Retries exceeded section
     if (no_of_retries && confidence_tries?.length) {
         systemPromptParts.push(`
 Task: Retries Exceeded
@@ -96,7 +96,7 @@ If count > ${no_of_retries} based on confidence: ${confidence_tries}, output Tru
 `);
     }
 
-    // 3️⃣ Emotion detection section
+    // Emotion detection section
     if (emotions?.length && confidence_emotions?.length) {
         systemPromptParts.push(`
 Task: Emotion Detection
@@ -388,10 +388,11 @@ Message: "${Body}"
                         });
 
                     }
+                    if (method?.dashboard){
+
+                    }
 
 
-                    // 🔧 Place your additional code here
-                    // (e.g. notify human operator, send webhook, log activity)
                     let affirmPrompt = `You are currently affirming a user that a human representative will reach them soon. Here is more information you can use to personalise your answer:
                     Client name: ${ProfileName}
                     Business name: ${businessName}

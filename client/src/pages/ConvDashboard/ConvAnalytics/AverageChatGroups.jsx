@@ -46,8 +46,10 @@ function AnalyticsDetail() {
           }
         });
 
-
-        const transformed = weekdays.map(day => ({ day, users: weekMap[day] }));
+        const transformed = weekdays.map(day => ({
+          day,
+          users: Math.max(weekMap[day] - 1, 0) 
+        }));
         setGroupData(transformed);
 
       } catch (err) {
@@ -88,7 +90,7 @@ function AnalyticsDetail() {
 
       <Paper elevation={3} sx={{ p: 4, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
-           Users by Weekday
+          Users by Weekday
 
         </Typography>
 

@@ -15,6 +15,7 @@ import http from './http';
 import UserContext from './contexts/UserContext';
 import AdminLogin from './pages/admin/Adminlogin';
 import Contactstaff from './pages/faq/Contactstaff';
+import Guide from './pages/faq/Guide';
 import AdminDashboard from './pages/admin/Dashboard/AdminDash';
 import AdminActions from './pages/admin/AdminActions';
 import Alert from './pages/admin/Dashboard/Alerts/Alert.jsx';
@@ -183,11 +184,6 @@ function App() {
                         </ListItemButton>
                       </ListItem>
                       <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/notifications">
-                          <ListItemText primary="Notifications" sx={{ color: 'white' }} />
-                        </ListItemButton>
-                      </ListItem>
-                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
                         <ListItemButton component={Link} to="/ConversationDb">
                           <ListItemText primary="My Analytics" sx={{ color: 'white' }} />
                         </ListItemButton>
@@ -332,6 +328,7 @@ function App() {
                     <Route path="/analytics/most-common-topic" element={<ConversationDb />} />
                     <Route path="/conv-analytics/average-chats/:id" element={<AverageChats />} />
                     <Route path="/conv-analytics/average-chat-users/:id" element={<AverageChatGroups />} />
+                    <Route path={'/faq/guide'} element={<Guide />} />
 
 
 
