@@ -13,6 +13,7 @@ import LinkOffIcon from '@mui/icons-material/LinkOff';
 import { toast } from 'react-toastify';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import placeholderPfp from '../assets/placeholderpfp.png';
+import NotificationButton from '../components/NotificationButton'
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -57,6 +58,10 @@ export default function Home() {
   }, []);
   useEffect(() => {
     const connected = waStatus?.status === 'ready' || waStatus?.status === 'authenticated';
+    if(localStorage.getItem == 1){
+      return
+    }
+    else
     setShowWaTutorial(!connected);
   }, [waStatus]);
 
@@ -181,8 +186,6 @@ export default function Home() {
     );
   }
 
-
-
   return (
     <Box>
       {loadingUser && <CircularProgress />}
@@ -203,13 +206,18 @@ export default function Home() {
                         style={{ width: '100%', height: '100%' }}
                       />
                     </Avatar>
-                    <Box>
-                      <Typography variant="h5" fontWeight={700}>
-                        Welcome{user?.name ? `, ${user.name}` : ''}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Manage your workspace, clients and chatbot settings from here.
-                      </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start' }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="h5" fontWeight={700}>
+                          Welcome{user?.name ? `, ${user.name}` : ''}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Manage your workspace, clients and chatbot settings from here.
+                        </Typography>
+                      </Box>
+                      <Box sx={{ ml: 'auto' }}>
+                        <NotificationButton/>
+                      </Box>
                     </Box>
                   </Stack>
 
@@ -270,7 +278,7 @@ export default function Home() {
                             {[
                               { label: 'Bot config', href: '/config/tone_personality' },
                               { label: 'My Clients', href: '/myclients' },
-                              { label: 'Notifications', href: '/notifications' },
+                              { label: 'Announcement', href: '/announcements' },
                               { label: 'Analytics', href: '/ConversationDb' }
                             ].map(btn => (
                               <Grid item key={btn.label} sm={6}>
@@ -361,7 +369,7 @@ export default function Home() {
                       },
                       {
                         title: 'Set business hours',
-                        desc: 'Add your business hours as an FAQ in your chatbot config',
+                        desc: 'Add your business hours as an FAQ in your chatbot',
                         icon: '/hours.svg',
                         actionLabel: 'Configure',
                         href: '/config/faq_management'

@@ -205,16 +205,6 @@ function App() {
                           <ListItemText primary="Escalations" sx={{ color: 'white' }} />
                         </ListItemButton>
                       </ListItem>
-                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/Review">
-                          <ListItemText primary="Review" sx={{ color: 'white' }} />
-                        </ListItemButton>
-                      </ListItem>
-                      <ListItem disablePadding sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}>
-                        <ListItemButton component={Link} to="/Announcements">
-                          <ListItemText primary="Announcements" sx={{ color: 'white' }} />
-                        </ListItemButton>
-                      </ListItem>
                     </>
                   ) : null}
                 </List>
