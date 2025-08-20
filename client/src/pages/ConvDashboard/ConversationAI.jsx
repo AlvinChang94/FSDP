@@ -125,8 +125,6 @@ function ConversationAI() {
 
     const payload = {
       average_response_time: realAverageResponseTime || '20 seconds',
-      payment_schedule_response_time: '2 seconds',
-      escalation_delay: '10.2 seconds',
       average_chats_per_day: chatAvg ?? 0,
       faq: faqList
     };

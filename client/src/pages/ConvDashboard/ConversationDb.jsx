@@ -157,7 +157,7 @@ function ConversationDb() {
                     {
                         title: "Unique users per day",
                         value: chatbotSessions !== null && !isNaN(chatbotSessions)
-                            ? `${Math.round(chatbotSessions)} users`
+                            ? `${Math.max(Math.round(chatbotSessions - 1), 0)} users`
                             : "Loading...",
                         to: `/conv-analytics/average-chat-users/${user?.id}`
                     }

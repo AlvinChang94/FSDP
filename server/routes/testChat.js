@@ -379,6 +379,7 @@ router.post('/receive', async (req, res) => {
 router.post('/summary', validateToken, async (req, res) => {
   try {
     const metrics = req.body.data || {};
+    const adjustedGroupCount = Math.max((metrics.average_group_count || 0) - 1, 0);
     const faqTopics = Array.isArray(metrics.faq) && metrics.faq.length > 0 ? metrics.faq : [];
     const faqMarkdownList = faqTopics.length
       ? faqTopics.map(topic => `- **${topic}**`).join('\n')
@@ -390,7 +391,7 @@ Generate a concise Markdown-formatted summary of the following chatbot analytics
 **Metrics:**
 - Average Response Time: ${metrics.average_response_time}
 - Average Chats Per Day: ${metrics.average_chats_per_day}
-- Unique Users Per Day: ${metrics.average_group_count}
+- Unique Users Per Day: ${adjustedGroupCount}
 
 **FAQ Topics:**
 ${faqMarkdownList}
