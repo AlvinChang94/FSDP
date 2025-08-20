@@ -32,6 +32,10 @@ router.get("/active", validateToken, async (req, res) => {
                 [Op.or]: [
                     { endDate: { [Op.gte]: now } },
                     { endDate: null } 
+                ],
+                [Op.or]: [
+                  { userId: req.userId },
+                  { userId: null }
                 ]
             },
             order: [['createdAt', 'DESC']]
