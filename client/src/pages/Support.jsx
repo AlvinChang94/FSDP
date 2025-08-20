@@ -31,8 +31,8 @@ function Support() {
                         <MuiLink component={Link} to="/faq/guide" target="_blank" underline="hover" sx={{ display: 'block', mb: 0.5 }} color="#1a73e8">
                             Read the full guide
                         </MuiLink>
-                        <MuiLink component={Link} to="/faq/guide#specific-section" underline="hover" sx={{ display: 'block' }} color="#1a73e8">
-                            Go to Specific Section
+                        <MuiLink component={Link} to="/faq/guide" underline="hover" sx={{ display: 'block' }} color="#1a73e8">
+                            Designing the best chatbot prompts
                         </MuiLink>
                     </Paper>
                 </Grid>
@@ -41,7 +41,7 @@ function Support() {
                         <Typography variant="h6" fontWeight="bold">
                             How to Link Your Account
                         </Typography>
-                        <MuiLink component={Link} to="/faq/link-account" target="_blank" underline="hover" color="#1a73e8" sx={{ display: 'block', mb: 3.5 }}>
+                        <MuiLink component={Link} to="/" target="_blank" underline="hover" color="#1a73e8" sx={{ display: 'block', mb: 3.5 }}>
                             Learn how to link your account
                         </MuiLink>
                         <MuiLink>
@@ -54,7 +54,7 @@ function Support() {
                         <Typography variant="h6" fontWeight="bold">
                             Troubleshooting Login Issues
                         </Typography>
-                        <MuiLink component={Link} to="/faq/login-issues" target="_blank" underline="hover" color="#1a73e8">
+                        <MuiLink component={Link} to="/contact" target="_blank" underline="hover" color="#1a73e8">
                             Troubleshoot login problems
                         </MuiLink>
                     </Paper>
