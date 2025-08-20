@@ -43,7 +43,8 @@ function Register() {
             http.post("/user/register", data)
                 .then((res) => {
                     console.log(res.data);
-                    navigate("/login");
+                    navigate("/verify-email", { state: { email: data.email } });
+
                 })
                 .catch(function (err) {
                     toast.error(`${err.response.data.message}`);

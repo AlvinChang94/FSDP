@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const { User, ThresholdRule } = require('../models');
 const yup = require("yup");
 const { sign } = require('jsonwebtoken');
 require('dotenv').config();
@@ -11,6 +10,9 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { ingestPdf, removePdf } = require('../services/pdfService');
+const { User, ThresholdRule, EmailVerification } = require('../models');
+const { sendVerificationEmail } = require('../services/emailMailer');
+const { Op } = require('sequelize');
 
 
 
@@ -77,64 +79,126 @@ const storage1 = multer.diskStorage({
 });
 const upload1 = multer({ storage: storage1 });
 
-router.post("/register", async (req, res) => {
-  let data = req.body;
-  let validationSchema = yup.object({
-    name: yup.string().trim().min(3).max(50).required().matches(/^[a-zA-Z '-,.]+$/, "name only allow letters, spaces and characters: ' - , ."),
+router.post('/register', async (req, res) => {
+  const { name, email, password } = req.body;
+
+  const validationSchema = yup.object({
+    name: yup.string().trim().min(3).max(50).required()
+      .matches(/^[a-zA-Z '-,.]+$/, "Name only allows letters, spaces, and characters: ' - , ."),
     email: yup.string().trim().lowercase().email().max(50).required(),
-    password: yup.string().trim().min(8).max(50).required().matches(/^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/, "password at least 1 letter and 1 number")
+    password: yup.string().trim().min(8).max(50).required()
+      .matches(/^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/, "Password must contain at least 1 letter and 1 number")
   });
+
   try {
-    data = await validationSchema.validate(data,
-      { abortEarly: false });
-    let user = await User.findOne({
-      where: { email: data.email }
-    });
-    if (user) {
-      res.status(400).json({ message: "Email already exists." });
-      return;
+    const data = await validationSchema.validate(req.body, { abortEarly: false });
+
+    const existingUser = await User.findOne({ where: { email: data.email } });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already exists.' });
     }
-    // Hash passowrd
-    data.password = await bcrypt.hash(data.password, 10);
-    data.link_code = await generateUniqueLinkCode();
-    // Create user
-    let result = await User.create(data);
-    const defaultRules = [
-      {
-        ruleName: "Default human intervention trigger",
-        triggerType: "keyword_match",
-        keyword: "Speak to business owner",
-        action: "", // <-- change to the desired default action
-        confidenceThreshold: 0.5
-      },
-      {
-        ruleName: "Default human intervention trigger",
-        triggerType: "keyword_match",
-        keyword: "Speak to a human",
-        action: "",
-        confidenceThreshold: 0.5
-      },
-      {
-        ruleName: "Default human intervention trigger",
-        triggerType: "keyword_match",
-        keyword: "Speak to a representative",
-        action: "",
-        confidenceThreshold: 0.5
-      }
-    ].map(rule => ({ ...rule, userId: result.id }));
-    await ThresholdRule.bulkCreate(defaultRules);
 
-    res.json({
-      message: `Email ${result.email} was registered successfully.`
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const payload = JSON.stringify({
+      name: data.name || '',
+      password: hashedPassword || ''
     });
-  }
-  catch (err) {
-    console.log(err)
-    res.status(400).json({ errors: err.errors });
-  }
 
+    console.log('Creating EmailVerification with payload:', payload);
+
+    await EmailVerification.create({
+      email: data.email,
+      code: verificationCode,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      payload
+    });
+
+
+    await sendVerificationEmail({ to: data.email, code: verificationCode });
+
+    res.json({ message: 'Verification code sent to email.' });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ errors: err.errors || err.message });
+  }
 });
 
+// Email verification: create user after code is confirmed
+router.post('/verify-email', async (req, res) => {
+  const { email, code } = req.body;
+
+  try {
+    const record = await EmailVerification.findOne({
+      where: {
+        email,
+        code,
+        expiresAt: { [Op.gt]: new Date() }
+      }
+    });
+
+    if (!record) {
+      return res.status(400).json({ message: 'Verification failed or code expired.' });
+    }
+
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists.' });
+    }
+
+    if (!record.payload) {
+      console.error('Missing payload in verification record:', record);
+      return res.status(500).json({ message: 'Verification data corrupted. Please register again.' });
+    }
+
+    let data;
+    try {
+      data = JSON.parse(record.payload);
+    } catch (err) {
+      console.error('Failed to parse payload:', record.payload);
+      return res.status(500).json({ message: 'Invalid verification data format.' });
+    }
+
+    data.email = email;
+    data.link_code = await generateUniqueLinkCode();
+    data.verified = true;
+    console.log('Creating user with data:', data);
+
+    const user = await User.create(data);
+
+    const defaultRules = [
+      "Speak to business owner",
+      "Speak to a human",
+      "Speak to a representative"
+    ].map(keyword => ({
+      ruleName: "Default human intervention trigger",
+      triggerType: "keyword_match",
+      keyword,
+      action: "",
+      confidenceThreshold: 0.5,
+      userId: user.id
+    }));
+
+    await ThresholdRule.bulkCreate(defaultRules);
+    await record.destroy();
+
+    res.json({ message: 'Email verified and user created.', userId: user.id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error during verification.' });
+  }
+});
+
+// Utility: generate unique link code
+function generateLinkCode(length = 8) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < length; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
 
 
 

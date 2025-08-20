@@ -107,6 +107,9 @@ const myclients = require('./routes/clients')
 app.use('/api/clients', myclients)
 const readReviewsRoutes = require('./routes/readReviews');
 app.use('/read-reviews', readReviewsRoutes);
+const { EmailVerification } = require('./models');
+
+
 
 
 const db = require('./models');

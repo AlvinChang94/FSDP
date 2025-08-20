@@ -46,6 +46,8 @@ import MyClients from './pages/MyClients.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import placeholderPfp from './assets/placeholderpfp.png';
+import VerifyEmail from './pages/VerifyEmail';
+
 
 const logout = () => {
   localStorage.clear();
@@ -329,6 +331,8 @@ function App() {
                     <Route path="/conv-analytics/average-chats/:id" element={<AverageChats />} />
                     <Route path="/conv-analytics/average-chat-users/:id" element={<AverageChatGroups />} />
                     <Route path={'/faq/guide'} element={<Guide />} />
+                    <Route path="/verify-email" element={<VerifyEmail />} />
+
 
 
 
