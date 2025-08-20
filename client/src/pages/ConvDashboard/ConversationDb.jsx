@@ -191,7 +191,7 @@ function ConversationDb() {
 
             <Box sx={{ maxWidth: 1100, mx: 'auto' }}>
                 <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
-                    Frequently asked questions
+                    Frequently asked Topics
                 </Typography>
 
                 {!showTopics ? (
