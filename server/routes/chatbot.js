@@ -14,6 +14,7 @@ const yup = require('yup'); // ensure yup is available
 const { TestChat } = require('../models');
 const { TestChatMessage } = require('../models');
 const { sendEscalationEmail, sendEscalationSMS } = require('./../services/emailService');
+const { sendDashBoard } = require('./../services/dashboardService')
 
 async function ensureClientExists({ userId, phoneNumber, name }) {
     // Try to find by exact number or number without '+'
@@ -388,8 +389,18 @@ Message: "${Body}"
                         });
 
                     }
-                    if (method?.dashboard){
-
+                    if (method?.dashboard) {
+                        const sgNow = new Date().toLocaleString('en-US', { timeZone: 'Asia/Singapore' });
+                        const sgDate = new Date(sgNow);
+                        const endOfDay = new Date(sgDate);
+                        endOfDay.setHours(23, 59, 59, 999);
+                        await sendDashBoard({
+                            title: 'Human intervention',
+                            message: `Client ${ProfileName} requires human intervention. Do check QueryEase for more information on the client.`,
+                            sendDate: sgDate,
+                            endDate: endOfDay,
+                            userId: userId
+                        });
                     }
 
 
