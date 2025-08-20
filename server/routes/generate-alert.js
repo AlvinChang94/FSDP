@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const today = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Singapore', hour12: false });
 
 router.post('/', async (req, res) => {
   const { message } = req.body;
@@ -9,7 +10,9 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Missing message' });
   }
 
-  const prompt = `You are an AI assistant. Given the message below, extract:
+  const prompt = `You are an AI assistant. Today's date amd time is ${today}.
+You will be given a message that needs to be summarized into a short alert title and two dates
+Given the message below, extract:
 1. A short, clear title (maximum 3–5 words, e.g. "Maintenance" or "System Downtime")
 2. A reasonable send date and end date in ISO 8601 format (e.g. 2025-07-22T14:00:00Z)
 
