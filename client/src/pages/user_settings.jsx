@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import {
-  Box, Typography, Paper, TextField, Button, Avatar, Divider, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, List, ListItem, ListItemIcon, ListItemText
+  Box, Typography, Paper, TextField, Button, Avatar, Divider, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, List, ListItem, ListItemIcon, ListItemText, Stack, Tooltip
 } from "@mui/material";
 import AttachmentIcon from "@mui/icons-material/Attachment";
 import CloseIcon from "@mui/icons-material/Close";
@@ -438,9 +438,17 @@ function UserSettings() {
           />
 
           <Divider sx={{ my: 3 }} />
-          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-            Business Context
-          </Typography>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              Business context
+            </Typography>
+
+            <Tooltip title="Provide your chatbot with some context to establish a foundation">
+              <IconButton size="small">
+                <Typography variant="body2" fontWeight="bold">?</Typography>
+              </IconButton>
+            </Tooltip>
+          </Stack>
           <TextField
             label="Business Name"
             name="businessName"
@@ -540,9 +548,17 @@ function UserSettings() {
             </DialogActions>
           </Dialog> <br />
           <Divider sx={{ my: 3 }} />
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Company Policy Documents
-          </Typography>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              Company Policy Documents
+            </Typography>
+
+            <Tooltip title="Chatbot ingests your company policy PDF files to answer client queries on them. Please be patient as it may take a few minutes for the chatbot to ingest your documents">
+              <IconButton size="small">
+                <Typography variant="body2" fontWeight="bold">?</Typography>
+              </IconButton>
+            </Tooltip>
+          </Stack>
           <Button variant="outlined" component="label" disabled={isUploading}>
             {isUploading ? 'Uploading documents…' : 'Upload documents'}
 
