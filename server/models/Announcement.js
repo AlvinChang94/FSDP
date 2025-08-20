@@ -36,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             defaultValue: "Unread",
             allownull: false,
+        },
+        editedAt: {
+            type: DataTypes.STRING,
+            allownull: true,
         }
 
     }, {

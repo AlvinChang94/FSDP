@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const today = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Singapore', hour12: false });
 
 router.post('/', async (req, res) => {
   const { message } = req.body;
+  const today = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Singapore', hour12: false });
 
   if (!message || message.trim() === '') {
     return res.status(400).json({ error: 'Missing message' });
